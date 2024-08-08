@@ -78,8 +78,8 @@ else:
 	taglist = ['all']
 	if isCategorized: 
                 #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
-                #taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
-                taglist=['allWlep','allTlep'] # TEMP
+                taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
+                #taglist=['allWlep','allTlep'] # TEMP
 
 # ------------- Definition of plots to make ------------------
 ### TO-DO: add ABCDnn branches

@@ -26,8 +26,8 @@ start_time = time.time()
 
 # ------------- File location and total lumi ---------------
 
-#step1Dir = 'root://cmseos.fnal.gov//store/user/jmanagan/BtoTW_Oct2023_fullRun2/'
-step1Dir = 'root://cmseos.fnal.gov//store/user/xshen/BtoTW_Oct2023_fullRun2_ABCDnnMar2024/'
+#step1Dir = 'root://cmseos.fnal.gov//store/user/jmanagan/BtoTW_Apr2024_fullRun2/'
+step1Dir = 'root://cmseos.fnal.gov//store/user/xshen/BtoTW_Apr2024_fullRun2_ABCDnnMar2024/'
 
 # ------------- Arguments and default values ------------
 iPlot = 'HT' #choose a discriminant from plotList below!

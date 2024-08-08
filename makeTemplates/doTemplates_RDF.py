@@ -4,19 +4,20 @@ import os,sys,time,math,datetime,pickle,itertools,fnmatch
 from ROOT import gROOT,TFile,TH1F, TH2D
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
-from samples import targetlumi, lumiStr, systListShort, systListFull, samples_data, samples_signal, samples_electroweak, samples_wjets, samples_ttbar, samples_singletop, samples_ttbarx, samples_qcd
+from samples import targetlumi, lumiStr, systListFull, systListABCDnn, samples_data, samples_signal, samples_electroweak, samples_wjets, samples_singletop, samples_ttbarx, samples_qcd, samples_ttbar, samples_ttbar_abcdnn
+#from samples import systListShort
 from utils import *
 
 gROOT.SetBatch(1)
 start_time = time.time()
 
-region='all' # BAX, DCY, individuals, or all
-isCategorized=False
+region='D' # BAX, DCY, individuals, or all
+isCategorized=True # TEMP
 year='all'
 
 pfix='templates'+region
 if not isCategorized: pfix='kinematics'+region
-pfix+='_Apr2024'
+pfix+='_Apr2024SysAll'
 outDir = os.getcwd()+'/'+pfix+'/'
 
 removeThreshold = 0.0005
@@ -26,19 +27,24 @@ doAllSys = True
 doPDF = False
 if isCategorized: doPDF=False # FIXME later
 
-systematicList = systListShort
-if isCategorized: systematicList = systListFull
+#systematicList = systListShort
+#if isCategorized: systematicList = systListFull
+systematicList = systListFull
 
-bkgProcs = {'ewk':samples_electroweak,'wjets':samples_wjets,'ttbar':samples_ttbar,'singletop':samples_singletop,'ttx':samples_ttbarx,'qcd':samples_qcd}
+bkgProcs = {'ewk':samples_electroweak,'wjets':samples_wjets,'ttbar':samples_ttbar,'singletop':samples_singletop,'ttx':samples_ttbarx,'qcd':samples_qcd,
+            #'ttbar_abcdnn':samples_ttbar_abcdnn
+            }
 massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200]
 sigList = ['BpM'+str(mass) for mass in massList]
 
 isEMlist = ['L'] #['E','M'] #
 if '2D' in outDir: 
         isEMlist =['L']
-taglist = ['all']
-if isCategorized: 
+if isCategorized:
         taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
+        #taglist = ['allWlep','allTlep']
+else:
+        taglist = ['all']
 	
 catList = ['is'+item[0]+'_'+item[1] for item in list(itertools.product(isEMlist,taglist))]
 

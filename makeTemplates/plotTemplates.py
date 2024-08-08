@@ -23,7 +23,7 @@ isCategorized=False
 if len(sys.argv)>3: isCategorized=bool(eval(sys.argv[3]))
 pfix='templates'+region
 if not isCategorized: pfix='kinematics'+region
-pfix+='_Oct2023statsonly_ABCDnn'
+pfix+='_Apr2024SysAll_validation'
 if len(sys.argv)>4: pfix=str(sys.argv[4])
 templateDir=os.getcwd()+'/'+pfix+'/'
 
@@ -199,21 +199,23 @@ for tag in taglist:
         for isEM in isEMlist:
                 histPrefix=iPlot+'_'+lumiInTemplates+'_'
                 catStr='is'+isEM+'_'+tagStr
-                histPrefix+=catStr
+                histPrefix=histPrefix+catStr+'_'+region # TEMP: check if region is needed for the combine steps
+                
                 totBkg = 0.
                 for proc in bkgProcList: 
-                        try:    
+                        try:
                                 bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
-                                if tag=='allTlep':
-                                        bkghists[proc+catStr].Scale(0.2)
-                                if tag=='allWlep':
-                                        bkghists[proc+catStr].Scale(0.2)
-                                print(proc, bkghists[proc+catStr].Integral())
+                                #if tag=='allTlep':
+                                        #bkghists[proc+catStr].Scale(0.2) # TODO/TEMP: check if this is still needed
+                                #if tag=='allWlep':
+                                        #bkghists[proc+catStr].Scale(0.2)
+                                #print(proc, bkghists[proc+catStr].Integral())
                                 totBkg += bkghists[proc+catStr].Integral()
                         except:
                                 print("There is no "+proc+"!!!!!!!!")
                                 print("tried to open "+histPrefix+'__'+proc)
                                 pass
+                print(histPrefix+'__'+datalabel)
                 hData = RFile1.Get(histPrefix+'__'+datalabel).Clone()
                 #print("data: ", hData.Integral())
                 histrange = [hData.GetBinLowEdge(1),hData.GetBinLowEdge(hData.GetNbinsX()+1)]

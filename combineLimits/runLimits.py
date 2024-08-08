@@ -11,30 +11,30 @@ os.chdir(path)
 blind = True
 morph = False
 
-print '===================================================================='
-print '==   Launching limits for in',limitdir
-print '==   ...'
+print('====================================================================')
+print('==   Launching limits for in',limitdir)
+print('==   ...')
 
 if blind:
 
-    print '***** Running Asymptotic CLs limits for all masses in'+os.getcwd()+' *****'
-    print 'Running Asymptotic CLs limits for all masses'
-    print 'Command = combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limit --run=blind'
+    print('***** Running Asymptotic CLs limits for all masses in'+os.getcwd()+' *****')
+    print('Running Asymptotic CLs limits for all masses')
+    print('Command = combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limit --run=blind')
     os.system('combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limit --run=blind') #
 
-    print 'Making a JSON file'
-    print 'Command = combineTool.py -M CollectLimits cmb/*/*.limit.* --use-dirs -o limits_cmb.json'
+    print('Making a JSON file')
+    print('Command = combineTool.py -M CollectLimits cmb/*/*.limit.* --use-dirs -o limits_cmb.json')
     os.system('combineTool.py -M CollectLimits cmb/*/*.limit.* --use-dirs -o limits_cmb.json')
 
 else:
 
     if not morph:
-        print '***** Running Asymptotic CLs limits for all masses in'+os.getcwd()+' *****'
-        print 'Command = combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limitUB --parallel 5'
+        print('***** Running Asymptotic CLs limits for all masses in'+os.getcwd()+' *****')
+        print('Command = combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limitUB --parallel 5')
         os.system('combineTool.py -M AsymptoticLimits -d cmb/*/workspace.root --there -n .limitUB --parallel 5')
 
-        print 'Making a JSON file'
-        print 'Command = combineTool.py -M CollectLimits cmb/*/*.limitUB.* --use-dirs -o limits_UB.json'
+        print('Making a JSON file')
+        print('Command = combineTool.py -M CollectLimits cmb/*/*.limitUB.* --use-dirs -o limits_UB.json')
         os.system('combineTool.py -M CollectLimits cmb/*/*.limitUB.* --use-dirs -o limits_UB.json')
     
     else:
@@ -43,11 +43,11 @@ else:
 
         masks = masks+',signalShape=0.01' # reset to 1fb after CR-only fit
         
-        print 'Command = combineTool.py -M AsymptoticLimits -d cmb/*/morphedWorkspace.root --snapshotName initialFit --there -n .limitUBM --parallel 5 --setParameters '+masks
+        print('Command = combineTool.py -M AsymptoticLimits -d cmb/*/morphedWorkspace.root --snapshotName initialFit --there -n .limitUBM --parallel 5 --setParameters '+masks)
         os.system('combineTool.py -M AsymptoticLimits -d cmb/*/morphedWorkspace.root --snapshotName initialFit --there -n .limitUBM --parallel 5 --setParameters '+masks) #
 
-        print 'Command = combineTool.py -M CollectLimits cmb/*/*.limitUBM.* --use-dirs -o limits_UBM.json'
+        print('Command = combineTool.py -M CollectLimits cmb/*/*.limitUBM.* --use-dirs -o limits_UBM.json')
         os.system('combineTool.py -M CollectLimits cmb/*/*.limitUBM.* --use-dirs -o limits_UBM.json')
 
-print 'Done!'
-print '===================================================================='
+print('Done!')
+print('====================================================================')
