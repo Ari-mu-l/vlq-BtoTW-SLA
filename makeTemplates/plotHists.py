@@ -6,7 +6,7 @@ import os,sys,time,math
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
 from ROOT import *
-from samples import lumiStr, systListShort, systListFull,  systListABCDnn
+from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn
 from utils import *
 
 gROOT.SetBatch(1)
@@ -346,23 +346,27 @@ for tag in taglist:
                                 if plotABCDnn and (proc in ABCDnnProcList):
                                         systematicList = systListABCDnn
                                 else:
-                                        systematicList = systListFull
-                                        if isRebinned: #TEMP: update this later
-                                                try:
+                                        if isCategorized:
+                                                systematicList = systListFullPlots
+                                                if isRebinned: #TEMP: update this later
+                                                        try:
+                                                                systematicList.remove('muR')
+                                                                systematicList.remove('muF')
+                                                                systematicList.remove('muRFcorrd')
+                                                                systematicList.append('muRFcorrdNewQCD')
+                                                                systematicList.append('muRFcorrdNewEWK')
+                                                                systematicList.append('muRFcorrdNewST')
+                                                                systematicList.append('muRFcorrdNewTTX')
+                                                                systematicList.append('muRFcorrdNewTT')
+                                                                systematicList.append('muRFcorrdNewWJT')
+                                                                systematicList.append('pdfNew')
+                                                        except:
+                                                                "Unable to remove muR, muF, muRFcorrd and append New"
+                                                else: # proxy rebinned by plotting only muRFcorrd
                                                         systematicList.remove('muR')
                                                         systematicList.remove('muF')
-                                                        systematicList.remove('muRFcorrd')
-                                                        systematicList.append('muRFcorrdNewQCD')
-                                                        systematicList.append('muRFcorrdNewEWK')
-                                                        systematicList.append('muRFcorrdNewST')
-                                                        systematicList.append('muRFcorrdNewTTX')
-                                                        systematicList.append('muRFcorrdNewTT')
-                                                        systematicList.append('muRFcorrdNewWJT')
-                                                except:
-                                                        "Unable to remove muR, muF, muRFcorrd and append New"
-                                        else: # proxy rebinned by plotting only muRFcorrd
-                                                systematicList.remove('muR')
-		                                systematicList.remove('muF')
+                                        else:
+                                                systematicList = systListShortPlots
                                 for syst in systematicList:
                                         for ud in shiftlist:
                                                 try:

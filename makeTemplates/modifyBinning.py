@@ -210,7 +210,7 @@ for key in xbinsList.keys(): xbins[key] = array('d', xbinsList[key])
 
 #os._exit(1)
 
-### FIXME: not computed yet for Bprime...
+### FIXME: not computed yet for Bprime...we will go for shape-only for now, very reasonable
 muSFsUp = {'TTM900':0.744,'TTM1000':0.744,'TTM1100':0.747,'TTM1200':0.742,'TTM1300':0.741,'TTM1400':0.738,'TTM1500':0.740,'TTM1600':0.735,'TTM1700':0.721,'TTM1800':0.746}
 muSFsDn = {'TTM900':1.312,'TTM1000':1.312,'TTM1100':1.306,'TTM1200':1.315,'TTM1300':1.316,'TTM1400':1.322,'TTM1500':1.319,'TTM1600':1.329,'TTM1700':1.354,'TTM1800':1.311}
 pdfSFsUp = {'TTM900':0.997,'TTM1000':0.997,'TTM1100':0.996,'TTM1200':0.995,'TTM1300':0.994,'TTM1400':0.991,'TTM1500':0.986,'TTM1600':0.984,'TTM1700':0.980,'TTM1800':0.966}
@@ -341,10 +341,11 @@ for rfile in rfiles:
                 pdfUphists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if 'pdf0' in k.GetName() and chn in k.GetName()]
                 newPDFName = 'pdfNew'
                 for hist in pdfUphists:
+                        pdfNomHist = rebinnedHists[hist[:hist.find('__pdf')]]
                         pdfNewUpHist = rebinnedHists[hist].Clone(hist.replace('pdf0',newPDFName+upTag))
                         pdfNewDnHist = rebinnedHists[hist].Clone(hist.replace('pdf0',newPDFName+downTag))
                         for ibin in range(1,pdfNewUpHist.GetNbinsX()+1):
-                                weightList = [rebinnedHists[hist.replace('pdf0','pdf'+str(pdfInd))].GetBinContent(ibin) for pdfInd in range(100)]
+                                weightList = [rebinnedHists[hist.replace('pdf0','pdf'+str(pdfInd))].GetBinContent(ibin) for pdfInd in range(101)]
                                 indPDFUp = sorted(range(len(weightList)), key=lambda k: weightList[k])[83]
                                 indPDFDn = sorted(range(len(weightList)), key=lambda k: weightList[k])[15]
                                 pdfNewUpHist.SetBinContent(ibin,rebinnedHists[hist.replace('pdf0','pdf'+str(indPDFUp))].GetBinContent(ibin))
@@ -354,12 +355,12 @@ for rfile in rfiles:
                         if ('__'+sigName in hist and '__pdf' in hist and normalizePDF): #normalize the renorm/fact shapes to nominal
                                 signame = hist.split('__')[1]
                                 if sigName not in signame: print("DIDNT GET SIGNAME "+signame)
-                                scalefactorUp = pdfSFsUp[signame]
-                                scalefactorDn = pdfSFsDn[signame]
-                                pdfNewUpHist.Scale(scalefactorUp)
-                                pdfNewDnHist.Scale(scalefactorDn)
-                                #pdfNewUpHist.Scale(renormNomHist.Integral()/pdfNewUpHist.Integral())
-                                #pdfNewDnHist.Scale(renormNomHist.Integral()/pdfNewDnHist.Integral())
+                                #scalefactorUp = pdfSFsUp[signame]
+                                #scalefactorDn = pdfSFsDn[signame]
+                                #pdfNewUpHist.Scale(scalefactorUp)
+                                #pdfNewDnHist.Scale(scalefactorDn)
+                                pdfNewUpHist.Scale(pdfNomHist.Integral()/pdfNewUpHist.Integral())
+                                pdfNewDnHist.Scale(pdfNomHist.Integral()/pdfNewDnHist.Integral())
                         pdfNewUpHist.Write()
                         # print 'Writing histogram: ',pdfNewUpHist.GetName()
                         pdfNewDnHist.Write()

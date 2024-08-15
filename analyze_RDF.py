@@ -95,11 +95,11 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         weightmuIsoSFUpStr  = weightStr.replace('leptonIsoSF[0]','(leptonIsoSF[0]+isMu*leptonIsoSF[1])')
                         weightmuIsoSFDnStr= weightStr.replace('leptonIsoSF[0]','(leptonIsoSF[0]-isMu*leptonIsoSF[1])')
 
-                        # FIXED 7/24/24 (ID --> HLT). Muon has indpependent [0] nominal, [1] up, [2] down. Electron has the shift stored in [1]
+                        # Changed 8/11/24 -- muon trigger is not correctionlib anymore, we store central and shift
                         weightTrigEffElUpStr  = weightStr.replace('leptonHLTSF[0]','(leptonHLTSF[0]+isEl*leptonHLTSF[1])')
                         weightTrigEffElDnStr= weightStr.replace('leptonHLTSF[0]','(leptonHLTSF[0]-isEl*leptonHLTSF[1])')
-                        weightTrigEffMuUpStr  = weightStr.replace('leptonHLTSF[0]','(isEl*leptonHLTSF[0]+isMu*leptonHLTSF[1])')
-                        weightTrigEffMuDnStr= weightStr.replace('leptonHLTSF[0]','(isEl*leptonHLTSF[0]+isMu*leptonHLTSF[2])') # plus symbol is correct
+                        weightTrigEffMuUpStr  = weightStr.replace('leptonHLTSF[0]','(leptonHLTSF[0]+isMu*leptonHLTSF[1])')
+                        weightTrigEffMuDnStr= weightStr.replace('leptonHLTSF[0]','(leptonHLTSF[0]-isMu*leptonHLTSF[1])')
                         
                         weightPileupUpStr   = weightStr.replace('PileupWeights[0]','PileupWeights[1]')
                         weightPileupDnStr   = weightStr.replace('PileupWeights[0]','PileupWeights[2]')
@@ -269,38 +269,37 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
         process = sample.prefix
 
         # TODO: Switch back to this piece of code once jet veto got implemented in the analyzer
-        # if '[0]' in plotTreeName:
-        #         df = RDataFrame(tTree[process]).Filter(fullcut)\
-        #                                        .Define('weight',weightStr)\
-        #                                        .Define(iPlot, plotTreeName)
-        #         plotTreeName = iPlot
-        # else:
-        #         df = RDataFrame(tTree[process]).Filter(fullcut)\
-        #                                        .Define('weight',weightStr)
+        if '[0]' in plotTreeName:
+                df = RDataFrame(tTree[process]).Filter(fullcut)\
+                                               .Define('weight',weightStr)\
+                                               .Define(iPlot, plotTreeName)
+                plotTreeName = iPlot
+        else:
+                df = RDataFrame(tTree[process]).Filter(fullcut)\
+                                               .Define('weight',weightStr)
 
         # TEMP: jet veto
         # 0 for run<319077. num of forwJets in the veto zone for run>=319077
-        if sample.year=="2018":
-                df_original = RDataFrame(tTree[process]).Define("NJets_forward_subtract", "(int) Sum((run>=319077 || (run==1 && event%100 >= 35) ) && ((gcforwJet_phi>-1.57 && gcforwJet_phi<-0.87 && gcforwJet_eta>-2.5 && gcforwJet_eta<-1.3) || (gcforwJet_phi>-1.57 && gcforwJet_phi<-0.87 && gcforwJet_eta>-3.0 && gcforwJet_eta<-2.5)))")\
-                                                        .Redefine("NJets_forward", "NJets_forward-NJets_forward_subtract")
+        #if sample.year=="2018":
+        #        df_original = RDataFrame(tTree[process]).Define("NJets_forward_subtract", "(int) Sum((run>=319077 || (run==1 && event%100 >= 35) ) && ((gcforwJet_phi>-1.57 && gcforwJet_phi<-0.87 && gcforwJet_eta>-2.5 && gcforwJet_eta<-1.3) || (gcforwJet_phi>-1.57 && gcforwJet_phi<-0.87 && gcforwJet_eta>-3.0 && gcforwJet_eta<-2.5)))")\
+        #                                                .Redefine("NJets_forward", "NJets_forward-NJets_forward_subtract")
                 # if 'Single' in process:
                 #         NEvents = df_original.Count().GetValue()
                 #         NEvents_adjusted = df_original.Filter("NJets_forward_subtract>0").Count().GetValue()
                 #         print(f'Number of events affected in {process}: {NEvents_adjusted}')
                 #         print(f'Number of events in {process}: {NEvents}')
                 #         print(f'Percentage of events affected in {process}: {NEvents_adjusted/NEvents}')
-        else:
-                df_original = RDataFrame(tTree[process])
+        #else:
+        #        df_original = RDataFrame(tTree[process])
 
-
-        if '[0]' in plotTreeName:
-                df = df_original.Filter(fullcut)\
-                                .Define('weight',weightStr)\
-                                .Define(iPlot, plotTreeName)
-                plotTreeName = iPlot                                                                                              
-        else:                                                       
-                df = df_original.Filter(fullcut)\
-                                .Define('weight',weightStr)
+        # if '[0]' in plotTreeName:
+        #         df = df_original.Filter(fullcut)\
+        #                         .Define('weight',weightStr)\
+        #                         .Define(iPlot, plotTreeName)
+        #         plotTreeName = iPlot                                                                                              
+        # else:                                                       
+        #         df = df_original.Filter(fullcut)\
+        #                         .Define('weight',weightStr)
                                            
 
         hist = df.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weight')             
@@ -385,10 +384,6 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         hist_topptDn     = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_topptDn_{process}'    ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weighttopptDn'    )
                         hist_muRFcorrdUp = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRFcorrdUp_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRFcorrdUp')
                         hist_muRFcorrdDn = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRFcorrdDn_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRFcorrdDn')
-                        hist_muRUp       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRUp_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRUp'      )
-                        hist_muRDn       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRDn_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRDn'      )
-                        hist_muFUp       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFUp_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFUp'      )
-                        hist_muFDn       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFDn_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFDn'      )
                         hist_btagHFCOUp  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_btagHFCOUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightbtagHFCOUp' )
                         hist_btagHFCODn  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_btagHFCODn_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightbtagHFCODn' )
                         hist_btagHFUCUp  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_btagHFUCUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightbtagHFUCUp' )
@@ -399,6 +394,11 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         hist_btagLFUCDn  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_btagLFUCDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightbtagLFUCDn' )
 
                         if isCategorized:
+                                hist_muRUp       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRUp_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRUp'      )
+                                hist_muRDn       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muRDn_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuRDn'      )
+                                hist_muFUp       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFUp_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFUp'      )
+                                hist_muFDn       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFDn_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFDn'      )
+
                                 if tag=='allWlep' or tag=="tagTjet" or tag=="untagWlep":
                                         hist_pNetTtagUp = sel.Define('weightpNetTtagUp', weightpNetTtagUpStr)\
                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetTtagUp_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetTtagUp' )
@@ -409,6 +409,18 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetWtagUp_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetWtagUp' )
                                         hist_pNetWtagDn = sel.Define('weightpNetWtagDn', weightpNetWtagDnStr)\
 			                                     .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetWtagDn_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetWtagDn' )
+                                ### TO-DO: check how many PDF variations live in NanoAOD, find branch names and get this segment set up correctly
+                                if doMuRF: # doMuRF happens to be False only for WW, WZ, ZZ, which do not have pdf branches
+                                        if 'Bprime' in sample.prefix or 'STs' in sample.prefix:
+                                                pdfVariations = 101
+                                        else:
+                                                pdfVariations =	103
+                                        hist_pdf = []
+                                        for i in range(pdfVariations):
+                                                hist_pdf.append(sel.Define(f'weightpdf{i}',f'{weightStr}*LHEPdfWeight[{i}]')\
+                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pdf{i}_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,f'weightpdf{i}'))
+                                else:
+                                        print(f'{process} does not have pdf branches.')
         
                         if process+'JERup' in tTree:
                                 dfjerUp    = RDataFrame(tTree[process+'JERup'])
@@ -434,18 +446,6 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 hist_jecUp = seljecUp.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_jecUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weight')
                                 hist_jecDn = seljecDn.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_jecDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weight')
 
-                        ### TO-DO: check how many PDF variations live in NanoAOD, find branch names and get this segment set up correctly
-                        if doMuRF: # doMuRF happens to be False only for WW, WZ, ZZ, which do not have pdf branches
-                                if 'Bprime' in sample.prefix or 'STs' in sample.prefix:
-                                        pdfVariations = 101
-                                else:
-                                        pdfVariations =	103
-                                for i in range(pdfVariations):
-                                        hist_pdf = sel.Define(f'weightpdf{i}',f'{weightStr}*LHEPdfWeight[{i}]')\
-                                                      .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pdf{i}_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,f'weightpdf{i}')
-                                        hist_pdf.Write()
-                        else:
-                                print(f'{process} does not have pdf branches.')
 
         # WRITE all the histograms (hopefully no event loop gets triggered until here?)
         hist.Write()
@@ -486,10 +486,6 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         hist_topptDn.Write()
                         hist_muRFcorrdUp.Write()
                         hist_muRFcorrdDn.Write()
-                        hist_muRUp.Write()
-                        hist_muRDn.Write()
-                        hist_muFUp.Write()
-                        hist_muFDn.Write()
                         hist_btagHFCOUp.Write()
                         hist_btagHFCODn.Write()
                         hist_btagHFUCUp.Write()
@@ -508,12 +504,19 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 hist_jecDn.Write()
 
                         if isCategorized:
+                                hist_muRUp.Write()
+                                hist_muRDn.Write()
+                                hist_muFUp.Write()
+                                hist_muFDn.Write()
                                 if tag=='allWlep' or tag=="tagTjet" or tag=="untagWlep":
                                         hist_pNetTtagUp.Write()
                                         hist_pNetTtagDn.Write()
                                 elif tag=="allTlep" or tag=="tagWjet" or tag=="untagTlep":
                                         hist_pNetWtagUp.Write()
                                         hist_pNetWtagDn.Write()
+                                if doMuRF:
+                                        for ipdf in hist_pdf:
+                                                ipdf.Write()
 
         # del df
         # if 'Single' not in process and doAllSys and not doABCDnn:

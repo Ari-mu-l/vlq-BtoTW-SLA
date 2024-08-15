@@ -103,73 +103,32 @@ def add_systematics(cb):
         if isABCDnn:
                 allmcgrps = signal + [allbkgs[1]] + [allbkgs[2]]
 
-        ## https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#CurRec
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'lumi', 'lnN', ch.SystMap()(1.018))
-
-        ## FIXME -- need to implement year-to-year uncorrelations...
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'jec', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'jer', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elRecoSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elIdSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elIsoSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'muRecoSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'muIdSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'muIsoSF', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'TrigEffEl', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'TrigEffMu', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagHFCO', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagLFCO', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagHFUC', 'shape', ch.SystMap()(1.0)) ## FIXME FOR SURE!
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagLFUC', 'shape', ch.SystMap()(1.0)) ## FIXME FOR SURE!
-
-        ## Taking lepton SFs as uncorrelated, new calculations each year.
-        # new el = 1.80 per year -- 3.1% combo . Mu w/o track = 2.5 per year -- 4.3 combo
-	#cb.cp().process(allmcgrps).channel(chnsE).AddSyst(cb, 'elRecoIsoSys', 'lnN', ch.SystMap()(1.031))
-	#cb.cp().process(allmcgrps).channel(chnsM).AddSyst(cb, 'muIdIsoSys', 'lnN', ch.SystMap()(1.043))
-
-        #for year in ['2016','2017','2018']:
-
-        #        cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chnsE).AddSyst(cb, 'elTrig'+year, 'shape', ch.SystMap()(1.0))
-        #        cb.cp().process([allbkgs[2]]).channel(qcdchnsE['elTrig'+year]).AddSyst(cb, 'elTrig'+year, 'shape', ch.SystMap()(1.0))                
-        #        cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chnsE).AddSyst(cb, 'elIdSF'+year, 'shape', ch.SystMap()(1.0))
-        #        cb.cp().process([allbkgs[2]]).channel(qcdchnsE['elIdSF'+year]).AddSyst(cb, 'elIdSF'+year, 'shape', ch.SystMap()(1.0))
-        #        cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chnsM).AddSyst(cb, 'muTrig'+year, 'shape', ch.SystMap()(1.0))
-        #        cb.cp().process([allbkgs[2]]).channel(qcdchnsM['muTrig'+year]).AddSyst(cb, 'muTrig'+year, 'shape', ch.SystMap()(1.0))
-
-        #        for syst in ['jec','jer','Wmis','Tmis']:
-                        ## JEC/JER uncorrelated -- example of B2G-19-001. Jec uncorrelated is more conservative than the various 0/50/100 scenarios that require source splitting
-                        ## DeepAK8 tags uncorrelated for mistags
-        #                cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chns).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
-        #                cb.cp().process([allbkgs[2]]).channel(qcdchns[syst+year]).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
-                        
-        ## Correlated in 2016 and 2017, doesn't exist in 2018 
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Prefire', 'shape', ch.SystMap()(1.0))
-
-        ## Taking these as correlated since the training was unchanged
-        #cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Teff', 'shape', ch.SystMap()(1.0)) 
-        #cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Weff', 'shape', ch.SystMap()(1.0))
-
-        ## PDF was separate in 16 from 17/18 -- FIXME, check in NanoAOD what was used....observe no more neg weights....
-        #cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chns).AddSyst(cb, 'pdfNew2016', 'shape', ch.SystMap()(1.0))
-        #cb.cp().process([allbkgs[2]]).channel(qcdchns['pdfNew2016']).AddSyst(cb, 'pdfNew2016', 'shape', ch.SystMap()(1.0))
-        #cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chns).AddSyst(cb, 'pdfNew20172018', 'shape', ch.SystMap()(1.0))
-        #cb.cp().process([allbkgs[2]]).channel(qcdchns['pdfNew20172018']).AddSyst(cb, 'pdfNew20172018', 'shape', ch.SystMap()(1.0))
-        ## FIX ME: need nuisance edit rename TTM * pdfNew20172018 pdfSig20172018 at the bottom of the datacards...
-        ## OR need to rename it properly when created and add a separate AddSyst here for pdfSig20172018
-
-        ## Correlated: https://hypernews.cern.ch/HyperNews/CMS/get/b2g/1381.html
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Pileup', 'shape', ch.SystMap()(1.0)) 
+        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'pdfNew', 'shape', ch.SystMap()(1.0))
 
+        cb.cp().process(allmcgrps).channel(chns1+chns4).AddSyst(cb, 'pNetTtag', 'shape', ch.SystMap()(1.0))
+        cp.cp().process(allmcgrps).channel(chns2+chns3).AddSyst(cb, 'pNetWtag', 'shape', ch.SystMap()(1.0))
+        
+        for year in ['2016APV','2016','2017','2018']:
+                for syst in ['jec','jer','TrigEffEl','TrigEffMu','btagHFUC','btagLFUC']:
+                       cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
+                        
         if not isABCDnn:
                 ## HT weighting only on WJet background, same in all years
                 cb.cp().process([allbkgs[1]]).channel(chns).AddSyst(cb, 'jsf', 'shape', ch.SystMap()(1.0))
 
                 ## HTCorr on top background only, same in all years
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'toppt', 'shape', ch.SystMap()(1.0))
-
-                ## DeepAK8 J-score shape correction, combining them for 2017 and 2018 (no 16, so sometimes qcd fails...)
-                #cb.cp().process(signal + [allbkgs[0]] + [allbkgs[1]]).channel(chns).AddSyst(cb, 'dnnJ', 'shape', ch.SystMap()(1.0)) 
-                #cb.cp().process([allbkgs[2]]).channel(qcdchns['dnnJ']).AddSyst(cb, 'dnnJ', 'shape', ch.SystMap()(1.0)) 
 
                 ## Taking as correlated across years, but not processes -- no changes to this setting in MC
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'muRFcorrdNewTT', 'shape', ch.SystMap()(1.0))
