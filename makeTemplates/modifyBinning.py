@@ -544,22 +544,26 @@ table.append(['break'])
 table.append(['','Systematics'])
 table.append(['break'])
 for proc in bkgProcList+sigProcList:
-	table.append([proc]+[chn for chn in channels]+['\\\\'])
-	systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if channels[0] in hist and '__'+proc+'__' in hist and upTag in hist])
-	for syst in systematicList:
-		for ud in [upTag,downTag]:
-			row = [syst+ud]
-			for chn in channels:
-				histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
-				nomHist = histoPrefix+proc
-				shpHist = histoPrefix+proc+'__'+syst+ud
-				try: row.append(' & '+str(round(yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20),2)))
-				except:
-					if proc != 'qcd': print("Missing "+proc+" for channel: "+chn+" and systematic: "+syst)
-					pass
-			row.append('\\\\')
-			table.append(row)
-	table.append(['break'])
+        table.append([proc]+[chn for chn in channels]+['\\\\'])
+        systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if channels[0] in hist and '__'+proc+'__' in hist and upTag in hist])
+        systematicList.append('pNetWtag')
+        for syst in systematicList:
+                for ud in [upTag,downTag]:
+                        row = [syst+ud]
+                        for chn in channels:
+                                histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
+                                nomHist = histoPrefix+proc
+                                shpHist = histoPrefix+proc+'__'+syst+ud
+                                try:
+                                        row.append(' & '+str(round(yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20),2)))
+                                except:
+                                        if 'Wtag' in syst and ('Tjet' in chn or 'Wlep' in chn): row.append(' & \\NA')
+                                        elif 'Ttag' in syst and ('Wjet' in chn or 'Tlep' in chn): row.append(' & \\NA')
+                                        elif proc != 'qcd': print("Missing "+proc+" for channel: "+chn+" and systematic: "+syst)
+                                        pass
+                        row.append('\\\\')
+                        table.append(row)
+        table.append(['break'])
 
 postFix = ''
 out=open(templateDir+'/'+combinefile.replace('templates','yields').replace('.root','_rebinned_stat'+str(stat).replace('.','p'))+postFix+'.txt','w')

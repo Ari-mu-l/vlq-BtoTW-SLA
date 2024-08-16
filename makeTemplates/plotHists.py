@@ -69,10 +69,10 @@ if len(isRebinned)>1 and 'ABCDnn' in iPlot:
         bkgProcList = ['ewk', 'ttx', 'major']
         ABCDnnProcList = ['major']
 else:
-        bkgProcList = ['qcd',
+        bkgProcList = ['ttx',
+                       'qcd',
                        'ewk',
-                       'wjets',
-                       'ttx',
+                       'wjets',                       
                        'singletop',
                        'ttbar'
                        ]
@@ -85,10 +85,7 @@ if plotABCDnn:
 else:
         bkgHistColors = {'ttbar':kAzure+8,'wjets':kMagenta-2,'qcd':kOrange-3,'ewk':kMagenta-6,'singletop':kGreen-6,'ttx':kAzure+2}
 
-# systematicList = systListShort
-# if len(isRebinned)>0 or isCategorized: systematicList = systListFull
 doAllSys = True
-#print('doAllSys: ',doAllSys,'systematicList: ',systematicList)
 
 doNormByBinWidth=False
 if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebinned: doNormByBinWidth = True
@@ -113,8 +110,8 @@ partialBlind = False
 isEMlist =['L']#'E','M']
 taglist = ['all']
 if isCategorized == True:
-        taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
-        #taglist = ['tagTjet','tagWjet','allWlep','allTlep']
+        #taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
+        taglist = ['tagTjet','tagWjet','untagWlep','untagTlep']
         #taglist = ['allWlep','allTlep']
         if ('D' in region or 'C' in region or region=='all') and 'BpMass' in iPlot and 'validation' not in pfix:
                 partialBlind = True
@@ -140,9 +137,12 @@ def formatUpperHist(histogram,th1hist):
         histogram.GetXaxis().SetRangeUser(lowside,highside)
         histogram.GetXaxis().SetNdivisions(506)
                 
+        #if 'BpMass' in histogram.GetName():
+        #        histogram.GetYaxis().SetTitleOffset(1.0)
+
         if 'JetTag' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
-                labels = ['b/light','t','W']
+                labels = ['b/light','t','W','both']
                 for ibin in range(1,th1hist.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
                 histogram.GetXaxis().SetLabelSize(0.25)
@@ -155,8 +155,6 @@ def formatUpperHist(histogram,th1hist):
                 histogram.GetXaxis().SetLabelSize(0.25)
                 histogram.GetXaxis().SetTitleOffset(1.0)
                 histogram.GetXaxis().SetTitle('B quark decay mode')
-        #if 'BpMass' in histogram.GetName():
-        #        histogram.GetYaxis().SetTitleOffset(1.0)
 
         if blind == True:
                 histogram.GetXaxis().SetLabelSize(0.045)
@@ -198,6 +196,23 @@ def formatLowerHist(histogram):
         histogram.GetXaxis().SetNdivisions(506)
         if 'YLD' in iPlot: histogram.GetXaxis().LabelsOption("u")
 
+        if 'JetTag' in histogram.GetName():
+                print('RELABELING!',histogram.GetName())
+                labels = ['b/light','t','W','both']
+                for ibin in range(1,histogram.GetNbinsX()+1):
+                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
+                histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetTitleOffset(1.0)
+                histogram.GetXaxis().SetTitle("AK8 ParticleNet tag")
+        if 'BpDecay' in histogram.GetName():
+                print('RELABELING!',histogram.GetName())
+                labels = ['','T+lepW','W+lepT','X+lepT','X+lepW']
+                for ibin in range(1,histogram.GetNbinsX()+1):
+                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
+                histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetTitleOffset(1.0)
+                histogram.GetXaxis().SetTitle('B quark decay mode')
+
         histogram.GetYaxis().SetLabelSize(0.15)
         histogram.GetYaxis().SetTitleSize(0.145)
         histogram.GetYaxis().SetTitleOffset(0.3)
@@ -229,12 +244,8 @@ systHists = {}
 totBkgTemp1 = {}
 totBkgTemp2 = {}
 totBkgTemp3 = {}
-#histrange = {} # from plotTemplates
 for tag in taglist:
-        perNGeV = 100 # 0.01 in plotTemplates was for DNN
-        #if 'wjet' in tag or 'ttbar' in tag:
-        #        perNGeV = 100
-        #elif 'dnnLarge' in tag: perNGeV = 1
+        perNGeV = 50 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
         print('------------------ ',tag,' with perNGeV = ',perNGeV,' -----------------------')
 
         tagStr=tag
@@ -275,13 +286,17 @@ for tag in taglist:
                                 bkghists[proc+catStr].Scale(factor)
 
                 for proc in bkgProcList:
-                        totBkg += bkghists[proc+catStr].Integral()
+                        try:
+                                totBkg += bkghists[proc+catStr].Integral()
+                        except:
+                                print('cant add',proc)
+                                pass
 
                 #histrange = [hData.GetBinLowEdge(1),hData.GetBinLowEdge(hData.GetNbinsX()+1)]
 
                 if (partialBlind and (tag!="untagTlep" and tag!="untagWlep")): # Todo: generalize it for other branches
                         if ("BpMass" in iPlot) and ('validation' not in pfix):
-                                start_bin = hData.GetXaxis().FindFixBin(1000)+1 # specifically for BpMass
+                                start_bin = hData.GetXaxis().FindFixBin(800)+1 # specifically for BpMass
                                 end_bin = hData.GetNbinsX()+1
                                 for b in range(start_bin, end_bin):
                                         hData.SetBinContent(b, 0)
@@ -373,7 +388,9 @@ for tag in taglist:
                                                         systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
                                                         if doNormByBinWidth: 
                                                                 normByBinWidth(systHists[proc+catStr+syst+ud],perNGeV)
-                                                except: 
+                                                except:
+                                                        if 'Wtag' in syst and ('Tjet' in tag or 'Wlep' in tag): continue
+                                                        if 'Ttag' in syst and ('Wjet' in tag or 'Tlep' in tag): continue
                                                         print(f'FAILED to open {histPrefix}__{proc}__{syst}{ud}')
                                                         pass
 
@@ -434,12 +451,14 @@ for tag in taglist:
 
                 if plotABCDnn:
                         drawQCD = False
-                else:
+                else:                        
                         drawQCD = True
 
                 try: 
                         drawQCD = bkghists['qcd'+catStr].Integral()/bkgHT.Integral()>.005 #don't plot QCD if it is less than 0.5%
-                except: pass
+                except:
+                        drawQCD = False
+                        pass
 
                 stackbkgHT = THStack("stackbkgHT","")
                 bkgProcListNew = bkgProcList[:]
@@ -579,10 +598,7 @@ for tag in taglist:
                 chLatex.DrawLatex(0.7, 0.48, tagString)
 
 
-                if drawQCD: 
-                        leg = TLegend(0.5,0.62,0.95,0.89)
-                if not drawQCD or blind: 
-                        leg = TLegend(0.5,0.74,0.95,0.89)
+                leg = TLegend(0.5,0.62,0.95,0.89)
                 leg.SetShadowColor(0)
                 leg.SetFillColor(0)
                 leg.SetFillStyle(0)
@@ -841,21 +857,21 @@ for tag in taglist:
 
                 if doOneBand:
                         if plotNorm:
-                                c1.SaveAs(f"{savePrefix}totBand_{region}_norm.pdf")
-                                c1.SaveAs(f"{savePrefix}totBand_{region}_norm.png")
+                                c1.SaveAs(f"{savePrefix}totBand_norm.pdf")
+                                c1.SaveAs(f"{savePrefix}totBand_norm.png")
                         else:
-                                c1.SaveAs(f"{savePrefix}totBand_{region}.pdf")
-                                c1.SaveAs(f"{savePrefix}totBand_{region}.png")
+                                c1.SaveAs(f"{savePrefix}totBand.pdf")
+                                c1.SaveAs(f"{savePrefix}totBand.png")
                                 #c1.SaveAs(savePrefix+"totBand.eps")
                                 #c1.SaveAs(savePrefix+"totBand.root")
                                 #c1.SaveAs(savePrefix+"totBand.C")
                 else:
                         if plotNorm:
-                                c1.SaveAs(f"{savePrefix}_{region}_norm.pdf")
-                                c1.SaveAs(f"{savePrefix}_{region}_norm.png")
+                                c1.SaveAs(f"{savePrefix}_norm.pdf")
+                                c1.SaveAs(f"{savePrefix}_norm.png")
                         else:
-                                c1.SaveAs(f"{savePrefix}_{region}.pdf")
-                                c1.SaveAs(f"{savePrefix}_{region}.png")
+                                c1.SaveAs(f"{savePrefix}.pdf")
+                                c1.SaveAs(f"{savePrefix}.png")
                                 #c1.SaveAs(savePrefix+".eps")
                                 #c1.SaveAs(savePrefix+".root")
                                 #c1.SaveAs(savePrefix+".C")
