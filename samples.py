@@ -22,20 +22,20 @@ for syst in uncorrList_sf:
 
 systListABCDnn = ['peak', 'tail', 'closure', 'factor']
 
-factorABCDnn = {'allWlep':'0.124847454', # '0.126057291', # without QCD300
-                'allTlep':'0.041517725', # '0.04249157',
-                'tagTjet':'0.027807176', # '0.027892638',
-                'tagWjet':'0.028433406', # '0.028440602',
-                'untagTlep':'0.04653169', # '0.047838701',
-                'untagWlep':'0.134246172', # '0.135501722'
+factorABCDnn = {'allWlep':'0.034045477',
+                'allTlep':'0.08270128', 
+                'tagTjet':'0.024456696', # '0.027892638',
+                'tagWjet':'0.025098598', # '0.028440602',
+                'untagTlep':'0.035287068', # '0.047838701',
+                'untagWlep':'0.097960876', # '0.135501722'
 }
 
-yieldUncertABCDnn = {'allWlep':'0.010399256', #'0.020091821',
-                     'allTlep':'0.052419753', #'0.077063257',
-                     'tagTjet':'0.075338469', #'0.078577386',
-                     'tagWjet':'0.061669828', #'0.061932256',
-                     'untagTlep':'0.051108876', #'0.080574995',
-                     'untagWlep':'0.00909292', #'0.018414285'
+yieldUncertABCDnn = {'allWlep':'0.056370156', #'0.020091821',
+                     'allTlep':'0.010990787', #'0.077063257',
+                     'tagTjet':'0.040886962', #'0.078577386',
+                     'tagWjet':'0.045300831', #'0.061932256',
+                     'untagTlep':'0.055798559', #'0.080574995',
+                     'untagWlep':'0.020008949', #'0.018414285'
 }
 # all with direct alpha-ratio. sqrt(sys^2+stat^2+closure^2)
 

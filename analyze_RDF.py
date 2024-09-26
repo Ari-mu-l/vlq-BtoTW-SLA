@@ -15,7 +15,7 @@ EnableImplicitMT()
 negative MC weights, ets) applied below should be checked!
 """
 
-def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorized, outHistFile, doABCDnn):
+def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorized, outHistFile, doABCDnn, doValidation):
         start_time = time.time()
         plotTreeName=plotDetails[0]
         plotTreeNameTemp = plotDetails[0] #TEMP
@@ -171,11 +171,13 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 isEMCut+=' && isEl==1'
 
 	# Define cuts by region. Use region "all" for all selected events
-        cut  = ' && W_MT < 200' #TEMP. TODO: Comment out once it got implemented in the analyzer
-        # if doABCDnn: # TEMP. validation only
-        #         cut  = ' && W_MT < 200 && OS1FatJetProbJ_ABCDnn>0.9'
-        # else:
-        #         cut  = ' && W_MT < 200 && gcOSFatJet_pNetJ[0]>0.9'
+        if doValidation:
+                if doABCDnn:
+                        cut  = ' && W_MT < 200 && OS1FatJetProbJ_ABCDnn>0.9'
+                else:
+                        cut  = ' && W_MT < 200 && gcOSFatJet_pNetJ[0]>0.9'
+        else:   
+                cut  = ' && W_MT < 200' #TEMP. TODO: Comment out once it got implemented in the analyer
                 
         #if 'lowMT' in region:
         #        cut += ' && W_MT < 160'
@@ -312,8 +314,8 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         
                         hist_PEAKUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_peakUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_PEAKUP','weight')
                         hist_PEAKDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_peakDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_PEAKDN','weight')
-                        hist_TAILUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILUP','weight')
-                        hist_TAILDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILDN','weight')
+                        hist_TAILUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILmodifiedUP','weight') #TEMP
+                        hist_TAILDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILmodifiedDN','weight') #TEMP
                         hist_CLOSUREUP = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_closureUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_CLOSUREUP','weight')
                         hist_CLOSUREDN = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_closureDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_CLOSUREDN','weight')
                         hist_FACTORUP  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_factorUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}','weightfactorUp')
