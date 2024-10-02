@@ -171,13 +171,13 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 isEMCut+=' && isEl==1'
 
 	# Define cuts by region. Use region "all" for all selected events
-        if doValidation:
+        if doValidation: # TODO: update for ST
                 if doABCDnn:
-                        cut  = ' && W_MT < 200 && OS1FatJetProbJ_ABCDnn>0.9'
+                        cut  = ' && W_MT <= 200 && OS1FatJetProbJ_ABCDnn>0.9'
                 else:
-                        cut  = ' && W_MT < 200 && gcOSFatJet_pNetJ[0]>0.9'
+                        cut  = ' && W_MT <= 200 && gcOSFatJet_pNetJ[0]>0.9'
         else:   
-                cut  = ' && W_MT < 200' #TEMP. TODO: Comment out once it got implemented in the analyer
+                cut  = ' && W_MT <= 200' #TEMP. TODO: Comment out once it got implemented in the analyer
                 
         #if 'lowMT' in region:
         #        cut += ' && W_MT < 160'
