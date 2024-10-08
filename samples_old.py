@@ -26,16 +26,16 @@ factorABCDnn = {'allWlep':'0.034045477',
                 'allTlep':'0.08270128', 
                 'tagTjet':'0.024456696', # '0.027892638',
                 'tagWjet':'0.025098598', # '0.028440602',
-                'untagWlep':'0.097960876', # '0.047838701',
-                'untagTlep':'0.035287068', # '0.135501722'
+                'untagTlep':'0.035287068', # '0.047838701',
+                'untagWlep':'0.097960876', # '0.135501722'
 }
 
-yieldUncertABCDnn = {'allWlep':0.056370156, #'0.020091821',
-                     'allTlep':0.010990787, #'0.077063257',
-                     'tagTjet':0.040886962, #'0.078577386',
-                     'tagWjet':0.045300831, #'0.061932256',
-                     'untagWlep':0.020008949, #'0.080574995',
-                     'untagTlep':0.055798559, #'0.018414285'
+yieldUncertABCDnn = {'allWlep':'0.056370156', #'0.020091821',
+                     'allTlep':'0.010990787', #'0.077063257',
+                     'tagTjet':'0.040886962', #'0.078577386',
+                     'tagWjet':'0.045300831', #'0.061932256',
+                     'untagTlep':'0.055798559', #'0.080574995',
+                     'untagWlep':'0.020008949', #'0.018414285'
 }
 
 # all with direct alpha-ratio. sqrt(sys^2+stat^2+closure^2)
@@ -430,7 +430,7 @@ STtW2016.nrun = 2490860.000000001 # from integral 2491000, file STtW2016
 STtWb2016.nrun = 2553882.0000000005 # from integral 2554000, file STtWb2016
 TTHB2016.nrun = 4834712.0 # from integral 4937000, file TTHB2016
 TTHnonB2016.nrun = 2194702.0 # from integral 2240994, file TTHnonB2016
-TTTo2L2Nu2016.nrun = 43193956.00000001 # from integral 43546000, file TTTo2L2Nu2016
+TTTo2L2Nu2016.nrun = 42110750.00000001 # from integral 42454000, file TTTo2L2Nu2016
 TTToHadronic2016.nrun = 106200414.0 # from integral 107067000, file TTToHadronic2016
 TTToSemiLeptonic2016.nrun = 143553998.00000003 # from integral 144722000, file TTToSemiLeptonic2016
 TTMT10002016.nrun = 22444321.999999996 + 0.02474*(TTToHadronic2016.nrun+TTToSemiLeptonic2016.nrun+TTTo2L2Nu2016.nrun)# from integral 23673116, file TTMT10002016

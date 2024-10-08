@@ -25,8 +25,8 @@ gROOT.SetBatch(1)
 start_time = time.time()
 
 # ------------- File location and total lumi ---------------
-step1Dir = 'root://cmseos.fnal.gov//store/user/jmanagan/BtoTW_Apr2024_fullRun2/'
-step1Dir_ABCDnn = 'root://cmseos.fnal.gov//store/user/xshen/BtoTW_Apr2024_fullRun2_ABCDnnBestApr2024/'
+step1Dir = 'root://cmseos.fnal.gov//store/user/lpchtop/BtoTW_Oct2024_fullRun2/'
+step1Dir_ABCDnn = 'root://cmseos.fnal.gov//store/user/xshen/BtoTW_Oct2024_fullRun2/'
 
 # ------------- Arguments and default values ------------
 iPlot = 'BpMass_ABCDnn' #choose a discriminant from plotList below!
@@ -43,14 +43,21 @@ else:
         from samples import samples_ttbar
 
 doABCDnn = False
-doJetRwt= 1
-doAllSys= True
+doJetRwt = 1
+doAllSys = True #TEMP
 cTime=datetime.datetime.now()
 datestr='%i_%i_%i'%(cTime.year,cTime.month,cTime.day)
 timestr='%i_%i_%i'%(cTime.hour,cTime.minute,cTime.second)
 pfix='templatesTest'+region
 if not isCategorized: pfix='kinematicsTEST'+region
 print('Set pfix to '+pfix)
+
+# if 'validation' in sys.argv[1]:
+#         doValidation = True
+# else:
+#         doValidation = False
+
+doValidation = True
 
 # -------------- Groups of background samples to use --------------
 
@@ -76,10 +83,8 @@ else:
 if len(sys.argv)>6: taglist=[str(sys.argv[6])]
 else: 
 	taglist = ['all']
-	if isCategorized: 
-                #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
+	if isCategorized:
                 taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
-                #taglist=['allWlep','allTlep'] # TEMP
 
 # ------------- Definition of plots to make ------------------
 ### TO-DO: add ABCDnn branches
@@ -210,13 +215,13 @@ for cat in catList:
 
                 ### For analyze_RDF make the switch here (and similar regions below)
                 #dataHistFile.cd()
-                analyze(tTreeData,samples_data[data],False,iPlot,plotList[iPlot],category,region,isCategorized,dataHistFile, False)
+                analyze(tTreeData,samples_data[data],False,iPlot,plotList[iPlot],category,region,isCategorized,dataHistFile, False, doValidation)
                 if catInd==nCats: 
                         print('deleting '+data)
                         del tTreeData[data]
         dataHistFile.Close()
 
-        # ### Now we begin the same general process but for simulated backgrounds
+        ### Now we begin the same general process but for simulated backgrounds
         for proc in bkgList:
                 bkgHistFile = TFile.Open(f'{outDir}/bkghists_{proc}_{iPlot}.root', "RECREATE")
                 bkgGrp = bkgList[proc]
@@ -242,7 +247,7 @@ for cat in catList:
                                                 #else:
                                                 tTreeBkg[bkg+syst+ud]=readTreeShift(fileprefix,bkgGrp[bkg].year,f'{syst}{ud}',step1Dir_apply) ## located in utils.py
                         #bkgHistFile.cd()
-                        analyze(tTreeBkg,bkgGrp[bkg],doAllSys,iPlot,plotList[iPlot],category,region,isCategorized, bkgHistFile, doABCDnn)
+                        analyze(tTreeBkg,bkgGrp[bkg],doAllSys,iPlot,plotList[iPlot],category,region,isCategorized, bkgHistFile, doABCDnn, doValidation)
                         if catInd==nCats:
                                 print('deleting '+bkg)
                                 del tTreeBkg[bkg]
@@ -263,7 +268,7 @@ for cat in catList:
                                         print(f'        {syst}{ud}')
                                         tTreeSig[sig+syst+ud]=readTreeShift(fileprefix,samples_signal[sig].year,f'{syst}{ud}',step1Dir)
                 #sigHistFile.cd()
-                analyze(tTreeSig,samples_signal[sig],doAllSys,iPlot,plotList[iPlot],category,region,isCategorized, sigHistFile, False)
+                analyze(tTreeSig,samples_signal[sig],doAllSys,iPlot,plotList[iPlot],category,region,isCategorized, sigHistFile, False, doValidation)
                 if catInd==nCats: 
                         print('deleting '+sig)
                         del tTreeSig[sig]

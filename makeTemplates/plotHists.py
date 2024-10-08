@@ -28,8 +28,8 @@ else:
 if len(sys.argv)>4:
         pfix+=str(sys.argv[4])
 else:
-        pfix+='_Apr2024SysAll'
-        #pfix+='_Apr2024SysAll_validation' # TEMP. validation only
+        #pfix+='_Aug2024SysAll'
+        pfix+='_Aug2024SysAll_validation' # TEMP. validation only
 templateDir = f'{os.getcwd()}/{pfix}/'
 
 year = 'all'
@@ -61,7 +61,7 @@ tempsig='templates_'+iPlot+'_'+lumiInTemplates+''+isRebinned+'.root'#+'_Data18.r
 if year != 'all': tempsig='templates_'+iPlot+'_'+year+''+isRebinned+'.root'#+'_Data18.root'
 
 plotABCDnn = False
-plotLowSide = True
+plotLowSide = False
 if 'ABCDnn' in iPlot:
         plotABCDnn = True
 
@@ -110,9 +110,7 @@ partialBlind = False
 isEMlist =['L']#'E','M']
 taglist = ['all']
 if isCategorized == True:
-        #taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
-        taglist = ['tagTjet','tagWjet','untagWlep','untagTlep']
-        #taglist = ['allWlep','allTlep']
+        taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
         if ('D' in region or 'C' in region or region=='all') and 'BpMass' in iPlot and 'validation' not in pfix:
                 partialBlind = True
                 print(f'Partial blind {iPlot} for {region}.')
@@ -280,10 +278,10 @@ for tag in taglist:
                 if plotNorm:
                         hData.Scale(1/hData.Integral())
 
-                if plotABCDnn and not partialBlind: # to scale training regions of ABCDnn
-                        factor = (hData.Integral()-totMinor)/totMajor
-                        for proc in ABCDnnProcList:
-                                bkghists[proc+catStr].Scale(factor)
+                # if plotABCDnn and not partialBlind: # to scale training regions of ABCDnn
+                #         factor = (hData.Integral()-totMinor)/totMajor
+                #         for proc in ABCDnnProcList:
+                #                 bkghists[proc+catStr].Scale(factor)
 
                 for proc in bkgProcList:
                         try:
@@ -378,10 +376,14 @@ for tag in taglist:
                                                         except:
                                                                 "Unable to remove muR, muF, muRFcorrd and append New"
                                                 else: # proxy rebinned by plotting only muRFcorrd
-                                                        systematicList.remove('muR')
-                                                        systematicList.remove('muF')
+                                                        try:
+                                                                systematicList.remove('muR')
+                                                                systematicList.remove('muF')
+                                                        except:
+                                                                print(f'{proc} does not have muR and muF')
                                         else:
                                                 systematicList = systListShortPlots
+                                
                                 for syst in systematicList:
                                         for ud in shiftlist:
                                                 try:
@@ -393,6 +395,8 @@ for tag in taglist:
                                                         if 'Ttag' in syst and ('Wjet' in tag or 'Tlep' in tag): continue
                                                         print(f'FAILED to open {histPrefix}__{proc}__{syst}{ud}')
                                                         pass
+                                for sys in systHists.keys():
+                                        systHists[sys].Print()
 
                 totBkgTemp1[catStr] = TGraphAsymmErrors(bkgHT.Clone(bkgHT.GetName()+'shapeOnly'))
                 totBkgTemp2[catStr] = TGraphAsymmErrors(bkgHT.Clone(bkgHT.GetName()+'shapePlusNorm'))
@@ -664,7 +668,8 @@ for tag in taglist:
                                         leg.AddEntry(bkghists['ABCDnn'+catStr],"ABCDnn","f")
                                         leg.AddEntry(bkghists['ttx'+catStr],"t#bar{t}+(V,H)","f")
                                         leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f")
-                                        leg.AddEntry(gaeData,"Data","pel")  #left
+                                        leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")
+                                        leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l")
                                 else:
                                         try: 
                                                 leg.AddEntry(bkghists['ttx'+catStr],"t#bar{t}+(V,H)","f") #right

@@ -19,19 +19,19 @@ year='all' # all
 pfix='templates'+region
 if not isCategorized: pfix='kinematics'+region
 
-pfix+='_Apr2024SysAll' 
+pfix+='_Aug2024SysAll_noSys' 
 outDir = os.getcwd()+'/'+pfix+'/'
 
 removeThreshold = 0.0005 # TODO: add if necessary
 
 scaleSignalXsecTo1pb = False # Set to True if analyze.py ever uses a non-1 cross section
-doAllSys = True # TEMP
+doAllSys = False # TEMP
 doPDF = False
 if isCategorized: doPDF=False # FIXME later
 
-#iPlot = "BpMass"
+iPlot = "BpMass"
 #iPlot = "OS1FatJetProbJ"
-iPlot = "BpMass_ABCDnn"
+#iPlot = "BpMass_ABCDnn"
 
 
 if 'ABCDnn' in iPlot:
@@ -59,7 +59,7 @@ catList = ['is'+item[0]+'_'+item[1] for item in list(itertools.product(isEMlist,
 lumiSys = 0.018 #lumi uncertainty
 
 groupHists = True # TEMP
-getYields = True # TEMP
+getYields = False # TEMP
 
 plotList = ['ST',
             'BpMass',
@@ -174,7 +174,6 @@ if groupHists:
                         # DID NOT IMPLEMENT REMOVETHRESHOLD
                         bkgHistFile = TFile.Open(f'{outDir}{cat[2:]}/bkghists_{proc}_{iPlot}.root', "READ")
 
-                        #print(f'{outDir}{cat[2:]}/bkghists_{proc}_{iPlot}.root')
                         bkgGrp = bkgProcs[proc]
                         systHists = {}
                         isFirstHist = True
@@ -185,25 +184,21 @@ if groupHists:
                                 systematicList = systListFull
 
                         for bkg in bkgGrp:
-                                if not doABCDnn and 'QCDHT300' in bkg:
-                                        print("Plotting without QCDHT300.")
+                                if not doABCDnn and 'QCDHT200' in bkg:
+                                        print("Plotting without QCDHT200.")
                                         continue
                                 if isFirstHist:
                                         hists = bkgHistFile.Get(histoPrefix+'_'+bkgGrp[bkg].prefix).Clone(histoPrefix+'__'+proc)
                                         isFirstHist = False
                                         if doAllSys:
                                                 for syst in systematicList:
-
-                                                        #print(f'{histoPrefix}_{syst}Up_{bkgGrp[bkg].prefix}')
                                                         systHists[f'{histoPrefix}__{proc}__{syst}Up'] = bkgHistFile.Get(f'{histoPrefix}_{syst}Up_{bkgGrp[bkg].prefix}').Clone(f'{histoPrefix}__{proc}__{syst}Up')
                                                         systHists[f'{histoPrefix}__{proc}__{syst}Down'] = bkgHistFile.Get(f'{histoPrefix}_{syst}Dn_{bkgGrp[bkg].prefix}').Clone(f'{histoPrefix}__{proc}__{syst}Down')
                                 else:
-                                        #print(bkgHistFile.Get(histoPrefix+'_'+bkgGrp[bkg].prefix))
+                                        print(histoPrefix+'_'+bkgGrp[bkg].prefix)
                                         hists.Add(bkgHistFile.Get(histoPrefix+'_'+bkgGrp[bkg].prefix))
                                         if doAllSys:
                                                 for syst in systematicList:
-
-                                                        #print(f'{histoPrefix}_{syst}Up_{bkgGrp[bkg].prefix}')
                                                         try:
                                                                 systHists[f'{histoPrefix}__{proc}__{syst}Up'].Add(bkgHistFile.Get(f'{histoPrefix}_{syst}Up_{bkgGrp[bkg].prefix}').Clone(f'{histoPrefix}__{proc}__{syst}Up'))
                                                                 systHists[f'{histoPrefix}__{proc}__{syst}Down'].Add(bkgHistFile.Get(f'{histoPrefix}_{syst}Dn_{bkgGrp[bkg].prefix}').Clone(f'{histoPrefix}__{proc}__{syst}Down'))
@@ -249,7 +244,7 @@ if groupHists:
                         for systHist in systHists:
                                 systHists[systHist].Write()
                 sigHistFile.Close()
-
+        outHistFile.Close()
 
 ###################
 ### Yield Table ###

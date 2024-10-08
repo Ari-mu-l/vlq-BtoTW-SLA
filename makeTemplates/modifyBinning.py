@@ -34,7 +34,7 @@ lumiInTemplates= lumiStr
 iPlot='BpMass_ABCDnn'
 #iPlot='BpMass' #TEMP
 if len(sys.argv)>1: iPlot=str(sys.argv[1])
-folder = 'templatesD_Apr2024SysAll'
+folder = 'templatesD_Aug2024SysAll'
 
 if len(sys.argv)>2: folder=str(sys.argv[2])
 cutString = ''
