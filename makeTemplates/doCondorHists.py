@@ -7,6 +7,8 @@ outputDir = thisDir+'/'
 
 region='all' #all, BAX, DCY, individuals
 categorize=1 #1==categorize into 6 tags
+doAllSys=1
+doValidation=0
 
 cTime=datetime.datetime.now()
 date='%i_%i_%i'%(cTime.year,cTime.month,cTime.day)
@@ -14,9 +16,13 @@ time='%i_%i_%i'%(cTime.hour,cTime.minute,cTime.second)
 pfix = 'templates'+region
 if not categorize: pfix='kinematics'+region
 
-#pfix+='_Oct2024StatsOnly'
-pfix+='_Oct2024SysAll'
-#pfix+='_Oct2024SysAll_validation'
+pfix+='_Oct2024'
+if doAllSys:
+        pfix+='SysAll'
+else:
+        pfix+='StatsOnly'
+if doValidation:
+        pfix+='_validation'
 
 plotList = [#distribution name as defined in "doHists.py"
         'ST', #:('gcJet_ST',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
@@ -151,7 +157,7 @@ for iplot in iPlotList:
 		os.chdir(outDir)			
 
 		dict={'rundir':runDir, 'dir':'.','iPlot':iplot,'region':region,'isCategorized':categorize,
-			  'isEM':cat[0],'tag':cat[1],'2D':dimstr}
+			  'isEM':cat[0],'tag':cat[1], 'doAllSys':doAllSys, 'doValidation':doValidation, '2D':dimstr}
 		print(dict)
 		jdf=open('condor.job','w')
 		jdf.write(
@@ -165,7 +171,7 @@ Output = condor_%(iPlot)s.out
 Error = condor_%(iPlot)s.err
 Log = condor_%(iPlot)s.log
 Notification = Never
-Arguments = %(dir)s %(iPlot)s %(region)s %(isCategorized)s %(isEM)s %(tag)s
+Arguments = %(dir)s %(iPlot)s %(region)s %(isCategorized)s %(isEM)s %(tag)s %(doAllSys)s %(doValidation)s
 request_memory = 8000
 
 Queue 1"""%dict)

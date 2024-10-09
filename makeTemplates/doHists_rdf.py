@@ -44,7 +44,6 @@ else:
 
 doABCDnn = False
 doJetRwt = 1
-doAllSys = True #TEMP
 cTime=datetime.datetime.now()
 datestr='%i_%i_%i'%(cTime.year,cTime.month,cTime.day)
 timestr='%i_%i_%i'%(cTime.hour,cTime.minute,cTime.second)
@@ -52,13 +51,19 @@ pfix='templatesTest'+region
 if not isCategorized: pfix='kinematicsTEST'+region
 print('Set pfix to '+pfix)
 
-# if 'validation' in sys.argv[1]:
-#         doValidation = True
-# else:
-#         doValidation = False
+if len(sys.argv)>7:
+        doAllSys = sys.argv[7]
+else:
+        doAllSys = True
 
-doValidation = True
+if len(sys.argv)>8:
+        doValidation = sys.argv[8]
+else:
+        doValidation = False
 
+if doValidation:
+        print('Plotting validation.')
+                
 # -------------- Groups of background samples to use --------------
 
 # this is a list of group dictionaries. "wjets" has entries like "WJetsHT2002018":WJetsHT2002018, where the 2nd is the class
