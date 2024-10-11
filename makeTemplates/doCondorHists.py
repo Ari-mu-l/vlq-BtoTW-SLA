@@ -5,9 +5,9 @@ else: runDir = thisDir
 if os.getcwd()[-17:] == 'singleLepAnalyzer': os.chdir(os.getcwd()+'/makeTemplates/')
 outputDir = thisDir+'/'
 
-region='all' #all, BAX, DCY, individuals
+region='A' #all, BAX, DCY, individuals
 categorize=1 #1==categorize into 6 tags
-doAllSys=1
+doAllSys=0
 doValidation=0
 
 cTime=datetime.datetime.now()
@@ -19,13 +19,16 @@ if not categorize: pfix='kinematics'+region
 pfix+='_Oct2024'
 if doAllSys:
         pfix+='SysAll'
+        requestMemory = '8000'
 else:
         pfix+='StatsOnly'
+        requestMemory = '4000'
+        
 if doValidation:
         pfix+='_validation'
 
 plotList = [#distribution name as defined in "doHists.py"
-        'ST', #:('gcJet_ST',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
+        #'ST', #:('gcJet_ST',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
         'BpMass', #:('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
         # 'HT', #:('gcJet_HT',linspace(0, 5000, 51).tolist(),';H_{T} (GeV)'), 
         # 'lepPt' , #:('lepton_pt',linspace(0, 1000, 51).tolist(),';lepton p_{T} [GeV]'),
@@ -117,8 +120,8 @@ isEMlist = ['L'] #['E','M']
 if '2D' in pfix: isEMlist = ['L']
 
 if categorize:
-        taglist=['tagTjet','tagWjet','untagTlep','untagWlep', 'allWlep','allTlep']
-        #taglist=['allWlep','allTlep']
+        #taglist=['tagTjet','tagWjet','untagTlep','untagWlep', 'allWlep','allTlep']
+        taglist=['allWlep','allTlep']
         #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
 else:
         taglist = ['all']
@@ -157,7 +160,7 @@ for iplot in iPlotList:
 		os.chdir(outDir)			
 
 		dict={'rundir':runDir, 'dir':'.','iPlot':iplot,'region':region,'isCategorized':categorize,
-			  'isEM':cat[0],'tag':cat[1], 'doAllSys':doAllSys, 'doValidation':doValidation, '2D':dimstr}
+			  'isEM':cat[0],'tag':cat[1], 'doAllSys':doAllSys, 'doValidation':doValidation, '2D':dimstr, 'requestMemory':requestMemory}
 		print(dict)
 		jdf=open('condor.job','w')
 		jdf.write(
@@ -172,7 +175,7 @@ Error = condor_%(iPlot)s.err
 Log = condor_%(iPlot)s.log
 Notification = Never
 Arguments = %(dir)s %(iPlot)s %(region)s %(isCategorized)s %(isEM)s %(tag)s %(doAllSys)s %(doValidation)s
-request_memory = 8000
+request_memory = %(requestMemory)s
 
 Queue 1"""%dict)
 		jdf.close()

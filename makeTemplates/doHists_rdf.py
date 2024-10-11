@@ -52,18 +52,20 @@ if not isCategorized: pfix='kinematicsTEST'+region
 print('Set pfix to '+pfix)
 
 if len(sys.argv)>7:
-        doAllSys = sys.argv[7]
+        doAllSys = int(sys.argv[7])
 else:
         doAllSys = True
 
 if len(sys.argv)>8:
-        doValidation = sys.argv[8]
+        doValidation = int(sys.argv[8])
 else:
         doValidation = False
 
+if doAllSys:
+        print('Doing all systematic uncertainties.')
 if doValidation:
         print('Plotting validation.')
-                
+
 # -------------- Groups of background samples to use --------------
 
 # this is a list of group dictionaries. "wjets" has entries like "WJetsHT2002018":WJetsHT2002018, where the 2nd is the class

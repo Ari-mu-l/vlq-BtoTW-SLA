@@ -19,7 +19,7 @@ year='all' # all
 pfix='templates'+region
 if not isCategorized: pfix='kinematics'+region
 
-pfix+='_Aug2024SysAll_noSys' 
+pfix+='_Oct2024StatsOnly' 
 outDir = os.getcwd()+'/'+pfix+'/'
 
 removeThreshold = 0.0005 # TODO: add if necessary
@@ -50,8 +50,8 @@ if '2D' in outDir:
         isEMlist =['L']
 taglist = ['all']
 if isCategorized: 
-        #taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
-        taglist=['allWlep','allTlep']
+        taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
+        #taglist=['allWlep','allTlep']
         #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
         
 catList = ['is'+item[0]+'_'+item[1] for item in list(itertools.product(isEMlist,taglist))]
