@@ -5,10 +5,10 @@ else: runDir = thisDir
 if os.getcwd()[-17:] == 'singleLepAnalyzer': os.chdir(os.getcwd()+'/makeTemplates/')
 outputDir = thisDir+'/'
 
-region='A' #all, BAX, DCY, individuals
+region='D' #all, BAX, DCY, individuals
 categorize=1 #1==categorize into 6 tags
-doAllSys=0
-doValidation=0
+doAllSys=1
+doValidation=1
 
 cTime=datetime.datetime.now()
 date='%i_%i_%i'%(cTime.year,cTime.month,cTime.day)
@@ -120,8 +120,8 @@ isEMlist = ['L'] #['E','M']
 if '2D' in pfix: isEMlist = ['L']
 
 if categorize:
-        #taglist=['tagTjet','tagWjet','untagTlep','untagWlep', 'allWlep','allTlep']
-        taglist=['allWlep','allTlep']
+        taglist=['tagTjet','tagWjet','untagTlep','untagWlep', 'allWlep','allTlep']
+        #taglist=['allWlep','allTlep']
         #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
 else:
         taglist = ['all']

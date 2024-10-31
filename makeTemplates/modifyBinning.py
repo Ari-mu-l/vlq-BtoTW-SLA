@@ -32,13 +32,13 @@ lumiInTemplates= lumiStr
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 iPlot='BpMass_ABCDnn'
-#iPlot='BpMass' #TEMP
 if len(sys.argv)>1: iPlot=str(sys.argv[1])
-folder = 'templatesD_Aug2024SysAll'
+folder = 'templatesD_Apr2024SysAll_correctQCD300'
 
 if len(sys.argv)>2: folder=str(sys.argv[2])
 cutString = ''
-templateDir = os.getcwd()+'/'+folder+'/'+cutString
+#templateDir = os.getcwd()+'/'+folder+'/'+cutString
+templateDir = "templatesD_Oct2024_42bins/" # TEMP
 print("templateDir: "+templateDir)
 combinefile = 'templates_'+iPlot+'_'+lumiInTemplates+'.root'
 print("file: "+combinefile)
@@ -51,7 +51,10 @@ if 'kinematics' in folder:
 
 massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200]
 sigProcList = ['BpM'+str(mass) for mass in massList]
-bkgProcList = ['ttbar','singletop','wjets','ttx','ewk','qcd'] #put the most dominant process first
+if 'ABCDnn' in iPlot:
+        bkgProcList = ['major','ttx','ewk']
+else:
+        bkgProcList = ['ttbar','singletop','wjets','ttx','ewk','qcd'] #put the most dominant process first
 #ABCDProcList = ['',]
 
 stat_saved = 0.2 #statistical uncertainty requirement (enter >1.0 for no rebinning; i.g., "1.1")
@@ -78,11 +81,12 @@ removalKeys['__muRDown'] = False
 removalKeys['__muF'] = False
 if 'kinematics' not in folder: removalKeys['__muRFcorrd'] = False
 removalKeys['__pdf'] = False
-if 'ABCDnn' in iPlot:
-        removalKeys['__ttbar'] = False
-        removalKeys['__wjets'] = False
-        removalKeys['__singletop'] = False
-        removalKeys['__qcd'] = False
+#if 'ABCDnn' in iPlot: # no longer needed for the fitting method
+#        removalKeys['__ttbar'] = False
+#        removalKeys['__wjets'] = False
+#        removalKeys['__singletop'] = False
+#        removalKeys['__qcd'] = False
+# TODO: later in the code, if ABCDnn, add major to keys
 
 def findfiles(path, filtre):
     for root, dirs, files in os.walk(path):
@@ -103,6 +107,10 @@ print (tfile)
 datahists = [k.GetName() for k in tfile.GetListOfKeys() if '__'+dataName in k.GetName()]
 #print datahists
 channels = [hist[hist.find('fb_')+3:hist.find('__')] for hist in datahists]
+#if 'V' in folder:
+#        channels.remove('isL_tagTjet_D')
+#        channels.remove('isL_tagWjet_D')
+        
 allhists = {chn:[hist.GetName() for hist in tfile.GetListOfKeys() if chn in hist.GetName()] for chn in channels}
 
 DataHists = {}
@@ -112,15 +120,15 @@ for hist in datahists:
 
 totBkgHists = {}
 for hist in datahists:
-	channel = hist[hist.find('fb_')+3:hist.find('__')]
-	totBkgHists[channel]=tfile.Get(hist.replace('__'+dataName,'__'+bkgProcList[0])).Clone()
-	for proc in bkgProcList:
-		if proc == bkgProcList[0]: continue
-		try: totBkgHists[channel].Add(tfile.Get(hist.replace('__'+dataName,'__'+proc)))
-		except: 
-			print("Missing "+proc+" for category: "+hist)
-			print("WARNING! Skipping this process!!!!")
-			pass
+        channel = hist[hist.find('fb_')+3:hist.find('__')]
+        totBkgHists[channel]=tfile.Get(hist.replace('__'+dataName,'__'+bkgProcList[0])).Clone()
+        for proc in bkgProcList:
+                if proc == bkgProcList[0]: continue
+                try: totBkgHists[channel].Add(tfile.Get(hist.replace('__'+dataName,'__'+proc)))
+                except:
+                        print("Missing "+proc+" for category: "+hist)
+                        print("WARNING! Skipping this process!!!!")
+                        pass
 
 ## Not currently using this -- it's for rebinning on signal stats.
 ##SigHists = {}
@@ -133,22 +141,23 @@ for hist in datahists:
 
 xbinsListTemp = {}
 for chn in totBkgHists.keys():
-	stat = stat_saved
+        stat = stat_saved
 
-	#print 'Channel',chn,'integral is',totBkgHists[chn].Integral()
-	print('Processing '+chn)
+        #print 'Channel',chn,'integral is',totBkgHists[chn].Integral()
+        print('Processing '+chn)
 
-	Nbins = 0
-	if 'templates' in folder:
+        Nbins = 0
+        if 'templates' in folder:
                 xbinsListTemp[chn]=[tfile.Get(datahists[0]).GetXaxis().GetBinUpEdge(tfile.Get(datahists[0]).GetXaxis().GetNbins())]
                 Nbins = tfile.Get(datahists[0]).GetNbinsX()
-                
-	totTempBinContent = 0.
-	totTempBinErrSquared = 0.
-	totTempDataContent = 0.
-	totTempDataErrSquared = 0.
-	totTempSigContent = 0;
-	for iBin in range(1,Nbins+1):
+
+        totTempBinContent = 0.
+        totTempBinErrSquared = 0.
+        totTempDataContent = 0.
+        totTempDataErrSquared = 0.
+        totTempSigContent = 0.
+
+        for iBin in range(1,Nbins+1):
                 totTempBinContent += totBkgHists[chn].GetBinContent(Nbins+1-iBin)
                 totTempBinErrSquared += totBkgHists[chn].GetBinError(Nbins+1-iBin)**2
                 try:
@@ -156,9 +165,9 @@ for chn in totBkgHists.keys():
                 except: pass
                 totTempDataContent += DataHists[chn].GetBinContent(Nbins+1-iBin)
                 totTempDataErrSquared += totBkgHists[chn].GetBinError(Nbins+1-iBin)**2
-		
-		#print 'totTempBinContent =',totTempBinContent,' ',totTempBinContent_M,', totTempBinErrSquared =',totTempBinErrSquared,' ',totTempBinErrSquared_M
-		#print 'totTempSigContent =',totTempSigContent,' ',totTempSigContent_M
+
+                #print 'totTempBinContent =',totTempBinContent,' ',totTempBinContent_M,', totTempBinErrSquared =',totTempBinErrSquared,' ',totTempBinErrSquared_M
+                #print 'totTempSigContent =',totTempSigContent,' ',totTempSigContent_M
 
                 if totTempBinContent>0.:
                         if rebin4chi2 and (totTempDataContent == 0): continue
@@ -172,29 +181,32 @@ for chn in totBkgHists.keys():
                                         #print 'Appending bin edge',totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin)
                                         xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
 
-	## Going right to left -- if the last entry isn't 0 add it
-	if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0)
-
+        ## Going right to left -- if the last entry isn't 0 add it
+        if '42bins' in templateDir: # TEMP: Change this if range, binning and templateDir naming changes
+                if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
+        else:
+                if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0) # only for histograms that start from 0
+        
         ## Placeholder: if needed for some plot, can add 1 at the end if rebinning left to right
-	#if 'Large' in chn and 'LargeJ' not in chn and 'templatesCR' in folder and xbinsListTemp[chn][-1]!=1: xbinsListTemp[chn].append(1)
+        #if 'Large' in chn and 'LargeJ' not in chn and 'templatesCR' in folder and xbinsListTemp[chn][-1]!=1: xbinsListTemp[chn].append(1)
 
         ## Placeholder: add some other limit at the end as needed...
-	# if (iPlot == 'DnnTprime' or iPlot == 'DnnBprime') and 'templatesSR' in folder:
-	# 	if xbinsListTemp[chn][-1]>0.5: xbinsListTemp[chn].append(0.5)
-	# 	elif xbinsListTemp[chn][-1]!=0.5: xbinsListTemp[chn][-1] = 0.5
-	# elif (iPlot == 'DnnTprime' or iPlot == 'DnnBprime') and 'CR' in folder and 'SCR' not in folder and xbinsListTemp[chn][0]!=0.5: xbinsListTemp[chn][0] = 0.5 
-	
-	## If the 1st bin is empty or too small, make the left side wider
-	if totBkgHists[chn].GetBinContent(1)==0.: 
-		if len(xbinsListTemp[chn])>2: del xbinsListTemp[chn][-2]
-	elif totBkgHists[chn].GetBinError(1)/totBkgHists[chn].GetBinContent(1)>stat: 
-		if len(xbinsListTemp[chn])>2: del xbinsListTemp[chn][-2]
+        # if (iPlot == 'DnnTprime' or iPlot == 'DnnBprime') and 'templatesSR' in folder:
+        # 	if xbinsListTemp[chn][-1]>0.5: xbinsListTemp[chn].append(0.5)
+        # 	elif xbinsListTemp[chn][-1]!=0.5: xbinsListTemp[chn][-1] = 0.5
+        # elif (iPlot == 'DnnTprime' or iPlot == 'DnnBprime') and 'CR' in folder and 'SCR' not in folder and xbinsListTemp[chn][0]!=0.5: xbinsListTemp[chn][0] = 0.5 
 
-	## Ignore all this if stat is > 1
-	if stat>1.0:
-		xbinsListTemp[chn] = [tfile.Get(datahists[0]).GetXaxis().GetBinUpEdge(tfile.Get(datahists[0]).GetXaxis().GetNbins())]
-		for iBin in range(1,Nbins+1): 
-			xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
+        ## If the 1st bin is empty or too small, make the left side wider
+        if totBkgHists[chn].GetBinContent(1)==0.: 
+                if len(xbinsListTemp[chn])>2: del xbinsListTemp[chn][-2]
+        elif totBkgHists[chn].GetBinError(1)/totBkgHists[chn].GetBinContent(1)>stat: 
+                if len(xbinsListTemp[chn])>2: del xbinsListTemp[chn][-2]
+
+        ## Ignore all this if stat is > 1
+        if stat>1.0:
+                xbinsListTemp[chn] = [tfile.Get(datahists[0]).GetXaxis().GetBinUpEdge(tfile.Get(datahists[0]).GetXaxis().GetNbins())]
+                for iBin in range(1,Nbins+1): 
+                        xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
 
 print("==> Here is the binning I found with "+str(stat_saved*100)+"% uncertainty threshold: ")
 print("//"*40)
@@ -245,6 +257,8 @@ for rfile in rfiles:
                 for hist in allhists[chn]:
                         rebinnedHists[hist] = tfiles[iRfile].Get(hist).Rebin(len(xbins[chn])-1,hist,xbins[chn])
                         rebinnedHists[hist].SetDirectory(0)
+                        if sigName in hist:
+                                rebinnedHists[hist].Scale(1.0/0.5) # already did lumi*1pb/Ngen, need lumi*1pb/(Ngen*BRsinglet)
                         if rebinnedHists[hist].Integral() < 1e-12: 
                                 print("Empty hist found, skipping: "+hist)
                                 continue
@@ -259,28 +273,36 @@ for rfile in rfiles:
                                 yieldsErrsAll[yieldHistName] += rebinnedHists[hist].GetBinError(ibin)**2
                         yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
 
-			
+
                 ##Check for empty signal bins
                 #sighist = rebinnedHists[iPlot+'_36p814fb_'+chn+'__sig']
                 #for ibin in range(1,sighist.GetNbinsX()+1):
                 #	if sighist.GetBinContent(ibin) == 0: print 'chn = '+chn+', mass = '+sigName+', empty minMlb > '+str(sighist.GetBinLowEdge(ibin))
 
                 #For ABCDnn, combine the major backgrounds into one histogram
-                if 'ABCDnn' in iPlot:
-                        ttbarhists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if '__ttbar' in k.GetName() and chn in k.GetName()]
-                        #print(str(ttbarhists))
-                        for hist in ttbarhists:
-                                majorhist = rebinnedHists[hist].Clone(hist.replace('__ttbar','__major'))
-                                majorhist.Add(rebinnedHists[hist.replace('__ttbar','__wjets')])
-                                majorhist.Add(rebinnedHists[hist.replace('__ttbar','__singletop')])
-                                majorhist.Add(rebinnedHists[hist.replace('__ttbar','__qcd')])
-                                print('\t Writing majorhist: '+majorhist.GetName())
-                                majorhist.Write()
-                                yieldsAll[majorhist.GetName()] = majorhist.Integral()
-                                yieldsErrsAll[majorhist.GetName()] = 0.
-                                for ibin in range(1,majorhist.GetXaxis().GetNbins()+1):
-                                        yieldsErrsAll[majorhist.GetName()] += majorhist.GetBinError(ibin)**2
-                                yieldsErrsAll[majorhist.GetName()] = math.sqrt(yieldsErrsAll[majorhist.GetName()])
+                # if 'ABCDnn' in iPlot:
+                #         pass # TEMP
+                #         ttbarhists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if '__ttbar' in k.GetName() and chn in k.GetName()]
+                #         #print(str(ttbarhists))
+                #         for hist in ttbarhists:
+                #                 majorhist = rebinnedHists[hist].Clone(hist.replace('__ttbar','__major'))
+                #                 majorhist.Add(rebinnedHists[hist.replace('__ttbar','__wjets')])
+                #                 majorhist.Add(rebinnedHists[hist.replace('__ttbar','__singletop')])
+                #                 majorhist.Add(rebinnedHists[hist.replace('__ttbar','__qcd')])
+                #                 print('\t Writing majorhist: '+majorhist.GetName())
+                #                 # if 'untagTlep' in majorhist.GetName():
+                #                 #         print('\t\t flipping untagTlep --> untagWlep')
+                #                 #         majorhist.Scale(0.035287068/0.097960876)
+                #                 # if 'untagWlep' in majorhist.GetName():
+                #                 #         print('\t\t flipping untagTlep --> untagWlep')
+                #                 #         majorhist.Scale(0.097960876/0.035287068)
+
+                                # majorhist.Write()
+                                # yieldsAll[majorhist.GetName()] = majorhist.Integral()
+                                # yieldsErrsAll[majorhist.GetName()] = 0.
+                                # for ibin in range(1,majorhist.GetXaxis().GetNbins()+1):
+                                #         yieldsErrsAll[majorhist.GetName()] += majorhist.GetBinError(ibin)**2
+                                # yieldsErrsAll[majorhist.GetName()] = math.sqrt(yieldsErrsAll[majorhist.GetName()])
 
                 #Constructing muRF shapes
                 muRUphists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if 'muR'+upTag in k.GetName() and chn in k.GetName()]
@@ -330,9 +352,7 @@ for rfile in rfiles:
                                 muRFcorrdNewUpHist.Scale(renormNomHist.Integral()/muRFcorrdNewUpHist.Integral())
                                 muRFcorrdNewDnHist.Scale(renormNomHist.Integral()/muRFcorrdNewDnHist.Integral())
                         muRFcorrdNewUpHist.Write()
-                        #print('Writing histogram: '+muRFcorrdNewUpHist.GetName())
                         muRFcorrdNewDnHist.Write()
-                        #print('Writing histogram: '+muRFcorrdNewDnHist.GetName())
 
                         yieldsAll[muRFcorrdNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRFcorrdNewUpHist.Integral()
                         yieldsAll[muRFcorrdNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRFcorrdNewDnHist.Integral()
@@ -341,17 +361,32 @@ for rfile in rfiles:
                 pdfUphists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if 'pdf0' in k.GetName() and chn in k.GetName()]
                 newPDFName = 'pdfNew'
                 for hist in pdfUphists:
-                        pdfNomHist = rebinnedHists[hist[:hist.find('__pdf')]]
+                        pdfNomHist = rebinnedHists[hist.replace('__pdf0','')]
                         pdfNewUpHist = rebinnedHists[hist].Clone(hist.replace('pdf0',newPDFName+upTag))
                         pdfNewDnHist = rebinnedHists[hist].Clone(hist.replace('pdf0',newPDFName+downTag))
+
                         for ibin in range(1,pdfNewUpHist.GetNbinsX()+1):
                                 weightList = [rebinnedHists[hist.replace('pdf0','pdf'+str(pdfInd))].GetBinContent(ibin) for pdfInd in range(101)]
-                                indPDFUp = sorted(range(len(weightList)), key=lambda k: weightList[k])[83]
-                                indPDFDn = sorted(range(len(weightList)), key=lambda k: weightList[k])[15]
-                                pdfNewUpHist.SetBinContent(ibin,rebinnedHists[hist.replace('pdf0','pdf'+str(indPDFUp))].GetBinContent(ibin))
-                                pdfNewDnHist.SetBinContent(ibin,rebinnedHists[hist.replace('pdf0','pdf'+str(indPDFDn))].GetBinContent(ibin))
-                                pdfNewUpHist.SetBinError(ibin,rebinnedHists[hist.replace('pdf0','pdf'+str(indPDFUp))].GetBinError(ibin))
-                                pdfNewDnHist.SetBinError(ibin,rebinnedHists[hist.replace('pdf0','pdf'+str(indPDFDn))].GetBinError(ibin))
+
+                                errsq = 0
+                                for weight in weightList:
+                                        ## sum up squares of differences to the central value
+                                        errsq += (weight - pdfNomHist.GetBinContent(ibin))**2
+
+                                        
+                                ## find the percentage of the shift w.r.t the central value
+                                if pdfNomHist.GetBinContent(ibin) != 0: shiftpct = math.sqrt(errsq)/pdfNomHist.GetBinContent(ibin)
+                                else:
+                                        if errsq > 0.0001:
+                                                print('Weird: central is 0 but not PDF unc has errsq',errsq,'in bin',ibin,'of hist',hist)
+                                        shiftpct = 0
+                
+                                if abs(shiftpct) > 1 and pdfNomHist.GetBinContent(ibin) > 0.008:
+                                        print('WARNING: pdf shift is',shiftpct,', flooring down at 0 in bin',ibin,'of hist',hist,'on bin content of',pdfNomHist.GetBinContent(ibin))
+                                ## multiply the central value by 1 +/- the shift
+                                pdfNewUpHist.SetBinContent(ibin, max(0,pdfNomHist.GetBinContent(ibin)*(1 + shiftpct)))
+                                pdfNewDnHist.SetBinContent(ibin, max(0,pdfNomHist.GetBinContent(ibin)*(1 - shiftpct)))                                
+
                         if ('__'+sigName in hist and '__pdf' in hist and normalizePDF): #normalize the renorm/fact shapes to nominal
                                 signame = hist.split('__')[1]
                                 if sigName not in signame: print("DIDNT GET SIGNAME "+signame)
@@ -362,11 +397,11 @@ for rfile in rfiles:
                                 pdfNewUpHist.Scale(pdfNomHist.Integral()/pdfNewUpHist.Integral())
                                 pdfNewDnHist.Scale(pdfNomHist.Integral()/pdfNewDnHist.Integral())
                         pdfNewUpHist.Write()
-                        # print 'Writing histogram: ',pdfNewUpHist.GetName()
                         pdfNewDnHist.Write()
-                        # print 'Writing histogram: ',pdfNewDnHist.GetName()
+
                         yieldsAll[pdfNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewUpHist.Integral()
                         yieldsAll[pdfNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewDnHist.Integral()
+
 			
         tfiles[iRfile].Close()
         outputRfiles[iRfile].Close()
@@ -381,8 +416,8 @@ for chn in channels:
 	if chn.split('_')[0] not in isEMlist: isEMlist.append(chn.split('_')[0])
 	if chn.split('_')[1] not in taglist: taglist.append(chn.split('_')[1])
 
-if 'ABCDnn' in iPlot:
-        bkgProcList = ['major','ttx','ewk'] #put the most dominant process first
+#if 'ABCDnn' in iPlot:
+#        bkgProcList = ['major','ttx','ewk'] #put the most dominant process first
 print("List of systematics for "+bkgProcList[0]+" process and "+channels[0]+" channel:")
 print("        "+str(sorted([hist[hist.find(bkgProcList[0])+len(bkgProcList[0])+2:hist.find(upTag)] for hist in yieldsAll.keys() if channels[0] in hist and '__'+bkgProcList[0]+'__' in hist and upTag in hist])))
 
@@ -557,8 +592,8 @@ for proc in bkgProcList+sigProcList:
                                 try:
                                         row.append(' & '+str(round(yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20),2)))
                                 except:
-                                        if 'Wtag' in syst and ('Tjet' in chn or 'Wlep' in chn): row.append(' & \\NA')
-                                        elif 'Ttag' in syst and ('Wjet' in chn or 'Tlep' in chn): row.append(' & \\NA')
+                                        if 'Wtag' in syst and ('Tjet' in chn or 'untag' in chn): row.append(' & \\NA')
+                                        elif 'Ttag' in syst and ('Wjet' in chn or 'untag' in chn): row.append(' & \\NA')
                                         elif proc != 'qcd': print("Missing "+proc+" for channel: "+chn+" and systematic: "+syst)
                                         pass
                         row.append('\\\\')
