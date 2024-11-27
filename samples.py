@@ -19,8 +19,10 @@ for syst in uncorrList_sf:
         systListShortPlots.append(syst+year)
         systListFullPlots.append(syst+year)
 
-
-systListABCDnn = ['peak', 'tail', 'closure', 'factor']
+#systListABCDnn = ['param0', 'param1', 'param2', 'param3', 'lastbin'] # add factor
+systListABCDnn = [#'lastbin', #'factor',
+                  'train',
+                  'param0', 'param1', 'param2', 'param3', 'param4', 'param5', 'param6', 'param7']
 
 factorABCDnn = {'allWlep':'0.034045477',
                 'allTlep':'0.08270128', 
@@ -50,7 +52,12 @@ class sample:
         self.kfactor = 1 # dummy
         self.xsec = xsec # in pb
         self.color = ROOT.kBlack
-                        
+
+# theory_mass = array('d', [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000])
+# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW 
+xsec = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
+# extrapolating from ln(xsec) fit I get 0.000238 for 2200
+
 Bprime_M1000_2016APV = sample("Bprime_M1000_2016APV", 1.0, "2016APV", "Bprime_M1000_2016APVULNanoList.txt", "/BprimeBtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
 Bprime_M1200_2016APV = sample("Bprime_M1200_2016APV", 1.0, "2016APV", "Bprime_M1200_2016APVULNanoList.txt", "/BprimeBtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
 Bprime_M1300_2016APV = sample("Bprime_M1300_2016APV", 1.0, "2016APV", "Bprime_M1300_2016APVULNanoList.txt", "/BprimeBtoTW_M-1300_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
@@ -198,34 +205,34 @@ SingleMuonRun2018A  = sample("SingleMuonRun2018A", 1.0, "2018", "SingleMuonRun20
 SingleMuonRun2018B  = sample("SingleMuonRun2018B", 1.0, "2018", "SingleMuonRun2018B2018ULNanoList.txt", "/SingleMuon/Run2018B-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD")
 SingleMuonRun2018C  = sample("SingleMuonRun2018C", 1.0, "2018", "SingleMuonRun2018C2018ULNanoList.txt", "/SingleMuon/Run2018C-UL2018_MiniAODv2_NanoAODv9-v2/NANOAOD")
 SingleMuonRun2018D  = sample("SingleMuonRun2018D", 1.0, "2018", "SingleMuonRun2018D2018ULNanoList.txt", "/SingleMuon/Run2018D-UL2018_MiniAODv2_NanoAODv9-v1/NANOAOD")
-STs2016APV        = sample("STs2016APV", 10.32*0.333, "2016APV", "STs2016APVULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
-STs2016           = sample("STs2016", 10.32*0.333, "2016", "STs2016ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
-STs2017           = sample("STs2017", 10.32*0.333, "2017", "STs2017ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
-STs2018           = sample("STs2018", 10.32*0.333, "2018", "STs2018ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
-STt2016APV        = sample("STt2016APV", 136.02, "2016APV", "STt2016APVULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
-STt2016           = sample("STt2016", 136.02, "2016", "STt2016ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
-STt2017           = sample("STt2017", 136.02, "2017", "STt2017ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
-STt2018           = sample("STt2018", 136.02, "2018", "STt2018ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
-STtb2016APV       = sample("STtb2016APV", 80.95, "2016APV", "STtb2016APVULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
-STtb2016          = sample("STtb2016", 80.95, "2016", "STtb2016ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
-STtb2017          = sample("STtb2017", 80.95, "2017", "STtb2017ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
-STtb2018          = sample("STtb2018", 80.95, "2018", "STtb2018ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
-STtW2016APV       = sample("STtW2016APV", 35.83, "2016APV", "STtW2016APVULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
-STtW2016          = sample("STtW2016", 35.83, "2016", "STtW2016ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
-STtW2017          = sample("STtW2017", 35.83, "2017", "STtW2017ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
-STtW2018          = sample("STtW2018", 35.83, "2018", "STtW2018ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
-STtWb2016APV      = sample("STtWb2016APV", 35.83, "2016APV", "STtWb2016APVULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
-STtWb2016         = sample("STtWb2016", 35.83, "2016", "STtWb2016ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
-STtWb2017         = sample("STtWb2017", 35.83, "2017", "STtWb2017ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
-STtWb2018         = sample("STtWb2018", 35.83, "2018", "STtWb2018ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
-TTHB2016APV       = sample("TTHB2016APV", 0.2934, "2016APV", "TTHB2016APVULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
-TTHB2016          = sample("TTHB2016", 0.2934, "2016", "TTHB2016ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
-TTHB2017          = sample("TTHB2017", 0.2934, "2017", "TTHB2017ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
-TTHB2018          = sample("TTHB2018", 0.2934, "2018", "TTHB2018ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
-TTHnonB2016APV    = sample("TTHnonB2016APV", 0.2151, "2016APV", "TTHnonB2016APVULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
-TTHnonB2016       = sample("TTHnonB2016", 0.2151, "2016", "TTHnonB2016ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
-TTHnonB2017       = sample("TTHnonB2017", 0.2151, "2017", "TTHnonB2017ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
-TTHnonB2018       = sample("TTHnonB2018", 0.2151, "2018", "TTHnonB2018ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+STs2016APV        = sample("STs2016APV", 11.073*0.333, "2016APV", "STs2016APVULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
+STs2016           = sample("STs2016", 11.073*0.333, "2016", "STs2016ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
+STs2017           = sample("STs2017", 11.073*0.333, "2017", "STs2017ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
+STs2018           = sample("STs2018", 11.073*0.333, "2018", "STs2018ULNanoList.txt", "/ST_s-channel_4f_leptonDecays_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
+STt2016APV        = sample("STt2016APV", 134.2, "2016APV", "STt2016APVULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
+STt2016           = sample("STt2016", 134.2, "2016", "STt2016ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
+STt2017           = sample("STt2017", 134.2, "2017", "STt2017ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
+STt2018           = sample("STt2018", 134.2, "2018", "STt2018ULNanoList.txt", "/ST_t-channel_top_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
+STtb2016APV       = sample("STtb2016APV", 80.0, "2016APV", "STtb2016APVULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
+STtb2016          = sample("STtb2016", 80.0, "2016", "STtb2016ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
+STtb2017          = sample("STtb2017", 80.0, "2017", "STtb2017ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM")
+STtb2018          = sample("STtb2018", 80.0, "2018", "STtb2018ULNanoList.txt", "/ST_t-channel_antitop_4f_InclusiveDecays_TuneCP5_13TeV-powheg-madspin-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
+STtW2016APV       = sample("STtW2016APV", 39.65, "2016APV", "STtW2016APVULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
+STtW2016          = sample("STtW2016", 39.65, "2016", "STtW2016ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+STtW2017          = sample("STtW2017", 39.65, "2017", "STtW2017ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+STtW2018          = sample("STtW2018", 39.65, "2018", "STtW2018ULNanoList.txt", "/ST_tW_top_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+STtWb2016APV      = sample("STtWb2016APV", 39.65, "2016APV", "STtWb2016APVULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
+STtWb2016         = sample("STtWb2016", 39.65, "2016", "STtWb2016ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+STtWb2017         = sample("STtWb2017", 39.65, "2017", "STtWb2017ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+STtWb2018         = sample("STtWb2018", 39.65, "2018", "STtWb2018ULNanoList.txt", "/ST_tW_antitop_5f_inclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+TTHB2016APV       = sample("TTHB2016APV", 0.2926, "2016APV", "TTHB2016APVULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+TTHB2016          = sample("TTHB2016", 0.2926, "2016", "TTHB2016ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+TTHB2017          = sample("TTHB2017", 0.2926, "2017", "TTHB2017ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+TTHB2018          = sample("TTHB2018", 0.2926, "2018", "TTHB2018ULNanoList.txt", "/ttHTobb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+TTHnonB2016APV    = sample("TTHnonB2016APV", 0.2126, "2016APV", "TTHnonB2016APVULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+TTHnonB2016       = sample("TTHnonB2016", 0.2126, "2016", "TTHnonB2016ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+TTHnonB2017       = sample("TTHnonB2017", 0.2126, "2017", "TTHnonB2017ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+TTHnonB2018       = sample("TTHnonB2018", 0.2126, "2018", "TTHnonB2018ULNanoList.txt", "/ttHToNonbb_M125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
 TTMT10002016APV   = sample("TTMT10002016APV", 831.76*0.02474, "2016APV", "TTMT10002016APVULNanoList.txt", "/TT_Mtt-1000toInf_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM")
 TTMT10002016      = sample("TTMT10002016", 831.76*0.02474, "2016", "TTMT10002016ULNanoList.txt", "/TT_Mtt-1000toInf_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM")
 TTMT10002017      = sample("TTMT10002017", 831.76*0.02474, "2017", "TTMT10002017ULNanoList.txt", "/TT_Mtt-1000toInf_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
@@ -491,7 +498,7 @@ TTHB2017.nrun = 7661778.0 # from integral 7825000, file TTHB2017
 TTHnonB2017.nrun = 4965389.0 # from integral 5070989, file TTHnonB2017
 TTTo2L2Nu2017.nrun = 105859990.0 # from integral 106724000, file TTTo2L2Nu2017
 TTToHadronic2017.nrun = 231117295.00000003 # from integral 232999999, file TTToHadronic2017
-TTToSemiLeptonic2017.nrun = 343257666.0 # from integral 346052000, file TTToSemiLeptonic2017
+TTToSemiLeptonic2017.nrun = 342446298.0 # from integral 345234000, file TTToSemiLeptonic2017
 TTMT10002017.nrun = 21545730.0 + 0.02474*(TTToHadronic2017.nrun+TTToSemiLeptonic2017.nrun+TTTo2L2Nu2017.nrun) # from integral 22724532, file TTMT10002017
 TTMT7002017.nrun = 35196862.0 + 0.0921*(TTToHadronic2017.nrun+TTToSemiLeptonic2017.nrun+TTTo2L2Nu2017.nrun) # from integral 35862238, file TTMT7002017
 TTTo2L2Nu20170.nrun = TTTo2L2Nu2017.nrun*0.8832
@@ -562,7 +569,7 @@ TTToSemiLeptonic2018700.nrun = TTToSemiLeptonic2018.nrun*0.0921 + TTMT7002018.nr
 TTTo2L2Nu20181000.nrun = TTTo2L2Nu2018.nrun*0.02474 + TTMT10002018.nrun*0.105
 TTToHadronic20181000.nrun = TTToHadronic2018.nrun*0.02474 + TTMT10002018.nrun*0.457
 TTToSemiLeptonic20181000.nrun = TTToSemiLeptonic2018.nrun*0.02474 + TTMT10002018.nrun*0.438
-TTWl2018.nrun = 5666427.999999999 # from integral 10450000, file TTWl2018
+TTWl2018.nrun = 4443620.999999998 # from integral 8195955, file TTWl2018
 TTWq2018.nrun = 530327.0000000001 # from integral 970179, file TTWq2018
 TTZM102018.nrun = 9651834.000000002 # from integral 19608000, file TTZM102018
 TTZM1to102018.nrun = 550706.0 # from integral 994000, file TTZM1to102018
