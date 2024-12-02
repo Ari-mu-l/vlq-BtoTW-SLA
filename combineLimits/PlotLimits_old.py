@@ -21,7 +21,7 @@ signal = 'B'
 # if len(sys.argv) > 5: combination = bool(eval(sys.argv[5]))
 
 blind=True
-morphed=False
+morphed=True
 ACLS = False
 saveKey=''
 if ACLS: saveKey+='_ACLS'
@@ -29,15 +29,15 @@ saveKey += '_smoothed'
 if blind: saveKey+='_blind'
 if morphed: saveKey+='_morphed'
 
-lumiPlot = '36'# '97.4'#
+lumiPlot = '138'# '97.4'#
 lumiStr = '138'
 
 discriminant='BToTW'
 histPrefix=discriminant+'_'+str(lumiStr)+'fb'
 
-mass6 = array('d', [800,1000,1200,1400,1600,1800])
-mass6err = array('d', [0,0,0])
-mass6_str = ['800','1000','1200','1400','1600','1800']
+mass3 = array('d', [800,1400,2000])
+mass3err = array('d', [0,0,0])
+mass3_str = ['800','1400','2000']
 
 mass = array('d', [800,1000,1200,1300,1400,1500,1600,1700,1800,2000])
 masserr = array('d', [0,0,0,0,0,0,0,0,0,0])
@@ -55,12 +55,16 @@ exp95L=array('d',[0 for i in range(len(mass))])
 xsec = array('d',[multiplier for i in range(len(mass))])
 # https://github.com/CrossSectionsLHC/TopPartners_SingleProduction/blob/master/interpreted_tables/sigma_B_Bbj.csv
 theory_mass = array('d', [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000])
+
+# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
 theory_xsec = [0.1187124, 0.0640113, 0.0362987, 0.0215009, 0.0131348, 0.0082629, 0.0053213, 0.0035078, 0.0022829, 0.0014947, 0.0009898, 0.0006519, 0.0004499]
+
 theoryDn = [0.0942576, 0.0505049, 0.0284212, 0.0167492, 0.0101664, 0.0063624, 0.0040814, 0.0026765, 0.0017327, 0.0011300, 0.0007453, 0.0004890, 0.0003361]
 theoryUp = [0.1530202, 0.0832147, 0.0475501, 0.0283811, 0.0174562, 0.0110475, 0.0071518, 0.0047426, 0.0031047, 0.0020418, 0.0013590, 0.0008990, 0.0006236]
 theory_xsec_dn = [2*(a-b) for a,b in zip(theory_xsec,theoryDn)]
 theory_xsec_up = [2*(a-b) for a,b in zip(theoryUp,theory_xsec)]
-theory_xsec = [2*a for a in theory_xsec]
+
+theory_xsec = [2*a for a in theory_xsec] # multiplying 50% tW by 2 to become 100% tW
 
 print('Theory xsec = ',theory_xsec)
 #theory_xsec_up = [item/1000 for item in xsecErrUp]
@@ -91,7 +95,7 @@ def getSensitivity(index, exp):
 
 def PlotLimits(limitDir,limitFile,tempKey):
     ljust_i = 10
-    print()
+    print
     print('mass'.ljust(ljust_i), 'observed'.ljust(ljust_i), 'expected'.ljust(ljust_i), '-2 Sigma'.ljust(ljust_i), '-1 Sigma'.ljust(ljust_i), '+1 Sigma'.ljust(ljust_i), '+2 Sigma'.ljust(ljust_i))
 
     f = open(limitDir+'/'+limitFile)       
@@ -137,7 +141,7 @@ def PlotLimits(limitDir,limitFile,tempKey):
 
         round_i = 5
         print(str(mass[i]).ljust(ljust_i), str(round(lims[-1],round_i)).ljust(ljust_i), str(round(lims[.5],round_i)).ljust(ljust_i), str(round(lims[.025],round_i)).ljust(ljust_i), str(round(lims[.16],round_i)).ljust(ljust_i), str(round(lims[.84],round_i)).ljust(ljust_i), str(round(lims[.975],round_i)).ljust(ljust_i))
-    print()
+    print
     # signExp = "="
     # signObs = "="
     # if limExpected==800: signExp = "<"
@@ -146,10 +150,14 @@ def PlotLimits(limitDir,limitFile,tempKey):
     # print "Observed lower limit "+signObs,int(round(limObserved)),"GeV"
     # print
 
-    mass2016 = array('d',[0.36, 0.17, 0.10, 0.07, 0.05, 0.04])
-    mass2016v = TVectorD(len(mass6),mass2016)
+    may2022mass = array('d',[0.2451171875,0.0380859375,0.01123046875]) #May 2022
+    dec2022mass = array('d',[0.11279296875,0.01416015625,0.00537109375]) #Dec 2022
+    mar2023mass = array('d',[0.0990625,0.0137109375,0.00513671875]) #Mar 2023
+    may2022massv = TVectorD(len(mass3),may2022mass)
+    dec2022massv = TVectorD(len(mass3),dec2022mass)
+    mar2023massv = TVectorD(len(mass3),mar2023mass)
 
-    mass6v = TVectorD(len(mass6),mass6)
+    mass3v = TVectorD(len(mass3),mass3)
     massv = TVectorD(len(mass),mass)
     expv = TVectorD(len(mass),exp)
     exp68Hv = TVectorD(len(mass),exp68H)
@@ -162,9 +170,15 @@ def PlotLimits(limitDir,limitFile,tempKey):
     obserrv = TVectorD(len(mass),obserr)
     experrv = TVectorD(len(mass),experr)       
 
-    mass2016_gr = TGraph(mass6v,mass2016v)
-    mass2016_gr.SetLineColor(ROOT.kBlue)
-    mass2016_gr.SetLineWidth(2)
+    may2022mass_gr = TGraph(mass3v,may2022massv)
+    may2022mass_gr.SetLineColor(ROOT.kRed)
+    may2022mass_gr.SetLineWidth(2)
+    dec2022mass_gr = TGraph(mass3v,dec2022massv)
+    dec2022mass_gr.SetLineColor(ROOT.kMagenta)
+    dec2022mass_gr.SetLineWidth(2)
+    mar2023mass_gr = TGraph(mass3v,mar2023massv)
+    mar2023mass_gr.SetLineColor(ROOT.kBlue)
+    mar2023mass_gr.SetLineWidth(2)
     observed = TGraphAsymmErrors(massv,obsv,masserrv,masserrv,obserrv,obserrv)
     observed.SetLineColor(ROOT.kBlack)
     observed.SetLineWidth(2)
@@ -196,7 +210,9 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected68.Draw("3same")
     expected.Draw("same")
 
-    mass2016_gr.Draw("same")
+    #may2022mass_gr.Draw("same")
+    #dec2022mass_gr.Draw("same")
+    #mar2023mass_gr.Draw("same")
 
     if not blind: observed.Draw("cpsame")
     theory_xsec_gr.SetLineColor(2)
@@ -214,11 +230,9 @@ def PlotLimits(limitDir,limitFile,tempKey):
     chLatex.SetTextAlign(11) # align right
     chString = 'B #rightarrow tW'
     chLatex.DrawLatex(0.18, 0.82, chString)
-    chString = '1-lep'
+    chString = '1-lep, M(B)'
     chLatex.DrawLatex(0.18, 0.77, chString)
-    chString = 'MC bkgd.'
-    if 'ABCDnn' in limitDir:
-            chString = 'ABCDnn'
+    chString = 'ParticleNet, tuned cuts'
     chLatex.DrawLatex(0.18, 0.72, chString)
         
     prelimTex=TLatex()
@@ -242,19 +256,20 @@ def PlotLimits(limitDir,limitFile,tempKey):
     #prelimTex3.SetTextFont(52)
     prelimTex3.SetTextSize(0.045)
     prelimTex3.SetLineWidth(2)
-    #prelimTex3.DrawLatex(0.23,0.945,"Private Work (CMS simulation)")
-    prelimTex3.DrawLatex(0.15,0.945,"Private Work (CMS simulation)")
+    #prelimTex3.DrawLatex(0.23,0.945,"Simulation work in progress")
+    prelimTex3.DrawLatex(0.15,0.945,"Private Work (CMS Simulation)")
 
     #legend = TLegend(.55,.5,.89,.89) # good for BR of 1
-    legend = TLegend(.6,.5,.89,.88,"95% CL upper limits") # mixes
+    legend = TLegend(.55,.5,.89,.88,"95% CL upper limits") # mixes
     if not blind: legend.AddEntry(observed , 'Observed', "lp")
     legend.AddEntry(expected, 'Expected', "l")
     legend.AddEntry(expected68, '68% expected', "f")
     legend.AddEntry(expected95, '95% expected', "f")    
-    legend.AddEntry(mass2016_gr, '2016 search', 'l')
-    legend.AddEntry(0,'(arXiv:1809.08597)','')
+    #legend.AddEntry(mar2023mass_gr, 'M(B), ParticleNet', 'l')
+    #legend.AddEntry(dec2022mass_gr, 'M(B), Dec 2022', 'l')
+    #legend.AddEntry(may2022mass_gr, '', 'l')
     legend.AddEntry(theory_xsec_gr, 'Theory: Bbj 1%','f')
-    legend.AddEntry(0,'Singlet x2: tW 100%','')
+    legend.AddEntry(0,'tW 100%','')
     legend.SetShadowColor(0)
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)

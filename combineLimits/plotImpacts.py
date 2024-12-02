@@ -30,7 +30,7 @@ parser.add_argument('--POI', default=None, help='Specify a POI to draw')
 args = parser.parse_args()
 
 if args.transparent:
-    print 'plotImpacts.py: --transparent is now always enabled, the option will be removed in a future update'
+    print('plotImpacts.py: --transparent is now always enabled, the option will be removed in a future update')
 
 externalPullDef = False
 if args.pullDef is not None:
@@ -109,7 +109,8 @@ if args.color_groups is not None:
 
 seen_types = set()
 
-for name, col in colors.iteritems():
+#for name, col in colors.iteritems():
+for name, col in colors.items(): # Xiaohe: python3 does not have dict.iteritems()
     color_hists[name] = ROOT.TH1F()
     plot.Set(color_hists[name], FillColor=col, Title=name)
 
@@ -118,14 +119,16 @@ if args.color_groups is not None:
         color_group_hists[name] = ROOT.TH1F()
         plot.Set(color_group_hists[name], FillColor=col, Title=name)
 
-for page in xrange(n):
+#for page in xrange(n):
+for page in range(n): # Xiaohe: python3 xrange->range
     canv = ROOT.TCanvas(args.output, args.output)
     n_params = len(data['params'][show * page:show * (page + 1)])
     pdata = data['params'][show * page:show * (page + 1)]
-    print '>> Doing page %i, have %i parameters' % (page, n_params)
+    print('>> Doing page %i, have %i parameters' % (page, n_params))
 
     boxes = []
-    for i in xrange(n_params):
+    #for i in xrange(n_params):
+    for i in range(n_params): # Xiaohe: python3 xrange->range 
         y1 = ROOT.gStyle.GetPadBottomMargin()
         y2 = 1. - ROOT.gStyle.GetPadTopMargin()
         h = (y2 - y1) / float(n_params)
@@ -161,7 +164,8 @@ for page in xrange(n):
 
     text_entries = []
     redo_boxes = []
-    for p in xrange(n_params):
+    #for p in xrange(n_params):
+    for p in range(n_params): # Xiaohe: python3 xrange->range
         i = n_params - (p + 1)
         pre = pdata[p]['prefit']
         fit = pdata[p]['fit']

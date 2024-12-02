@@ -3,8 +3,8 @@
 import os,sys,time,math,datetime,itertools
 from ROOT import TFile,TH1F
 
-if 'CMSSW_12_4_8' in os.environ['CMSSW_BASE']:
-        print("Go CMSENV inside CMSSW_11_3_4!")
+if 'CMSSW_13_0_18' in os.environ['CMSSW_BASE']:
+        print("Go CMSENV inside CMSSW_14_1_0!")
         exit(1)
 
 parent = os.path.dirname(os.getcwd())
@@ -15,11 +15,40 @@ import CombineHarvester.CombineTools.ch as ch
 
 #gROOT.SetBatch(1)
 
-fileDir = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
-template = 'templatesD_Apr2024SysAll'
+#V2, DV2 for ABCDnn
+#V2 or ABCV2V2, for MC CRs, DV2, ABCDCV2V2 for MC SRs
+boosted = False
+region = 'V2' #TEMP: change region here
+fileDir = '/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
+template = 'templates'+region+'_Oct2024_42bins' 
+saveKey = 'ABCDnn_'+region 
+dateKey = '_Oct2024'
+outputdir = 'limits_templates'+saveKey+dateKey+'_420RB2'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
+discrim = 'BpMass_ABCDnn'
 
-tag = 'Apr2024' ##Tag and saveKey are used for output directory names
-saveKey = '138fb'#tag+'_'+str(sys.argv[3])
+if 'ABCDnn' in saveKey:
+        regionlist = ['V2']
+        if region == 'DV2':
+                regionlist = ['V2','D']
+                
+if 'MC' in saveKey:
+        regionlist = ['V2']
+        if region == 'ABCV2V2':
+                regionlist = ['A','B','CV2','V2']
+        elif region == 'ABCDCV2V2':
+                regionlist = ['A','B','C','D','CV2','V2']
+        elif region == 'DV2':
+                regionlist = ['D','V2']
+        discrim = 'BpMass'
+
+print('SETUP:')
+print('region = ',region)
+print('discrim = ',discrim)
+print('templatedir = ',template)
+print('output = ',outputdir)
+
+        
+massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000]
 
 def add_processes_and_observations(cb, prefix='Bp'):
         print('------------------------------------------------------------------------')
@@ -44,6 +73,7 @@ def add_shapes(cb, prefix='Bp'):
 
                 SRbkg_pattern = discrim+'_'+lumiStr+'_%s$BIN__$PROCESS' % chn
                 SRsig_pattern = discrim+'_'+lumiStr+'_%s$BIN__$PROCESS$MASS' % chn
+                        
 
 		#if 'isCR' in chn: 
 		#	cb.cp().channel([chn]).era([era]).backgrounds().ExtractShapes(rfile, CRbkg_pattern, CRbkg_pattern + '__$SYSTEMATIC')
@@ -58,8 +88,8 @@ def rename_and_write(cb):
         print('>> Setting standardised bin names...')
         ch.SetStandardBinNames(cb)
 	
-        writer = ch.CardWriter('limits_'+template+saveKey+'/$TAG/$MASS/$ANALYSIS_$CHANNEL_$BINID_Combine.txt',
-                               'limits_'+template+saveKey+'/$TAG/common/$ANALYSIS_$CHANNEL.input.root')
+        writer = ch.CardWriter(outputdir+'/$TAG/$MASS/$ANALYSIS_$CHANNEL_$BINID_Combine.txt',
+                               outputdir+'/$TAG/common/$ANALYSIS_$CHANNEL.input.root')
         writer.SetVerbosity(1)
         writer.WriteCards('cmb', cb)
         for chn in chns:
@@ -81,23 +111,31 @@ def add_systematics(cb):
         print('>> Using ABCDnn? '+str(isABCDnn))
 
         signal = cb.cp().signals().process_set()
-
+        
 	#### Use these rateParams to make a comparison to 2016-only
-        #cb.cp().process(signal).channel(chns).AddSyst(cb, 'signalScale', 'rateParam', ch.SystMap()(35.9/138.0)) # scale down to 2016
-        #cb.cp().process(allbkgs).channel(chns).AddSyst(cb, 'bkgScale', 'rateParam', ch.SystMap()(35.9/138.0)) # scale down to 2016
-        #cb.GetParameter("signalScale").set_frozen(True)
-        #cb.GetParameter("bkgScale").set_frozen(True)
-        #print (cb.GetParameter("signalScale").frozen())
-        #print (cb.GetParameter("bkgScale").frozen())
+        cb.cp().process(signal).channel(chns).AddSyst(cb, 'signalScale', 'rateParam', ch.SystMap()(1.0)) ##35.9/138.0)) # scale down to 2016
+        cb.GetParameter("signalScale").set_frozen(True)
+        print (cb.GetParameter("signalScale").frozen())
+
+        #cb.cp().process(signal+allbkgs).channel(chns).AddSyst(cb, 'scale36fb', 'rateParam', ch.SystMap()(35.9/138.0)) # scale down to 2016
+        #cb.GetParameter("scale36fb").set_frozen(True)
+        #print (cb.GetParameter("scale36fb").frozen())
 	
         if isABCDnn:
-                cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'peak', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'tail', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'closure', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abdcyield1', 'lnN', ch.SystMap()(1.075))
-                cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abdcyield2', 'lnN', ch.SystMap()(1.062))
-                cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'abdcyield3', 'lnN', ch.SystMap()(1.051))
-                cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'abdcyield4', 'lnN', ch.SystMap()(1.009))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param0', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param1', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param2', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param3', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param4', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param5', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param6', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param7', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'lastbin', 'shape', ch.SystMap()(1.0))
+                cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'train', 'shape', ch.SystMap()(1.0))
+                cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abcdRateC1', 'lnN', ch.SystMap()(1.02))
+                cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abcdRateC2', 'lnN', ch.SystMap()(1.02))
+                cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'abcdRateC3', 'lnN', ch.SystMap()(1.10))
+                cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'abcdRateC4', 'lnN', ch.SystMap()(1.08))
 
         allmcgrps = signal + allbkgs
         if isABCDnn:
@@ -113,15 +151,16 @@ def add_systematics(cb):
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagHFCO', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'btagLFCO', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Prefire', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Pileup', 'shape', ch.SystMap()(1.0)) 
+        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'Pileup', 'shape', ch.SystMap()(1.0))
+        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'PuJetSF', 'shape', ch.SystMap()(1.0)) 
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'pdfNew', 'shape', ch.SystMap()(1.0))
 
-        cb.cp().process(allmcgrps).channel(chns1+chns4).AddSyst(cb, 'pNetTtag', 'shape', ch.SystMap()(1.0))
-        cp.cp().process(allmcgrps).channel(chns2+chns3).AddSyst(cb, 'pNetWtag', 'shape', ch.SystMap()(1.0))
+        cb.cp().process(allmcgrps).channel(chns1).AddSyst(cb, 'pNetTtag', 'shape', ch.SystMap()(1.0))
+        cb.cp().process(allmcgrps).channel(chns2).AddSyst(cb, 'pNetWtag', 'shape', ch.SystMap()(1.0))
         
         for year in ['2016APV','2016','2017','2018']:
-                for syst in ['jec','jer','TrigEffEl','TrigEffMu','btagHFUC','btagLFUC']:
-                       cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
+                for syst in ['jec','jer','TrigEffEl','TrigEffMu','btagHFUC','btagLFUC']: #
+                        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
                         
         if not isABCDnn:
                 ## HT weighting only on WJet background, same in all years
@@ -133,8 +172,8 @@ def add_systematics(cb):
                 ## Taking as correlated across years, but not processes -- no changes to this setting in MC
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'muRFcorrdNewTT', 'shape', ch.SystMap()(1.0))
                 cb.cp().process([allbkgs[1]]).channel(chns).AddSyst(cb, 'muRFcorrdNewWJT', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[2]]).channel(chns).AddSyst(cb, 'muRFcorrdNewST', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[5]]).channel(chns).AddSyst(cb, 'muRFcorrdNewQCD', 'shape', ch.SystMap()(1.0))
+                cb.cp().process([allbkgs[2]]).channel(chns).AddSyst(cb, 'muRFcorrdNewST', 'lnN', ch.SystMap()(1.05)) #'shape', ch.SystMap()(1.0))
+                cb.cp().process([allbkgs[5]]).channel(chns).AddSyst(cb, 'muRFcorrdNewQCD', 'lnN', ch.SystMap()(1.05)) #'shape', ch.SystMap()(1.0))
 
         if isABCDnn:
                 ttxgrp = [allbkgs[1]]
@@ -142,9 +181,9 @@ def add_systematics(cb):
         else:
                 ttxgrp = [allbkgs[3]]
                 ewkgrp = [allbkgs[4]]
-
-        cb.cp().process(ttxgrp).channel(chns).AddSyst(cb, 'muRFcorrdNewTTX', 'shape', ch.SystMap()(1.0))
-        cb.cp().process(ewkgrp).channel(chns).AddSyst(cb, 'muRFcorrdNewEWK', 'shape', ch.SystMap()(1.0))
+        
+        cb.cp().process(ttxgrp).channel(chns).AddSyst(cb, 'muRFcorrdNewTTX', 'lnN', ch.SystMap()(1.05)) #'shape', ch.SystMap()(1.0))
+        cb.cp().process(ewkgrp).channel(chns).AddSyst(cb, 'muRFcorrdNewEWK', 'lnN', ch.SystMap()(1.05)) #'shape', ch.SystMap()(1.0))
         cb.cp().process(signal).channel(chns).AddSyst(cb, 'muRFcorrdNewSIG', 'shape', ch.SystMap()(1.0))
 
 
@@ -153,32 +192,139 @@ def add_autoMCstat(cb):
         print('------------------------------------------------------------------------')
         print('>> Adding autoMCstats...')
 	
-        thisDir = os.getcwd()
-        mass=0
-        massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200]
+        thisDir = os.getcwd()        
+        xsec = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
 
-        for chn in chns+['cmb']:
+        for chn in ['cmb']:
                 print('>>>> \t Adding autoMCstats for channel:',chn)
                 for mass in massList:
-                        chnDir = os.getcwd()+'/limits_'+template+saveKey+'/'+chn+'/'+str(mass)+'/'
-                        if not os.path.exists(chnDir): os.system(f'mkdir -p {chnDir}') # was removed on my side. forgot why
-                        
+                        chnDir = os.getcwd()+'/'+outputdir+'/'+chn+'/'+str(mass)+'/'
                         print('chnDir: ',chnDir)
                         os.chdir(chnDir)
                         files = [x for x in os.listdir(chnDir) if '.txt' in x]
                         for ifile in files:
-                                with open(chnDir+ifile, 'a') as chnfile: chnfile.write('* autoMCStats 1.')
+                                with open(chnDir+ifile, 'a') as chnfile:
+                                        chnfile.write('* autoMCStats 1.\n')
+                                        ## IN CASE SIGNALS GET SCALED TO THEIR CROSS SECTION IN THE FILES
+                                        #chnfile.write('noXsec     rateParam  *          BpM        '+str(round(1.0/xsec[str(mass)],5))+'\n')
+                                        #chnfile.write('nuisance edit freeze noXsec')
+
                         os.chdir(thisDir)
 
+                        
 def create_workspace(cb):
         print('------------------------------------------------------------------------')
         print('>> Creating workspace...')
 
+        thisDir = os.getcwd()
         for chn in ['cmb']:
                 print('>>>> \t Creating workspace for channel:',chn)
-                chnDir = os.getcwd()+'/limits_'+template+saveKey+'/'+chn+'/*'
-                cmd = 'combineTool.py -M T2W -i '+chnDir+' -o workspace.root --parallel 4 --channel-masks'
-                os.system(cmd)
+                for mass in massList:
+                        chnDir = os.getcwd()+'/'+outputdir+'/'+chn+'/'+str(mass)+'/'
+                        os.chdir(chnDir)
+                        cmd = 'combineCards.py '
+                        for reg in regionlist:
+                                if boosted:
+                                        cmd += 'Case1_'+reg+'=Bp_isL_tagTjet_'+reg+'_0_Combine.txt Case2_'+reg+'=Bp_isL_tagWjet_'+reg+'_0_Combine.txt '
+                                else:
+                                        cmd += 'Case1_'+reg+'=Bp_isL_tagTjet_'+reg+'_0_Combine.txt Case2_'+reg+'=Bp_isL_tagWjet_'+reg+'_0_Combine.txt Case3_'+reg+'=Bp_isL_untagTlep_'+reg+'_0_Combine.txt Case4_'+reg+'=Bp_isL_untagWlep_'+reg+'_0_Combine.txt '
+                        cmd += '&> combined.txt.cmb'
+                        print('Running: ',cmd)
+                        os.system(cmd)
+
+                        if 'MC' in saveKey:
+                                with open('combined.txt.cmb', 'a') as chnfile:
+                                        chnfile.write('nuisance edit rename ttbar * toppt Toppt \n')
+                                        chnfile.write('nuisance edit rename ewk * muRFcorrdNewEWK muRFewk\n')
+                                        chnfile.write('nuisance edit rename ttx * muRFcorrdNewTTX muRFttx\n')
+                                        chnfile.write('nuisance edit rename BpM * muRFcorrdNewSIG muRFsig\n')
+                                        chnfile.write('nuisance edit rename ttbar * muRFcorrdNewTT muRFtt\n')
+                                        chnfile.write('nuisance edit rename singletop * muRFcorrdNewST muRFtt\n')
+                                        chnfile.write('nuisance edit rename wjets * muRFcorrdNewWJT muRFwjt\n')
+                                        chnfile.write('nuisance edit rename qcd * muRFcorrdNewQCD muRFqcd\n')                                                
+                                     
+                        if 'ABCDnn' in saveKey:
+                                with open('combined.txt.cmb', 'a') as chnfile:
+                                        for reg in regionlist:
+                                                chnfile.write('nuisance edit rename major Case1_'+reg+' train abcdTrainC1\n')
+                                                chnfile.write('nuisance edit rename major Case2_'+reg+' train abcdTrainC2\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param0 abcdPar0C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param1 abcdPar1C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param2 abcdPar2C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param3 abcdPar3C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param4 abcdPar4C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param5 abcdPar5C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param6 abcdPar6C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' param7 abcdPar7C1\n')
+                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' lastbin abcdLastBinC1\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param0 abcdPar0C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param1 abcdPar1C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param2 abcdPar2C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param3 abcdPar3C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param4 abcdPar4C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param5 abcdPar5C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param6 abcdPar6C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' param7 abcdPar7C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' lastbin abcdLastBinC2\
+                                                # n')
+                                                if not boosted:
+                                                        chnfile.write('nuisance edit rename major Case3_'+reg+' train abcdTrainC3\n')
+                                                        chnfile.write('nuisance edit rename major Case4_'+reg+' train abcdTrainC4\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param0 abcdPar0C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param1 abcdPar1C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param2 abcdPar2C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param3 abcdPar3C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param4 abcdPar4C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param5 abcdPar5C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param6 abcdPar6C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' param7 abcdPar7C3\n')
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' lastbin abcdLastBinC3\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param0 abcdPar0C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param1 abcdPar1C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param2 abcdPar2C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param3 abcdPar3C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param4 abcdPar4C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param5 abcdPar5C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param6 abcdPar6C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' param7 abcdPar7C4\n')
+                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' lastbin abcdLastBinC4\n')
+                                        chnfile.write('nuisance edit rename ewk * muRFcorrdNewEWK muRFewk\n')
+                                        chnfile.write('nuisance edit rename ttx * muRFcorrdNewTTX muRFttx\n')
+                                        chnfile.write('nuisance edit rename BpM * muRFcorrdNewSIG muRFsig\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffEl2016APV TrigEl16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffEl2016 TrigEl16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffEl2017 TrigEl17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffEl2018 TrigEl18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2016APV TrigMu16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2016 TrigMu16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2017 TrigMu17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2018 TrigMu18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016APV jec16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016 jec16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2017 jec17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2018 jec18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016APV jer16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016 jer16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2017 jer17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2018 jer18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2016APV bHFUC16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2016 bHFUC16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2017 bHFUC17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2018 bHFUC18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagLFUC2016APV bLFUC16APV\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagLFUC2016 bLFUC16\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagLFUC2017 bLFUC17\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagLFUC2018 bLFUC18\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFCO bHFCO\n')
+                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagLFCO bLFCO\n')
+                
+                        cmd = 'text2workspace.py -o workspace.root --channel-masks -m '+str(mass)+' combined.txt.cmb'
+                        print('Running: ',cmd)
+                        os.system(cmd)
+                        os.chdir(thisDir)
+
+                #cmd = 'combineTool.py -M T2W -i '+chnDir+' -o workspace.root --parallel 4 --channel-masks'
+                #os.system(cmd)
 
 
 def go(cb):
@@ -196,31 +342,35 @@ if __name__ == '__main__':
         lumiStrDir = '138'
         lumiStr = lumiStrDir+'fbfb'
 
-        if not os.path.exists('./limits_'+template+saveKey): os.system('mkdir -p ./limits_'+template+saveKey+'/')
+        if not os.path.exists('./'+outputdir): os.system('mkdir -p ./'+outputdir+'/')
 
-        discrim = 'BpMass_ABCDnn'  #TEMP
-        #discrim = 'BpMass'
-        
         isABCDnn = False
         if 'ABCDnn' in discrim:
                 isABCDnn = True
 
-        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned_stat0p2.root'
-        os.system('cp '+rfile+' ./limits_'+template+saveKey+'/')
+        ### CHANGE THE rebinnedX HERE IF YOU CHANGE X
+        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned1_stat0p2.root' #TEMP. Check rebinnedX
+        if 'TW100' in outputdir:
+                rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned_TW100_stat0p2.root'
+        os.system('cp '+rfile+' ./'+outputdir+'/')
 
         print('File: ',rfile)
         allbkgs = ['ttbar','wjets','singletop','ttx','ewk','qcd']
         if isABCDnn:
                 allbkgs = ['major','ttx','ewk']
 
+        print('Allbkgs = ',allbkgs)
+
         dataName = 'data_obs'
         tfile = TFile(rfile)
         allHistNames = [k.GetName() for k in tfile.GetListOfKeys() if not 'allTlep' in k.GetName() and not 'allWlep' in k.GetName() and not (k.GetName().endswith('Up') or k.GetName().endswith('Down'))]
         upSystNames = [k.GetName() for k in tfile.GetListOfKeys() if (k.GetName().endswith('Up') and not 'allTlep' in k.GetName() and not 'allWlep' in k.GetName())]
-        #qcdsysts = [(k.GetName().split('__')[-1]).replace('Up','') for k in tfile.GetListOfKeys() if '__ttbar__' in k.GetName() and k.GetName().endswith('Up') and '_untagWlep_' in k.GetName()]
+        qcdsysts = [(k.GetName().split('__')[-1]).replace('Up','') for k in tfile.GetListOfKeys() if '__ttbar__' in k.GetName() and k.GetName().endswith('Up') and '_untagWlep_' in k.GetName()]
         tfile.Close()
 
         chns = [hist[hist.find('fb_')+3:hist.find('__')] for hist in allHistNames if '__'+dataName in hist and 'all' not in hist]
+        if boosted:
+                chns = [hist[hist.find('fb_')+3:hist.find('__')] for hist in allHistNames if '__'+dataName in hist and 'all' not in hist and 'untag' not in hist]
 
         chns1 = [chn for chn in chns if '_tagTjet_' in chn]
         chns2 = [chn for chn in chns if '_tagWjet_' in chn]
@@ -228,25 +378,17 @@ if __name__ == '__main__':
         chns4 = [chn for chn in chns if '_untagWlep_' in chn]
         bkg_procs = {chn:[hist.split('__')[-1] for hist in allHistNames if '_'+chn+'_' in hist and not (hist.endswith('Up') or hist.endswith('Down') or hist.endswith(dataName) or '_BpM' in hist)] for chn in chns}
 
-        #systchannels = {chn:[(hist.split('__')[-1]).replace('Up','') for hist in upSystNames if '__qcd__' in hist and '_'+chn+'_' in hist] for chn in chns}
-        #qcdchns = {syst:[chn for chn in chns if syst in systchannels[chn]] for syst in qcdsysts}
-        #qcdchnsE = {syst:[chn for chn in chns if 'isE' in chn and syst in systchannels[chn]] for syst in qcdsysts}
-        #qcdchnsM = {syst:[chn for chn in chns if 'isM' in chn and syst in systchannels[chn]] for syst in qcdsysts}
+        systchannels = {chn:[(hist.split('__')[-1]).replace('Up','') for hist in upSystNames if '__qcd__' in hist and '_'+chn+'_' in hist] for chn in chns}
 
         print('bkg_procs: ',bkg_procs)
-        # for cat in sorted(bkg_procs.keys()):
-        #         print(cat,bkg_procs[cat])
-        #         if 'qcd' in bkg_procs[cat]:
-        #                 print('		Removing qcd ...')
-        #                 bkg_procs[cat]=bkg_procs[cat][:-1]
 
         sig_procs = ['BpM']
 
         cats = {}
         for chn in chns: cats[chn] = [(0, '')]
 
-        masses = ch.ValsFromRange('800:2200|200')	
-        masses.push_back("1300") # these worked in newer combine
+        masses = ch.ValsFromRange('800:2000|200')	
+        masses.push_back("1300")
         masses.push_back("1500")
         masses.push_back("1700")
         
