@@ -2,7 +2,7 @@
 # python3 groupHists.py $iPlot $region $isCategorized $pfix
 # python3 groupHists.py BpMass D True _Oct2024SysAll
 import os,sys,time,math,datetime,itertools,ctypes
-from ROOT import gROOT,TFile,TH1F, TH2D
+from ROOT import gROOT,TFile,TH1F, TH2D, TH1
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
 from samples import targetlumi, lumiStr, systListShort, systListFull, systListABCDnn, samples_data, samples_signal, samples_electroweak, samples_wjets, samples_singletop, samples_ttbarx, samples_qcd, uncorrList_sf, yearList, samples_ttbar
@@ -45,7 +45,7 @@ else:
     pfix+='StatsOnly'
 
 outDir = os.getcwd()+'/'+pfix+'/'
-outDir = f'templates{region}_Oct2024_42bins/' # TEMP
+outDir = f'templates{region}_Oct2024_420bins/' # TEMP
 #outDir = f'templates{region}_Oct2024_Julie/' # TEMP 
 
 removeThreshold = 0.0005 # TODO: add if necessary

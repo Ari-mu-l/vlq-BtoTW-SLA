@@ -15,11 +15,9 @@ start_time = time.time()
 lumi=138. #for plots #56.1 #
 lumiInTemplates= lumiStr
 
-#iPlot='HT'
-iPlot = "BpMass_ABCDnn" #TEMP
+iPlot='HT'
 if len(sys.argv)>1: iPlot=str(sys.argv[1])
-#region='lowMT2pb'
-region = 'V' #TEMP
+region='lowMT2pb'
 if len(sys.argv)>2: region=str(sys.argv[2])
 isCategorized=True
 if len(sys.argv)>3: isCategorized=bool(eval(sys.argv[3]))
@@ -32,8 +30,7 @@ if len(sys.argv)>4:
 else:
         pfix+='_Apr2024SysAll'
         #pfix+='_Apr2024SysAll_validation' # TEMP. validation only
-#templateDir = f'{os.getcwd()}/{pfix}/'
-templateDir = f'templates{region}_Oct2024_42bins/' #TEMP
+templateDir = f'{os.getcwd()}/{pfix}/'
 
 year = 'all'
 if len(sys.argv)>8: year=sys.argv[8]
@@ -54,33 +51,39 @@ sig1leg='B (1.0 TeV, 36 fb)'
 sig2='BpM1800' #  choose the 2nd signal to plot
 sig2leg='B (1.8 TeV, 1 fb)'
 
+
 scaleSignals = True
 #if not isCategorized: scaleSignals = True
-sigScaleFact = 25 #50 # TEMP: set lower temporarily for inaugural talk
+sigScaleFact = 25
 print('Scaling signals?',scaleSignals)
 print('Scale factor = ',sigScaleFact)
 tempsig='templates_'+iPlot+'_'+lumiInTemplates+''+isRebinned+'.root'#+'_Data18.root'
-if year != 'all': tempsig='templates_'+iPlot+'_'+year+''+isRebinned+'.root'#+'_Data18.root'
+if year != 'all': tempsig='templates_'+iPlot+'_'+lumiInTemplates+'_'+year+''+isRebinned+'.root'#+'_Data18.root'
 
 plotABCDnn = False
 plotLowSide = True
 if 'ABCDnn' in iPlot:
         plotABCDnn = True
 
-#if len(isRebinned)>1 and 'ABCDnn' in iPlot:
-if 'ABCDnn' in iPlot: #TEMP
+if len(isRebinned)>1 and 'ABCDnn' in iPlot:
         bkgProcList = ['ewk', 'ttx', 'major']
         ABCDnnProcList = ['major']
 else:
-        bkgProcList = ['qcd',
-                       'ttx',
-                       'ewk',
-                       'wjets',                       
-                       'singletop',
-                       'ttbar'
-                       ]
-        ABCDnnProcList = ['qcd','wjets','singletop','ttbar']
-        
+        if 'ABCDnn' not in iPlot:
+                bkgProcList = ['qcd',
+                               'ttx',
+                               'ewk',
+                               'wjets',                       
+                               'singletop',
+                               'ttbar'
+                ]
+                ABCDnnProcList = ['major']#'qcd','wjets','singletop','ttbar']
+        else:
+                bkgProcList = ['ttx',
+                               'ewk',
+                               'major'                       
+                ]
+        ABCDnnProcList = ['major']#'qcd','wjets','singletop','ttbar']
 minorProcList = ['ewk', 'ttx']
 
 
@@ -89,7 +92,7 @@ if plotABCDnn:
 else:
         bkgHistColors = {'ttbar':kAzure+8,'wjets':kMagenta-2,'qcd':kOrange-3,'ewk':kMagenta-6,'singletop':kGreen-6,'ttx':kAzure+2}
 
-doAllSys = True #TEMP
+doAllSys = True
 
 doNormByBinWidth=False
 if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebinned: doNormByBinWidth = True
@@ -107,7 +110,7 @@ if len(sys.argv)>5: blind=bool(eval(sys.argv[5]))
 yLog  = False
 if len(sys.argv)>6: yLog=bool(eval(sys.argv[6]))
 print('Plotting blind?',blind,' yLog?',yLog)
-if yLog or region == 'V' or 'validation' in pfix: scaleSignals = False
+if yLog or 'V' in region or 'validation' in pfix: scaleSignals = False
 
 partialBlind = False
 
@@ -122,15 +125,11 @@ if isCategorized == True:
                 partialBlind = True
                 print(f'Partial blind {iPlot} for {region}.')
 
-lumiSys = 0.018 # lumi uncertainty
+lumiSys = 0.016 # lumi uncertainty
+factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
 
 #### Consider: Did not set removeThreshold
 ####           No doPDF
-
-def getNormUnc(hist,ibin,modelingUnc):
-        contentsquared = hist.GetBinContent(ibin)**2
-        error = lumiSys*lumiSys*contentsquared  #might be others in future
-        return error
 
 def formatUpperHist(histogram,th1hist):
         histogram.GetXaxis().SetLabelSize(0)
@@ -250,7 +249,7 @@ totBkgTemp1 = {}
 totBkgTemp2 = {}
 totBkgTemp3 = {}
 for tag in taglist:
-        perNGeV = 50 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
+        perNGeV = 5 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
         print('------------------ ',tag,' with perNGeV = ',perNGeV,' -----------------------')
 
         tagStr=tag
@@ -262,24 +261,18 @@ for tag in taglist:
                 totBkg = 0.
                 totMajor = 0.
                 totMinor = 0.
-                for proc in bkgProcList:
-                        if plotABCDnn:
-                                if proc=="major":
-                                        print(histPrefix+'__'+proc)
-                                        bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
-                                else:
-                                        print(histPrefix+'__'+proc)
-                                        #histPrefix = histPrefix.replace("BpMass_ABCDnn", "BpMass")
-                                        bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
-                                #if plotABCDnn: # and not partialBlind:
-                                if proc in minorProcList:
-                                        totMinor += bkghists[proc+catStr].Integral()
-                                else:
-                                        totMajor += bkghists[proc+catStr].Integral()
-                        #except:
-                        #        print("There is no "+proc+"!!!!!!!!")
-                        #        print("tried to open "+histPrefix+'__'+proc)
-                        #        pass
+                for proc in bkgProcList: 
+                        try:
+                                bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
+                                if plotABCDnn: # and not partialBlind:
+                                        if proc in minorProcList:
+                                                totMinor += bkghists[proc+catStr].Integral()
+                                        else:
+                                                totMajor += bkghists[proc+catStr].Integral()
+                        except:
+                                print("There is no "+proc+"!!!!!!!!")
+                                print("tried to open "+histPrefix+'__'+proc)
+                                pass
 
                 if plotNorm:
                         for proc in bkgProcList:
@@ -287,17 +280,15 @@ for tag in taglist:
                         totBkg = 1.0
 
                 #print(histPrefix+'__'+datalabel)
-                #histPrefix = histPrefix.replace("BpMass_ABCDnn", "BpMass") #TEMP
                 hData = RFile1.Get(histPrefix+'__'+datalabel).Clone()
-                print(hData.Integral())
+                print('Data:',hData.Integral())
                 if plotNorm:
                         hData.Scale(1/hData.Integral())
 
-                # TEMP: comment for inaugural talk
-                # if plotABCDnn and not partialBlind and 'validation' not in pfix: # to scale training regions of ABCDnn
-                #         factor = (hData.Integral()-totMinor)/totMajor
-                #         for proc in ABCDnnProcList:
-                #                 bkghists[proc+catStr].Scale(factor)
+                if plotABCDnn and not partialBlind and 'validation' not in pfix and 'V' not in region: # to scale training regions of ABCDnn
+                        factor = (hData.Integral()-totMinor)/totMajor
+                        for proc in ABCDnnProcList:
+                                bkghists[proc+catStr].Scale(factor)
 
                 for proc in bkgProcList:
                         try:
@@ -306,7 +297,7 @@ for tag in taglist:
                                 print('cant add',proc)
                                 pass
 
-                print(totBkg,totMajor,totMinor)
+                print('Total, Major, Minor:',totBkg,totMajor,totMinor)
                 #histrange = [hData.GetBinLowEdge(1),hData.GetBinLowEdge(hData.GetNbinsX()+1)]
 
                 if (partialBlind and (tag!="untagTlep" and tag!="untagWlep")): # Todo: generalize it for other branches
@@ -319,23 +310,18 @@ for tag in taglist:
                         else:
                                 sys.exit("Error: Edit partial unblinding for {}!".format(iPlot))
 
-                # for j in range(10): #TEMP
-                #         if hData.GetXaxis().GetBinCenter(j)<400:
-                #                 hData.SetBinContent(j, 0)
-
                 gaeData = TGraphAsymmErrors(hData.Clone(hData.GetName().replace(datalabel,'gaeDATA')))
                 hsig1 = RFile1.Get(histPrefix+'__'+sig1).Clone(histPrefix+'__sig1')
                 hsig2 = RFile1.Get(histPrefix+'__'+sig2).Clone(histPrefix+'__sig2')
                 if plotNorm:
                         hsig1.Scale(1/hsig1.Integral())
                         hsig2.Scale(1/hsig2.Integral())
-                # TEMP: comment out for inaugural talk
-                # if isCategorized:
-                #         hsig1.Scale(xsec[sig1[3:]]) ## B singlet cross sections -- modbinning has the BR multiplier to get singlet!
-                #         hsig2.Scale(xsec[sig2[3:]])
-                # #if len(isRebinned) > 0: ## FIXME later
-                # #        hsig1.Scale(10) # 100fb input -> 1pb
-                # #        hsig2.Scale(10)
+                if isCategorized:
+                        hsig1.Scale(xsec[sig1[3:]]) ## B singlet cross sections -- modbinning has the BR multiplier to get singlet!
+                        hsig2.Scale(xsec[sig2[3:]])
+                #if len(isRebinned) > 0: ## FIXME later
+                #        hsig1.Scale(10) # 100fb input -> 1pb
+                #        hsig2.Scale(10)
                 if doNormByBinWidth:
                         poissonNormByBinWidth(gaeData,hData,perNGeV)
                         for proc in bkgProcList:
@@ -352,8 +338,8 @@ for tag in taglist:
 
                 if plotABCDnn:
                         bkghists["ABCDnn"+catStr] = bkghists[ABCDnnProcList[0]+catStr].Clone()
-                        #for iproc in range(1,len(ABCDnnProcList)):
-                        #        bkghists["ABCDnn"+catStr].Add(bkghists[ABCDnnProcList[iproc]+catStr])
+                        for iproc in range(1,len(ABCDnnProcList)):
+                                bkghists["ABCDnn"+catStr].Add(bkghists[ABCDnnProcList[iproc]+catStr])
 
                         bkgHT = bkghists["ABCDnn"+catStr].Clone() # perhaps redundant
 
@@ -362,7 +348,7 @@ for tag in taglist:
                                         bkgHT.Add(bkghists[proc+catStr])
                                 except: pass
 
-                        print(bkgHT.Integral())
+                        print('BkgHT:',bkgHT.Integral())
                         gaeBkgHT = TGraphAsymmErrors(bkgHT.Clone("gaeBkgHT"))
                 else:
                         bkgHT = bkghists[bkgProcList[0]+catStr].Clone()
@@ -384,10 +370,10 @@ for tag in taglist:
                         for proc in bkgProcList:
                                 if plotABCDnn and (proc in ABCDnnProcList):
                                         systematicList = systListABCDnn.copy()
-                                        try:
-                                                systematicList.remove('factor')
-                                        except:
-                                                print("Unable to remove factor")
+                                        # try:
+                                        #         systematicList.remove('factor')
+                                        # except:
+                                        #         print("Unable to remove factor")
                                 else:
                                         if isCategorized:
                                                 systematicList = systListFullPlots.copy()
@@ -416,14 +402,7 @@ for tag in taglist:
                                 for syst in systematicList:
                                         for ud in shiftlist:
                                                 try:
-                                                        if proc=="major": #TEMP
-                                                                systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
-                                                                # FIXME
-                                                                #if plotABCDnn and not partialBlind and 'validation' not in pfix: # to scale training regions of ABCDnn
-                                                                        #systHists[proc+catStr+syst+ud].Scale(factor)
-                                                        else:
-                                                                # replace. not added
-                                                                systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
+                                                        systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
                                                         if doNormByBinWidth: 
                                                                 normByBinWidth(systHists[proc+catStr+syst+ud],perNGeV)
                                                 except:
@@ -431,7 +410,7 @@ for tag in taglist:
                                                         if 'Ttag' in syst and ('Wjet' in tag or 'Tlep' in tag): continue
                                                         print(f'FAILED to open {histPrefix}__{proc}__{syst}{ud}')
                                                         pass
-                                                                                
+
                 totBkgTemp1[catStr] = TGraphAsymmErrors(bkgHT.Clone(bkgHT.GetName()+'shapeOnly'))
                 totBkgTemp2[catStr] = TGraphAsymmErrors(bkgHT.Clone(bkgHT.GetName()+'shapePlusNorm'))
                 totBkgTemp3[catStr] = TGraphAsymmErrors(bkgHT.Clone(bkgHT.GetName()+'All'))
@@ -443,15 +422,18 @@ for tag in taglist:
                         errorStatUp = gaeBkgHT.GetErrorYhigh(ibin-1)**2
                         errorStatDn = gaeBkgHT.GetErrorYlow(ibin-1)**2
                         errorNorm = (lumiSys**2)*(bkgHT.GetBinContent(ibin)**2)
-                        # if plotABCDnn: #TEMP: comment out for inaugural talk
-                        #         errorNorm += (yieldUncertABCDnn[tag]*bkghists['major'+catStr].GetBinContent(ibin))**2
+                        if plotABCDnn:
+                                errorNorm = (yieldUncertABCDnn[tag]*bkghists['major'+catStr].GetBinContent(ibin))**2 + (lumiSys*(bkghists['ewk'+catStr].GetBinContent(ibin)+bkghists['ttx'+catStr].GetBinContent(ibin)))**2
                         if doAllSys:
                                 for syst in systematicList:
                                         for proc in bkgProcList:
                                                 try:
+                                                        #if ibin == 1:
+                                                        #        print('for',syst,'in',proc,'found central bin',bkghists[proc+catStr].GetBinContent(ibin),'and up bin',systHists[proc+catStr+syst+shiftlist[0]].GetBinContent(ibin),'and down bin',systHists[proc+catStr+syst+shiftlist[1]].GetBinContent(ibin))
                                                         errorPlus = systHists[proc+catStr+syst+shiftlist[0]].GetBinContent(ibin)-bkghists[proc+catStr].GetBinContent(ibin)
                                                         errorMinus = bkghists[proc+catStr].GetBinContent(ibin)-systHists[proc+catStr+syst+shiftlist[1]].GetBinContent(ibin)
-                                                        #print('for',syst,'in',proc,'found errorPlus =',errorPlus,'and errorMinus =',errorMinus)
+                                                        #if ibin == 1:
+                                                        #        print('for',syst,'in',proc,'found errorPlus =',errorPlus,'and errorMinus =',errorMinus)
                                                         if errorPlus > 0:
                                                                 errorUp += errorPlus**2
                                                         else: 
@@ -485,9 +467,6 @@ for tag in taglist:
                         scaleFact2=1
                 hsig1.Scale(scaleFact1)
                 hsig2.Scale(scaleFact2)
-                # TEMP. TODO: Remove after fixing modifyBinning for ABCDnn
-                hsig1.Scale(2)
-                hsig2.Scale(2)
 
                 ############################################################
                 ############## Making Plots of e+jets, mu+jets and e/mu+jets 
@@ -498,11 +477,11 @@ for tag in taglist:
                 else:                        
                         drawQCD = True
 
-                #try: 
+                try: 
                         drawQCD = bkghists['qcd'+catStr].Integral()/bkgHT.Integral()>.005 #don't plot QCD if it is less than 0.5%
-                #except:
-                #        drawQCD = False
-                #        pass
+                except:
+                        drawQCD = False
+                        pass
 
                 stackbkgHT = THStack("stackbkgHT","")
                 bkgProcListNew = bkgProcList[:]
@@ -643,8 +622,10 @@ for tag in taglist:
                 if isCategorized:
                         tagString = tag
                         regionString = 'region '+region
-                        if region == 'V':
-                                regionString = 'VR: region D, ST < 850 GeV'
+                        if region == 'V' or (region == 'V2' and 'untag' not in tag):
+                                regionString = 'VR: region D, ST < 850 GeV'                                
+                        elif region == 'V2' and 'untag' in tag:
+                                regionString = 'VR: region D, full ST'
                 if tagString.endswith(', '): tagString = tagString[:-2]		
                 if not yLog:
                         chLatex.DrawLatex(0.7, 0.54, flvString)
@@ -905,8 +886,7 @@ for tag in taglist:
                         pull.Draw("HIST")
 
                 #c1.Write()
-                #savePrefix = templateDir+templateDir.split('/')[-2]+'plots/'
-                savePrefix = ''
+                savePrefix = templateDir+templateDir.split('/')[-2]+'plots/'
                 if not os.path.exists(savePrefix): os.system('mkdir '+savePrefix)
                 savePrefix+=histPrefix+isRebinned.replace('_rebinned_stat1p1','')+saveKey
                 if year != 'all': savePrefix=savePrefix.replace(lumiInTemplates,year)
