@@ -19,11 +19,11 @@ import CombineHarvester.CombineTools.ch as ch
 #V2 or ABCV2V2, for MC CRs, DV2, ABCDCV2V2 for MC SRs
 boosted = False
 region = 'DV2' #TEMP: change region here
-fileDir = '/uscms_data/d3/jmanagan/BtoTW/CMSSW_13_0_18/src/vlq-BtoTW-SLA/makeTemplates/'
+fileDir = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
 template = 'templates'+region+'_Oct2024_420binsTU' 
 saveKey = 'ABCDnn_'+region 
 dateKey = '_Oct2024'
-outputdir = 'limits_templates'+saveKey+dateKey+'_420RB5_TUValSmooth'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
+outputdir = 'limits_templates'+saveKey+dateKey+'_420RB3_TUValSmooth'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
 discrim = 'BpMass_ABCDnn'
 
 if 'ABCDnn' in saveKey:
@@ -356,7 +356,7 @@ if __name__ == '__main__':
                 isABCDnn = True
 
         ### CHANGE THE rebinnedX HERE IF YOU CHANGE X
-        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned5_stat0p2_smoothed.root' #TEMP. Check rebinnedX
+        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned3_stat0p2_smoothed.root' #TEMP. Check rebinnedX
         if 'TW100' in outputdir:
                 rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned_TW100_stat0p2.root'
         os.system('cp '+rfile+' ./'+outputdir+'/')
