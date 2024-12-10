@@ -9,6 +9,7 @@ mass = sys.argv[2]
 name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','')
 path = limitdir+'/cmb/'+mass
 
+scriptdir = os.getcwd()
 os.chdir(path)
 
 datafile = 'higgsCombineTest.GoodnessOfFit.mH120.root'
@@ -16,22 +17,22 @@ datafile = 'higgsCombineTest.GoodnessOfFit.mH120.root'
 # data = RFile.Get('limit')
 # data.GetEntry(0)
 # datachi2 = data.limit
-os.system('xrdcp root://cmseos.fnal.gov//store/user/jmanagan/CombineV10_BpGOF/'+limitdir+'_'+mass+'/'+datafile+' .')
+os.system('xrdcp root://cmseos.fnal.gov//store/user/xshen/CombineV10_BpGOF/'+limitdir+'_'+mass+'/'+datafile+' .')
 
 toysfile = 'higgsCombineTest.GoodnessOfFit.toys.root'
 if not os.path.exists(toysfile):
-    rootfiles = EOSlist_root_files('/store/user/jmanagan/CombineV10_BpGOF/'+limitdir+'_'+mass+'/')
+    rootfiles = EOSlist_root_files('/store/user/xshen/CombineV10_BpGOF/'+limitdir+'_'+mass+'/')
     haddcommand = 'hadd '+toysfile
     for ifile in rootfiles:
         if ifile == 'workspace.root': continue
-        haddcommand += ' root://cmseos.fnal.gov//store/user/jmanagan/CombineV10_BpGOF/'+limitdir+'_'+mass+'/'+ifile
+        haddcommand += ' root://cmseos.fnal.gov//store/user/xshen/CombineV10_BpGOF/'+limitdir+'_'+mass+'/'+ifile
     os.system(haddcommand)
 
 collect = 'combineTool.py -M CollectGoodnessOfFit --input '+datafile+' '+toysfile+' -m 120.0 -o gof.json'
 print(collect)
 os.system(collect)
 
-plot = 'plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --title-right="Region V2"'
+plot = scriptdir+'/plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --range 0 600 --title-right="Region V2"'
 print(plot)
 os.system(plot)
 

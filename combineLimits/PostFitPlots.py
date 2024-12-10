@@ -17,12 +17,13 @@ lumi = 138
 
 outDir = os.getcwd()
 
-sig1 = 'BpM1200'
-sig2 = 'BpM1800'
-sig1leg = 'B (1.2 TeV)'
-sig2leg = 'B (1.8 TeV)'
-mass1 = '1200'
+mass1val = int(sys.argv[2])
+mass1 = str(mass1val) #'1000'
 mass2 = '1800'
+sig1 = 'BpM'+mass1
+sig2 = 'BpM1800'
+sig1leg = 'B ('+str(mass1val/1000.0)+' TeV)'
+sig2leg = 'B (1.8 TeV)'
 
 taglabels = {'Case1':'t jet + lept. W','Case2':'W jet + lept. t','Case3':'jet + lept. t','Case4':'jet + lept. W'}
 
@@ -120,7 +121,7 @@ def formatLowerHist(histogram):
 
 if isSR:
     os.chdir(outDir)
-print('Opening',shapesfile,' -- will plot signals like',sig1.replace('1200',''))
+print('Opening',shapesfile,' -- will plot signals like',sig1.replace(mass1,''))
 tFile = TFile.Open(shapesfile)
 if isSR:
     tFile2 = TFile.Open(shapesfile.replace(mass1,mass2))
@@ -149,7 +150,7 @@ for chn in chns:
 
     hDatamerged = tFile.Get(chn+'/data_obs').Clone()
     bkgHTgerrmerged = tFile.Get(chn+'/TotalBkg').Clone(chn+'__totbkg')
-    hsig1merged = tFile.Get(chn.replace('postfit','prefit')+'/'+sig1.replace('1200','')).Clone(chn+'__sig1merged')
+    hsig1merged = tFile.Get(chn.replace('postfit','prefit')+'/'+sig1.replace(mass1,'')).Clone(chn+'__sig1merged')
     hsig1merged.Scale(xsec[sig1[3:]])
     if isSR: hsig1merged.Scale(1000)
 

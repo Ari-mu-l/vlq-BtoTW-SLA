@@ -9,14 +9,16 @@ limitdir = sys.argv[1]
 path = limitdir+'/'
 os.chdir(path)
 blind = True
-morph = False
+morph = True
 
 print('====================================================================')
 print('==   Launching limits for in',limitdir)
 print('==   ...')
 
 if not morph:
-    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, mask V
+    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V=1,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1' # unmask D, mask V
+    if 'DV2' in limitdir:
+        masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, mask V
     if 'MC' in limitdir:
         masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=1,mask_Case4_D=1,mask_Case1_V=1,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1,mask_Case3_A=1,mask_Case4_A=1,mask_Case3_B=1,mask_Case3_B=1,mask_Case3_C=1,mask_Case4_C=1' # unmask D, mask V
     if '36fb' not in limitdir:
@@ -45,7 +47,9 @@ if not morph:
 
 else:
 
-    masks = 'mask_Case1_D=1,mask_Case2_D=1,mask_Case3_D=1,mask_Case4_D=1,mask_Case1_V2=0,mask_Case2_V2=0,mask_Case3_V2=0,mask_Case4_V2=0,signalScale=1' # mask D for initial fit on untested masses, 1pb for V2 fit
+    masks = 'mask_Case1_D=1,mask_Case2_D=1,mask_Case3_D=1,mask_Case4_D=1,mask_Case1_V=0,mask_Case2_V=0,mask_Case3_V=0,mask_Case4_V=0,signalScale=1' # mask D for initial fit on untested masses, 1pb for V2 fit
+    if 'DV2' in limitdir:
+        masks = 'mask_Case1_D=1,mask_Case2_D=1,mask_Case3_D=1,mask_Case4_D=1,mask_Case1_V2=0,mask_Case2_V2=0,mask_Case3_V2=0,mask_Case4_V2=0,signalScale=1' # mask D for initial fit on untested masses, 1pb for V2 fit
 
     for mass in ['800','1000','1200','1300','1400','1500','1600','1700','1800','2000']:
 
@@ -71,7 +75,9 @@ else:
         os.chdir('../../')
         
     # now unmask D, remask V
-    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, mask V after initial fit
+    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case1_V=1,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1,mask_Case3_D=0,mask_Case4_D=0' # unmask D, mask V after initial fit #
+    if 'DV2' in limitdir:
+        masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1,mask_Case3_D=0,mask_Case4_D=0' # unmask D, mask V after initial fit #
     masks = masks+',signalScale=0.01' # 10 fb
     
     print('Command = combineTool.py -M AsymptoticLimits -d cmb/*/morphedWorkspace.root --snapshotName initialFit --there -n .limitM --parallel 5 --run=blind --setParameters '+masks)

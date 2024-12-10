@@ -49,8 +49,8 @@ if isSR and not os.path.exists(filename):
             masks = 'mask_Case1_D=1,mask_Case2_D=1,mask_Case3_D=1,mask_Case4_D=1,signalScale=1'
 
     print("Running Fit Diagnostics for initial workspace with SR channels masked: Mass =",mass)
-    print('Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
-    os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
+    print('Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace --rMin -1 -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
+    os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --rMin -1 -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
     #print "Running Fit Diagnostics for initial workspace with SR channels masked"
     #print 'Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace --saveShapes --plots -n Masked --setParameters '+masks
     #os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --saveShapes --plots -n Masked --setParameters '+masks)

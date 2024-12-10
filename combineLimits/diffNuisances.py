@@ -377,7 +377,8 @@ if options.plotfile:
     gr_fit_s.SetMarkerSize(1.0)
     gr_fit_b.SetLineWidth(2)
     gr_fit_s.SetLineWidth(2)
-    hist_prefit.GetXaxis().SetRangeUser(0,82)
+    hist_prefit.GetXaxis().SetRangeUser(0,54) #82
+    hist_prefit.LabelsOption("v","X")
     hist_prefit.GetYaxis().SetTitleOffset(0.7)
     hist_prefit.SetLineWidth(2)
     hist_prefit.SetTitle("Nuisance Parameters")
@@ -406,7 +407,8 @@ if options.plotfile:
     canvas_prop.SetBottomMargin(0.6)
     canvas_prop.SetLeftMargin(0.05)
     canvas_prop.SetRightMargin(0.05)    
-    hist_prefit.GetXaxis().SetRangeUser(82,hist_prefit.GetNbinsX())
+    hist_prefit.GetXaxis().SetRangeUser(54,hist_prefit.GetNbinsX()) #82
+    hist_prefit.LabelsOption("v","X")
     hist_prefit.Draw("E2")
     hist_prefit.Draw("histsame")
     gr_fit_b.Draw("EPsame")

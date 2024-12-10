@@ -18,18 +18,20 @@ import CombineHarvester.CombineTools.ch as ch
 #V2, DV2 for ABCDnn
 #V2 or ABCV2V2, for MC CRs, DV2, ABCDCV2V2 for MC SRs
 boosted = False
-region = 'V2'
-fileDir = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
-template = 'templates'+region+'_Oct2024_420binsTU'
-saveKey = 'ABCDnn_'+region
+region = 'DV2' #TEMP: change region here
+fileDir = '/uscms_data/d3/jmanagan/BtoTW/CMSSW_13_0_18/src/vlq-BtoTW-SLA/makeTemplates/'
+template = 'templates'+region+'_Oct2024_420binsTU' 
+saveKey = 'ABCDnn_'+region 
 dateKey = '_Oct2024'
-outputdir = 'limits_templates'+saveKey+dateKey+'_420RB3_TUValSmooth'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
+outputdir = 'limits_templates'+saveKey+dateKey+'_420RB5_TUValSmooth'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
 discrim = 'BpMass_ABCDnn'
 
 if 'ABCDnn' in saveKey:
-        regionlist = ['V2']
+        regionlist = [region]
         if region == 'DV2':
                 regionlist = ['V2','D']
+        elif region == 'DV':
+                regionlist = ['V','D']
                 
 if 'MC' in saveKey:
         regionlist = ['V2']
@@ -132,9 +134,10 @@ def add_systematics(cb):
                 # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'param7', 'shape', ch.SystMap()(1.0))
                 # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'lastbin', 'shape', ch.SystMap()(1.0))
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'train', 'shape', ch.SystMap()(1.0))
+                cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'val', 'shape', ch.SystMap()(1.0))
                 cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abcdRateC1', 'lnN', ch.SystMap()(1.02))
                 cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abcdRateC2', 'lnN', ch.SystMap()(1.02))
-                cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'abcdRateC3', 'lnN', ch.SystMap()(1.10))
+                cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'abcdRateC3', 'lnN', ch.SystMap()(1.02))
                 cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'abcdRateC4', 'lnN', ch.SystMap()(1.08))
 
         allmcgrps = signal + allbkgs
@@ -248,6 +251,8 @@ def create_workspace(cb):
                                         for reg in regionlist:
                                                 chnfile.write('nuisance edit rename major Case1_'+reg+' train abcdTrainC1\n')
                                                 chnfile.write('nuisance edit rename major Case2_'+reg+' train abcdTrainC2\n')
+                                                chnfile.write('nuisance edit rename major Case1_'+reg+' val abcdValC1\n')
+                                                chnfile.write('nuisance edit rename major Case2_'+reg+' val abcdValC2\n')
                                                 # chnfile.write('nuisance edit rename major Case1_'+reg+' param0 abcdPar0C1\n')
                                                 # chnfile.write('nuisance edit rename major Case1_'+reg+' param1 abcdPar1C1\n')
                                                 # chnfile.write('nuisance edit rename major Case1_'+reg+' param2 abcdPar2C1\n')
@@ -270,6 +275,8 @@ def create_workspace(cb):
                                                 if not boosted:
                                                         chnfile.write('nuisance edit rename major Case3_'+reg+' train abcdTrainC3\n')
                                                         chnfile.write('nuisance edit rename major Case4_'+reg+' train abcdTrainC4\n')
+                                                        chnfile.write('nuisance edit rename major Case3_'+reg+' val abcdValC3\n')
+                                                        chnfile.write('nuisance edit rename major Case4_'+reg+' val abcdValC4\n')
                                                         # chnfile.write('nuisance edit rename major Case3_'+reg+' param0 abcdPar0C3\n')
                                                         # chnfile.write('nuisance edit rename major Case3_'+reg+' param1 abcdPar1C3\n')
                                                         # chnfile.write('nuisance edit rename major Case3_'+reg+' param2 abcdPar2C3\n')
@@ -349,7 +356,7 @@ if __name__ == '__main__':
                 isABCDnn = True
 
         ### CHANGE THE rebinnedX HERE IF YOU CHANGE X
-        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned3_stat0p2_smoothed.root'
+        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned5_stat0p2_smoothed.root' #TEMP. Check rebinnedX
         if 'TW100' in outputdir:
                 rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned_TW100_stat0p2.root'
         os.system('cp '+rfile+' ./'+outputdir+'/')
@@ -376,7 +383,7 @@ if __name__ == '__main__':
         chns2 = [chn for chn in chns if '_tagWjet_' in chn]
         chns3 = [chn for chn in chns if '_untagTlep_' in chn]
         chns4 = [chn for chn in chns if '_untagWlep_' in chn]
-        bkg_procs = {chn:[hist.split('__')[-1] for hist in allHistNames if '_'+chn+'_' in hist and not (hist.endswith('Up') or hist.endswith('Down') or hist.endswith(dataName) or '_BpM' in hist)] for chn in chns}
+        bkg_procs = {chn:[hist.split('__')[-1] for hist in allHistNames if '_'+chn+'_' in hist and not (hist.endswith('Up') or hist.endswith('Down') or hist.endswith(dataName) or '_BpM' in hist or 'VRpct' in hist)] for chn in chns}
 
         systchannels = {chn:[(hist.split('__')[-1]).replace('Up','') for hist in upSystNames if '__qcd__' in hist and '_'+chn+'_' in hist] for chn in chns}
 
@@ -387,7 +394,7 @@ if __name__ == '__main__':
         cats = {}
         for chn in chns: cats[chn] = [(0, '')]
 
-        masses = ch.ValsFromRange('800:2000|200')	
+        masses = ch.ValsFromRange('800:2000|200')
         masses.push_back("1300")
         masses.push_back("1500")
         masses.push_back("1700")

@@ -21,7 +21,7 @@ signal = 'B'
 # if len(sys.argv) > 5: combination = bool(eval(sys.argv[5]))
 
 blind=True
-morphed=False
+morphed=True
 ACLS = False
 saveKey=''
 if ACLS: saveKey+='_ACLS'

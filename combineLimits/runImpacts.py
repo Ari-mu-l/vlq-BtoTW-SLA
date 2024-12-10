@@ -22,7 +22,7 @@ if not blind:
     options = ''
 else:
     if isSR: 
-        masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, remask V after V-only fit
+        masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_D=0,mask_Case4_D=0,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, remask V after V-only fit #
         masks = masks+',signalScale=0.01' # set to 1fb after V-only fit, or 10fb for expected limit 1200 of 19fb
 
         filename = 'morphedWorkspace.root'

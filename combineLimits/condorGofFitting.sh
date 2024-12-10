@@ -39,7 +39,7 @@ if [[ "$INDEX" == 1 ]]; then
 fi
 
 echo "---------- 'Running background-only GOF with toys, after frequentist fit -------------"
-echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --fixedSignalStrength=0'
+echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --toysFreq --fixedSignalStrength=0'
 combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --fixedSignalStrength=0
 fitted=$?
 if [[ $fitted -ne 0 ]]; then

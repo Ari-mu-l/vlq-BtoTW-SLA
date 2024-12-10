@@ -9,12 +9,12 @@ rInj = float(sys.argv[3])
 name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','')+'InjR'+str(rInj).replace('.','p')+'CDMS0'
 path = limitdir+'/cmb/'+mass
 
-rootfiles = EOSlist_root_files('/store/user/xshen/CombineV10_BpInjection/'+limitdir+'_'+mass+'/') # CHANGE directory
+rootfiles = EOSlist_root_files('/store/user/xshen/CombineV10_BpInjection/'+limitdir+'_'+mass+'/')	
 
 tree_fit_sb = ROOT.TChain('tree_fit_sb')
 for i in range(0,len(rootfiles)):
     if 'fitDiagnostics'+name+'_' not in rootfiles[i]: continue
-    tree_fit_sb.Add('root://cmseos.fnal.gov//store/user/xshen/CombineV10_BpInjection/'+limitdir+'_'+mass+'/'+rootfiles[i]) # CHANGE directory
+    tree_fit_sb.Add('root://cmseos.fnal.gov//store/user/xshen/CombineV10_BpInjection/'+limitdir+'_'+mass+'/'+rootfiles[i])
 
 #post_file = ROOT.TFile.Open('root://cmseos.fnal.gov/fitDiagnostics'+name+'_hadd.root')
 #tree_fit_sb = post_file.Get('tree_fit_sb')
