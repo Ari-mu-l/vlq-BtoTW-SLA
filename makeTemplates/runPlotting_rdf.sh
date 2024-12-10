@@ -34,24 +34,26 @@ for iPlot in $plotList; do
     # python3 groupHists.py $iPlot CV2 True _Oct2024_420bins
     # python3 groupHists.py $iPlot V True _Oct2024_420bins
 
-    python3 modifyBinning.py $iPlot templatesD2_Oct2024_420bins 0.2 10 False
-    python3 modifyBinning.py $iPlot templatesD2_Oct2024_420bins 0.2 10 False
-    python3 modifyBinning.py $iPlot templatesV_Oct2024_420bins 0.2 10 True
-    python3 modifyBinning.py $iPlot templatesV_Oct2024_420bins 0.2 10 True
+    #python3 modifyBinning.py $iPlot templatesD_Oct2024_420bins 0.2 2
+    #python3 modifyBinning.py $iPlot templatesD_Oct2024_420bins 0.2 5
     #python3 modifyBinning.py $iPlot templatesD_Oct2024_420bins 0.2 10
     # python3 modifyBinning.py $iPlot templatesC_Oct2024_420bins 0.1
     # python3 modifyBinning.py $iPlot templatesB_Oct2024_420bins 0.1
     # python3 modifyBinning.py $iPlot templatesA_Oct2024_420bins 0.1
-    #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420bins 0.2 2
-    #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420bins 0.2 5
     #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420bins 0.2 10
     # python3 modifyBinning.py $iPlot templatesV_Oct2024_420bins 0.2
     # python3 modifyBinning.py $iPlot templatesCV2_Oct2024_420bins 0.1
+    
+    #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420binsTU 0.2 4 True
+    #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420binsTU 0.2 3 True
+    #python3 modifyBinning.py $iPlot templatesD_Oct2024_420binsTU 0.2 4 True
+    #python3 modifyBinning.py $iPlot templatesD_Oct2024_420binsTU 0.2 3 True
 
-    python3 plotHists.py $iPlot D2 True _Oct2024_420bins False False _rebinned10_stat0p2
-    python3 plotHists.py $iPlot V True _Oct2024_420bins False False _rebinned10_stat0p2
-    #python3 plotHists.py $iPlot D True _Oct2024_420binsTU False True _rebinned5_stat0p2
-    #python3 plotHists.py $iPlot D True _Oct2024_420binsTU False True _rebinned10_stat0p2
+    #python3 plotHists.py $iPlot V2 True _Oct2024_420binsTU False True _rebinned5_stat0p2
+    python3 plotHists.py $iPlot V2 True _Oct2024_420binsTU False True _rebinned3_stat0p2_smoothed
+
+    
+    #python3 plotHists.py $iPlot D True _Oct2024_420bins False True _rebinned2_stat0p2
     # python3 plotHists.py $iPlot C True _Oct2024_420bins False True _rebinned_stat0p1
     # python3 plotHists.py $iPlot B True _Oct2024_420bins False True _rebinned_stat0p1
     # python3 plotHists.py $iPlot A True _Oct2024_420bins False True _rebinned_stat0p1

@@ -67,7 +67,7 @@ print("Initial rebin of factor "+str(rebinX))
 doVRunc = False
 if len(sys.argv)>5: doVRunc=bool(eval(sys.argv[5]))
 print("Adding VR uncert?: "+str(doVRunc))
-doSmoothing = True
+
 
 dataName = 'data_obs'
 upTag = 'Up'
@@ -341,7 +341,8 @@ for rfile in rfiles:
                                         VRuncDown = majorhist.Clone(majorname.replace('__major','__major__valDown')) # can add Down if desired...
                                         VRpct = majorhist.Clone(majorname.replace('__major','__VRpct'))
                                         for ibin in range(1,datahist.GetNbinsX()+1):
-                                                if datahist.GetBinContent(ibin) > 100:  # avoid the lower-stats regions with more fluctuation
+                                                if totbkghist.GetBinError(ibin)/totbkghist.GetBinContent(ibin) < 0.1: # bkg stat unc < 10%
+                                                        #datahist.GetBinContent(ibin) > 100:  # this is == bins w/ data stat uncert < 10%, seems fine
                                                         # set content of this shifted major to be the expected data - minor
                                                         datMinusMinor = majorhist.GetBinContent(ibin) + datahist.GetBinContent(ibin) - totbkghist.GetBinContent(ibin)
                                                 else:
@@ -355,13 +356,13 @@ for rfile in rfiles:
                                 elif 'templatesD' in folder:                                        
                                         ## Check if the matching V (or V2, choose!) file exists and open it, extract VRpct
                                         ## Make a VRuncUp and add the right amount
-                                        Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV')
+                                        Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV2')
                                         if os.path.exists(Vfilename):
                                                 Vfile = TFile.Open(Vfilename)
                                         else:
                                                 print('You asked for VR uncert on region D, but the VR file is missing!')
                                                 exit()
-                                        VRpct = Vfile.Get(majorname.replace('_D','_V').replace('__major','__VRpct'))
+                                        VRpct = Vfile.Get(majorname.replace('_D','_V2').replace('__major','__VRpct'))
                                         VRpct.SetDirectory(0)
                                         Vfile.Close()
                                         outputRfiles[iRfile].cd()
