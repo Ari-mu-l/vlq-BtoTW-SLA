@@ -353,16 +353,22 @@ for rfile in rfiles:
                                         VRuncUp.Write()
                                         VRuncDown.Write()
                                         VRpct.Write()
-                                elif 'templatesD' in folder:                                        
+                                elif 'templatesD' in folder:
                                         ## Check if the matching V (or V2, choose!) file exists and open it, extract VRpct
                                         ## Make a VRuncUp and add the right amount
-                                        Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV2')
+                                        if 'templatesD2' in folder:
+                                                Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD2','templatesV')
+                                        else:
+                                                Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV2')
                                         if os.path.exists(Vfilename):
                                                 Vfile = TFile.Open(Vfilename)
                                         else:
                                                 print('You asked for VR uncert on region D, but the VR file is missing!')
                                                 exit()
-                                        VRpct = Vfile.Get(majorname.replace('_D','_V2').replace('__major','__VRpct'))
+                                        if 'templatesD2' in folder:
+                                                VRpct = Vfile.Get(majorname.replace('_D2','_V').replace('__major','__VRpct'))
+                                        else:
+                                                VRpct = Vfile.Get(majorname.replace('_D','_V2').replace('__major','__VRpct'))
                                         VRpct.SetDirectory(0)
                                         Vfile.Close()
                                         outputRfiles[iRfile].cd()
@@ -371,9 +377,19 @@ for rfile in rfiles:
                                         for ibin in range(1,datahist.GetNbinsX()+1):
                                                 shiftpct = VRpct.GetBinContent(ibin)
                                                 # want shift to contain major + major*pct
-                                                VRuncUp.SetBinContent(ibin,majorhist.GetBinContent(ibin)*(1.0 + shiftpct))                                                
+                                                VRuncUp.SetBinContent(ibin,majorhist.GetBinContent(ibin)*(1.0 + shiftpct))
                                         VRuncUp.Write()
                                         VRuncDown.Write()
+                                        for shiftTag in ['Up','Down']:
+                                                yieldHistName = majorname.replace('__major',f'__major__val{shiftTag}')
+                                                if shiftTag == 'Up':
+                                                        yieldsAll[yieldHistName] = VRuncUp.Integral()
+                                                else:
+                                                        yieldsAll[yieldHistName] = VRuncDown.Integral()
+                                                yieldsErrsAll[yieldHistName] = 0.
+                                                for ibin in range(1,rebinnedHists[hist].GetXaxis().GetNbins()+1):
+                                                        yieldsErrsAll[yieldHistName] += rebinnedHists[hist].GetBinError(ibin)**2
+                                                yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
                                         
                         else:
                                 print('You need to implement the VR uncert for MC background, or set it to false!')
@@ -495,20 +511,21 @@ print("List of systematics for "+bkgProcList[0]+" process and "+channels[0]+" ch
 print("        "+str(sorted([hist[hist.find(bkgProcList[0])+len(bkgProcList[0])+2:hist.find(upTag)] for hist in yieldsAll.keys() if channels[0] in hist and '__'+bkgProcList[0]+'__' in hist and upTag in hist])))
 
 def getShapeSystUnc(proc,chn):
-	if not addShapes: return 0
-	systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if chn in hist and '__'+proc+'__' in hist and upTag in hist])
-	totUpShiftPrctg=0
-	totDnShiftPrctg=0
-	histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
-	nomHist = histoPrefix+proc
-	for syst in systematicList:
-		for ud in [upTag,downTag]:
-			shpHist = histoPrefix+proc+'__'+syst+ud
-			shift = yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20)-1
-			if shift>0.: totUpShiftPrctg+=shift**2
-			if shift<0.: totDnShiftPrctg+=shift**2
-	shpSystUncPrctg = (math.sqrt(totUpShiftPrctg)+math.sqrt(totDnShiftPrctg))/2 #symmetrize the total shape uncertainty up/down shifts
-	return shpSystUncPrctg	
+    if not addShapes: return 0
+    systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if chn in hist and '__'+proc+'__' in hist and upTag in hist])
+    if (proc=='major') and ('templatesD' in folder): systematicList+=['val']
+    totUpShiftPrctg=0
+    totDnShiftPrctg=0
+    histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
+    nomHist = histoPrefix+proc
+    for syst in systematicList:
+        for ud in [upTag,downTag]:
+            shpHist = histoPrefix+proc+'__'+syst+ud
+            shift = yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20)-1
+            if shift>0.: totUpShiftPrctg+=shift**2
+            if shift<0.: totDnShiftPrctg+=shift**2
+    shpSystUncPrctg = (math.sqrt(totUpShiftPrctg)+math.sqrt(totDnShiftPrctg))/2 #symmetrize the total shape uncertainty up/down shifts
+    return shpSystUncPrctg	
 
 table = []
 taglist = ['tag','untag']
