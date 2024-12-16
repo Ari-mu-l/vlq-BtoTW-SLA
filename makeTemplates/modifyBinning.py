@@ -380,17 +380,8 @@ for rfile in rfiles:
                                                 VRuncUp.SetBinContent(ibin,majorhist.GetBinContent(ibin)*(1.0 + shiftpct))
                                         VRuncUp.Write()
                                         VRuncDown.Write()
-                                        for shiftTag in ['Up','Down']:
-                                                yieldHistName = majorname.replace('__major',f'__major__val{shiftTag}')
-                                                if shiftTag == 'Up':
-                                                        yieldsAll[yieldHistName] = VRuncUp.Integral()
-                                                else:
-                                                        yieldsAll[yieldHistName] = VRuncDown.Integral()
-                                                yieldsErrsAll[yieldHistName] = 0.
-                                                for ibin in range(1,rebinnedHists[hist].GetXaxis().GetNbins()+1):
-                                                        yieldsErrsAll[yieldHistName] += rebinnedHists[hist].GetBinError(ibin)**2
-                                                yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
-                                        
+                                        yieldsAll[VRuncUp.GetName()] = VRuncUp.Integral()
+                                        yieldsAll[VRuncDown.GetName()] = VRuncDown.Integral()
                         else:
                                 print('You need to implement the VR uncert for MC background, or set it to false!')
                                 exit()
