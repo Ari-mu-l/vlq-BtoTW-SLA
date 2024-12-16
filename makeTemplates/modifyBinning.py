@@ -42,6 +42,7 @@ print("templateDir: "+templateDir)
 combinefile = 'templates_'+iPlot+'_'+lumiInTemplates+'.root'
 print("file: "+combinefile)
 
+doTwoSided = True
 normalizeRENORM = True #only for signals
 normalizePDF    = True #only for signals
 if 'kinematics' in folder:
@@ -342,33 +343,32 @@ for rfile in rfiles:
                                         VRpct = majorhist.Clone(majorname.replace('__major','__VRpct'))
                                         for ibin in range(1,datahist.GetNbinsX()+1):
                                                 if totbkghist.GetBinError(ibin)/totbkghist.GetBinContent(ibin) < 0.1: # bkg stat unc < 10%
-                                                        #datahist.GetBinContent(ibin) > 100:  # this is == bins w/ data stat uncert < 10%, seems fine
+                                                        # datahist.GetBinContent(ibin) > 100:  # this is == bins w/ data stat uncert < 10%, seems fine
                                                         # set content of this shifted major to be the expected data - minor
                                                         datMinusMinor = majorhist.GetBinContent(ibin) + datahist.GetBinContent(ibin) - totbkghist.GetBinContent(ibin)
                                                 else:
                                                         datMinusMinor = majorhist.GetBinContent(ibin)
                                                 VRuncUp.SetBinContent(ibin,datMinusMinor)
+                                                if doTwoSided:
+                                                        VRuncDown.SetBinContent(ibin, majorhist.GetBinContent(ibin) - datahist.GetBinContent(ibin) + totbkghist.GetBinContent(ibin))
                                                 # percentage should be (shift - nominal)/nominal
                                                 VRpct.SetBinContent(ibin,(datMinusMinor - majorhist.GetBinContent(ibin))/majorhist.GetBinContent(ibin))
                                         VRuncUp.Write()
                                         VRuncDown.Write()
                                         VRpct.Write()
-                                elif 'templatesD' in folder:
+                                        yieldsAll[VRuncUp.GetName()] = VRuncUp.Integral()
+                                        yieldsAll[VRuncDown.GetName()] = VRuncDown.Integral()
+
+                                elif 'templatesD' in folder:                                        
                                         ## Check if the matching V (or V2, choose!) file exists and open it, extract VRpct
                                         ## Make a VRuncUp and add the right amount
-                                        if 'templatesD2' in folder:
-                                                Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD2','templatesV')
-                                        else:
-                                                Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV2')
+                                        Vfilename = rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root').replace('templatesD','templatesV2')
                                         if os.path.exists(Vfilename):
                                                 Vfile = TFile.Open(Vfilename)
                                         else:
                                                 print('You asked for VR uncert on region D, but the VR file is missing!')
                                                 exit()
-                                        if 'templatesD2' in folder:
-                                                VRpct = Vfile.Get(majorname.replace('_D2','_V').replace('__major','__VRpct'))
-                                        else:
-                                                VRpct = Vfile.Get(majorname.replace('_D','_V2').replace('__major','__VRpct'))
+                                        VRpct = Vfile.Get(majorname.replace('_D','_V2').replace('__major','__VRpct'))
                                         VRpct.SetDirectory(0)
                                         Vfile.Close()
                                         outputRfiles[iRfile].cd()
@@ -378,10 +378,15 @@ for rfile in rfiles:
                                                 shiftpct = VRpct.GetBinContent(ibin)
                                                 # want shift to contain major + major*pct
                                                 VRuncUp.SetBinContent(ibin,majorhist.GetBinContent(ibin)*(1.0 + shiftpct))
+                                                if doTwoSided:
+                                                        VRuncDown.SetBinContent(ibin,majorhist.GetBinContent(ibin)*(1.0 - shiftpct))
                                         VRuncUp.Write()
                                         VRuncDown.Write()
+
                                         yieldsAll[VRuncUp.GetName()] = VRuncUp.Integral()
                                         yieldsAll[VRuncDown.GetName()] = VRuncDown.Integral()
+
+                                        
                         else:
                                 print('You need to implement the VR uncert for MC background, or set it to false!')
                                 exit()
@@ -435,7 +440,7 @@ for rfile in rfiles:
                         #         muRFcorrdNewDnHist.Scale(renormNomHist.Integral()/muRFcorrdNewDnHist.Integral())
                         muRFcorrdNewUpHist.Write()
                         muRFcorrdNewDnHist.Write()
-
+ 
                         yieldsAll[muRFcorrdNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRFcorrdNewUpHist.Integral()
                         yieldsAll[muRFcorrdNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRFcorrdNewDnHist.Integral()
 
@@ -502,24 +507,23 @@ print("List of systematics for "+bkgProcList[0]+" process and "+channels[0]+" ch
 print("        "+str(sorted([hist[hist.find(bkgProcList[0])+len(bkgProcList[0])+2:hist.find(upTag)] for hist in yieldsAll.keys() if channels[0] in hist and '__'+bkgProcList[0]+'__' in hist and upTag in hist])))
 
 def getShapeSystUnc(proc,chn):
-    if not addShapes: return 0
-    systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if chn in hist and '__'+proc+'__' in hist and upTag in hist])
-    if (proc=='major') and ('templatesD' in folder): systematicList+=['val']
-    totUpShiftPrctg=0
-    totDnShiftPrctg=0
-    histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
-    nomHist = histoPrefix+proc
-    for syst in systematicList:
-        for ud in [upTag,downTag]:
-            shpHist = histoPrefix+proc+'__'+syst+ud
-            shift = yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20)-1
-            if shift>0.: totUpShiftPrctg+=shift**2
-            if shift<0.: totDnShiftPrctg+=shift**2
-    shpSystUncPrctg = (math.sqrt(totUpShiftPrctg)+math.sqrt(totDnShiftPrctg))/2 #symmetrize the total shape uncertainty up/down shifts
-    return shpSystUncPrctg	
+	if not addShapes: return 0
+	systematicList = sorted([hist[hist.find(proc)+len(proc)+2:hist.find(upTag)] for hist in yieldsAll.keys() if chn in hist and '__'+proc+'__' in hist and upTag in hist])
+	totUpShiftPrctg=0
+	totDnShiftPrctg=0
+	histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
+	nomHist = histoPrefix+proc
+	for syst in systematicList:
+		for ud in [upTag,downTag]:
+			shpHist = histoPrefix+proc+'__'+syst+ud
+			shift = yieldsAll[shpHist]/(yieldsAll[nomHist]+1e-20)-1
+			if shift>0.: totUpShiftPrctg+=shift**2
+			if shift<0.: totDnShiftPrctg+=shift**2
+	shpSystUncPrctg = (math.sqrt(totUpShiftPrctg)+math.sqrt(totDnShiftPrctg))/2 #symmetrize the total shape uncertainty up/down shifts
+	return shpSystUncPrctg	
 
 table = []
-taglist = ['tag','untag']
+taglist = ['tag']
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
 if 'kinematics' in folder: taglist = ['all']
 for isEM in isEMlist:
