@@ -43,6 +43,8 @@ combinefile = 'templates_'+iPlot+'_'+lumiInTemplates+'.root'
 print("file: "+combinefile)
 
 doTwoSided = True
+doTruncated = True
+if 'templatesD_' not in folder: doTruncated = False
 normalizeRENORM = True #only for signals
 normalizePDF    = True #only for signals
 if 'kinematics' in folder:
@@ -167,6 +169,8 @@ for chn in totBkgHists.keys():
         if 'templates' in folder:
                 Nbins = DataHists[chn].GetNbinsX() #-1 ## TEMPORARY REMOVE -1!
                 xbinsListTemp[chn]=[DataHists[chn].GetXaxis().GetBinUpEdge(Nbins)] #[tfile.Get(datahists[0]).GetXaxis().GetBinUpEdge(tfile.Get(datahists[0]).GetXaxis().GetNbins()-1)]
+                if doTruncated and 'jet' in chn:
+                        xbinsListTemp[chn]=[800.0] # partialBlind D
                 
         totTempBinContent = 0.
         totTempBinErrSquared = 0.
@@ -195,10 +199,13 @@ for chn in totBkgHists.keys():
                                         totTempDataErrSquared = 0.
                                         totTempSigContent = 0.
                                         #print 'Appending bin edge',totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin)
-                                        xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
+                                        
+                                        if doTruncated and 'jet' in chn and totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin)>=800: pass
+                                        else:
+                                                xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
 
         ## Going right to left -- if the last entry isn't 0 add it
-        if '_42' in folder or '420bins' in folder or 'FU' in folder:
+        if '_42' in folder or 'FU' in folder:
                 if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
         else:
                 if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0)
