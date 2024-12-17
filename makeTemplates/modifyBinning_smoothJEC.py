@@ -22,7 +22,7 @@ start_time = time.time()
 
 #cutString = 'splitLess/'#BB_templates/'
 region = sys.argv[1]
-templateDir = os.getcwd()+'/templates'+region+'_Oct2024_420bins_xcheck/'
+templateDir = os.getcwd()+'/templates'+region+'_Oct2024_420bins/'
 
 doTwoSided = True
 scaleLumi = False
@@ -64,7 +64,7 @@ for rfile in rfiles:
         rebinnedHists[hist]=tfiles[iRfile].Get(hist)
         rebinnedHists[hist].SetDirectory(0)
 
-        if doTwosided:
+        if doTwoSided:
             if 'val' not in hist and 'train' not in hist:
                 rebinnedHists[hist].Write()
         else:
