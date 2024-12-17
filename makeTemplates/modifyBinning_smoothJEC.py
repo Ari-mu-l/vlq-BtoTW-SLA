@@ -120,7 +120,7 @@ for rfile in rfiles:
             dnsmooth = TGraphSmooth("normal")
             dngraph = dnsmooth.SmoothLowess(dngraph,"",frac)
 
-            for ibin in range(1,dn.GetNbinsX()+1):
+            for ibin in range(1,down.GetNbinsX()+1):
                 newdnratio = dngraph.Eval(down.GetXaxis().GetBinCenter(ibin))
                 centralval = central.GetBinContent(ibin)
                 down.SetBinContent(ibin, max(0,newdnratio*centralval))
