@@ -15,13 +15,13 @@ EnableImplicitMT()
 negative MC weights, ets) applied below should be checked!
 """
 
-def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorized, outHistFile, doABCDnn, doValidation):
+def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorized, outHistFile, doABCDnn):
         start_time = time.time()
         plotTreeName=plotDetails[0]
         plotTreeNameTemp = plotDetails[0] #TEMP
         xbins=array('d', plotDetails[1])
         xAxisLabel=plotDetails[2]
-        
+
         # Define categories
         isEM  = category['isEM']
         tag   = category['tag']
@@ -62,14 +62,15 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 if doABCDnn:
                         weightStr += f' * {factorABCDnn[tag]}'
                 else:
+                        #
                         weightStr += ' * '+jetSFstr+' * '+topCorr+' * PileupWeights[0] * L1PreFiringWeight_Nom * leptonIDSF[0] * leptonRecoSF[0] * leptonIsoSF[0] * leptonHLTSF[0] * puJetSF[0] * btagWeights[17] *'+str(targetlumi[sample.year]*sample.xsec/sample.nrun)+' * (genWeight/abs(genWeight))'
                         
                         if isCategorized:
-                                if tag=='allWlep' or tag=="tagTjet" or tag=="untagWlep":
+                                if tag=="tagTjet":
                                         weightStr += f' * gcFatJet_pnetweights[6]'
                                         weightpNetTtagUpStr = weightStr.replace('gcFatJet_pnetweights[6]', 'gcFatJet_pnetweights[7]')
                                         weightpNetTtagDnStr = weightStr.replace('gcFatJet_pnetweights[6]', 'gcFatJet_pnetweights[8]')
-                                elif tag=="allTlep" or tag=="tagWjet" or tag=="untagTlep":
+                                elif tag=="tagWjet":
                                         weightStr += f' * gcFatJet_pnetweights[9]'
                                         weightpNetWtagUpStr = weightStr.replace('gcFatJet_pnetweights[9]', 'gcFatJet_pnetweights[10]')
                                         weightpNetWtagDnStr = weightStr.replace('gcFatJet_pnetweights[9]', 'gcFatJet_pnetweights[11]')
@@ -77,7 +78,6 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         weightPrefireUpStr = weightStr.replace('PreFiringWeight_Nom','PreFiringWeight_Up')
                         weightPrefireDnStr = weightStr.replace('PreFiringWeight_Nom','PreFiringWeight_Dn')                        
                         
-
                         # Reco has the main value in [0], up in [1], down in [2]. Up/Down are not additive on [0]
                         weightelRecoSFUpStr  = weightStr.replace('leptonRecoSF[0]','(isMu*leptonRecoSF[0]+isEl*leptonRecoSF[1])')
                         weightelRecoSFDnStr= weightStr.replace('leptonRecoSF[0]','(isMu*leptonRecoSF[0]+isEl*leptonRecoSF[2])')
@@ -174,13 +174,7 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 isEMCut+=' && isEl==1'
 
 	# Define cuts by region. Use region "all" for all selected events
-        if doValidation:
-                if doABCDnn:
-                        cut  = ' && W_MT <= 200 && gcJet_ST<850'
-                else:
-                        cut  = ' && W_MT <= 200 && gcJet_ST<850'
-        else:   
-                cut  = ' && W_MT <= 200' #TEMP. TODO: Comment out once it got implemented in the analyer
+        cut  = ' && W_MT < 200' #TEMP. TODO: Comment out once it got implemented in the analyer
                 
         #if 'lowMT' in region:
         #        cut += ' && W_MT < 160'
@@ -199,6 +193,10 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 cut += ' && NJets_forward > 0'
         elif region == 'B': 
                 cut += ' && NJets_forward == 0 && NJets_DeepFlavL < 3'
+        elif region == 'BV': 
+                cut += ' && NJets_forward == 0 && NJets_DeepFlavL < 3 && gcJet_ST < 850'
+        elif region == 'BhighST':
+                cut += ' && NJets_forward == 0 && NJets_DeepFlavL < 3 && gcJet_ST > 850'
         elif region == 'A': 
                 cut += ' && NJets_forward == 0 && NJets_DeepFlavL == 3'
         elif region == 'X': 
@@ -209,6 +207,36 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                 cut += ' && NJets_forward > 0 && NJets_DeepFlavL == 3'
         elif region == 'Y': 
                 cut += ' && NJets_forward > 0 && NJets_DeepFlavL > 3'
+        elif region == 'D2':
+                cut += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST >= 850'
+        elif region == 'V':
+                if doABCDnn:
+                        cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST < 850' #fake
+                else:
+                        cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST < 850'
+        elif region == 'highST':
+                if doABCDnn:
+                        cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST > 850' #fake
+                else:
+                        cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST > 850'
+        elif region == 'V2':
+                if doABCDnn:
+                        print('You need fits for this ABCDnn!! Quitting')
+                        exit(1)
+                else:
+                        if 'untag' in tag:
+                                cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3'
+                        else:
+                                cut  += ' && NJets_forward > 0 && NJets_DeepFlavL < 3 && gcJet_ST < 850'
+        elif region == 'CV2':
+                if doABCDnn:
+                        print('You need fits for this ABCDnn!! Quitting')
+                        exit(1)
+                else:
+                        if 'untag' in tag:
+                                cut  += ' && NJets_forward > 0 && NJets_DeepFlavL == 3'
+                        else:
+                                cut  += ' && NJets_forward > 0 && NJets_DeepFlavL == 3 && gcJet_ST < 850'
 
         # Separate ttbar into mass bins for proper normalization 
         if not doABCDnn:
@@ -279,6 +307,15 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                                .Define('weight',weightStr)\
                                                .Define(iPlot, plotTreeName)
                 plotTreeName = iPlot
+        elif plotTreeName == 'minDR_lepb':
+                df = RDataFrame(tTree[process]).Filter(fullcut)\
+                                               .Filter('NJets_DeepFlavL > 0')\
+                                               .Define('weight',weightStr)\
+                                               .Define('minDR_lepb','ROOT::VecOps::Min(DR_gcJets_central[gcJet_DeepFlavL == true])')
+        elif plotTreeName == 'gcOSFatJet_DR':
+                df = RDataFrame(tTree[process]).Filter(fullcut)\
+                                               .Define('weight',weightStr)\
+                                               .Define('gcOSFatJet_DR','DR_gcFatJets[OS_gcFatJets == true][0]')
         else:
                 df = RDataFrame(tTree[process]).Filter(fullcut)\
                                                .Define('weight',weightStr)
@@ -317,8 +354,8 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                         
                         hist_PEAKUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_peakUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_PEAKUP','weight')
                         hist_PEAKDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_peakDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_PEAKDN','weight')
-                        hist_TAILUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILmodifiedUP','weight') #TEMP
-                        hist_TAILDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILmodifiedDN','weight') #TEMP
+                        hist_TAILUP    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILsigmoidUP','weight') #TEMP
+                        hist_TAILDN    = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_tailDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_TAILsigmoidDN','weight') #TEMP
                         hist_CLOSUREUP = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_closureUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_CLOSUREUP','weight')
                         hist_CLOSUREDN = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_closureDn_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}_CLOSUREDN','weight')
                         hist_FACTORUP  = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_factorUp_{process}' ,xAxisLabel,len(xbins)-1,xbins),f'{plotTreeName}','weightfactorUp')
@@ -408,17 +445,17 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 hist_muFUp       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFUp_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFUp'      )
                                 hist_muFDn       = sel.Histo1D((f'{iPlot}_{lumiStr}_{catStr}_muFDn_{process}'      ,xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightmuFDn'      )
 
-                                if tag=='allWlep' or tag=="tagTjet" or tag=="untagWlep":
+                                if tag=='allWlep' or tag=="tagTjet":
                                         hist_pNetTtagUp = sel.Define('weightpNetTtagUp', weightpNetTtagUpStr)\
                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetTtagUp_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetTtagUp' )
                                         hist_pNetTtagDn = sel.Define('weightpNetTtagDn', weightpNetTtagDnStr)\
                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetTtagDn_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetTtagDn' )
-                                elif tag=='allTlep' or tag=="tagWjet" or tag=="untagTlep":
+                                elif tag=='allTlep' or tag=="tagWjet":
                                         hist_pNetWtagUp = sel.Define('weightpNetWtagUp', weightpNetWtagUpStr)\
                                                              .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetWtagUp_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetWtagUp' )
                                         hist_pNetWtagDn = sel.Define('weightpNetWtagDn', weightpNetWtagDnStr)\
 			                                     .Histo1D((f'{iPlot}_{lumiStr}_{catStr}_pNetWtagDn_{process}',xAxisLabel,len(xbins)-1,xbins),plotTreeName,'weightpNetWtagDn' )
-                                ### TO-DO: check how many PDF variations live in NanoAOD, find branch names and get this segment set up correctly
+
                                 if doMuRF: # doMuRF happens to be False only for WW, WZ, ZZ, which do not have pdf branches
                                         if 'Bprime' in sample.prefix or 'STs' in sample.prefix:
                                                 pdfVariations = 101
@@ -437,6 +474,12 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 if '[0]' in plotTreeNameTemp: #TEMP
                                         seljerUp   = dfjerUp.Filter(fullcut).Define('weight',weightStr).Define(iPlot,plotTreeNameTemp)
                                         seljerDn   = dfjerDn.Filter(fullcut).Define('weight',weightStr).Define(iPlot,plotTreeNameTemp)
+                                elif plotTreeName == 'minDR_lepb':
+                                        seljerUp   = dfjerUp.Filter(fullcut).Filter('NJets_DeepFlavL > 0').Define('weight',weightStr).Define('minDR_lepb','ROOT::VecOps::Min(DR_gcJets_central[gcJet_DeepFlavL == true])')
+                                        seljerDn   = dfjerDn.Filter(fullcut).Filter('NJets_DeepFlavL > 0').Define('weight',weightStr).Define('minDR_lepb','ROOT::VecOps::Min(DR_gcJets_central[gcJet_DeepFlavL == true])')
+                                elif plotTreeName == 'gcOSFatJet_DR':
+                                        seljerUp   = dfjerUp.Filter(fullcut).Define('weight',weightStr).Define('gcOSFatJet_DR','DR_gcFatJets[OS_gcFatJets == true][0]')
+                                        seljerDn   = dfjerDn.Filter(fullcut).Define('weight',weightStr).Define('gcOSFatJet_DR','DR_gcFatJets[OS_gcFatJets == true][0]')
                                 else:
                                         seljerUp   = dfjerUp.Filter(fullcut).Define('weight',weightStr)
                                         seljerDn   = dfjerDn.Filter(fullcut).Define('weight',weightStr)
@@ -449,6 +492,12 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 if '[0]' in plotTreeNameTemp: #TEMP
                                         seljecUp   = dfjecUp.Filter(fullcut).Define('weight',weightStr).Define(iPlot,plotTreeNameTemp)
                                         seljecDn   = dfjecDn.Filter(fullcut).Define('weight',weightStr).Define(iPlot,plotTreeNameTemp)
+                                elif plotTreeName == 'minDR_lepb':
+                                        seljecUp   = dfjecUp.Filter(fullcut).Filter('NJets_DeepFlavL > 0').Define('weight',weightStr).Define('minDR_lepb','ROOT::VecOps::Min(DR_gcJets_central[gcJet_DeepFlavL == true])')
+                                        seljecDn   = dfjecDn.Filter(fullcut).Filter('NJets_DeepFlavL > 0').Define('weight',weightStr).Define('minDR_lepb','ROOT::VecOps::Min(DR_gcJets_central[gcJet_DeepFlavL == true])')
+                                elif plotTreeName == 'gcOSFatJet_DR':
+                                        seljecUp   = dfjecUp.Filter(fullcut).Define('weight',weightStr).Define('gcOSFatJet_DR','DR_gcFatJets[OS_gcFatJets == true][0]')
+                                        seljecDn   = dfjecDn.Filter(fullcut).Define('weight',weightStr).Define('gcOSFatJet_DR','DR_gcFatJets[OS_gcFatJets == true][0]')
                                 else:
                                         seljecUp   = dfjecUp.Filter(fullcut).Define('weight',weightStr)
                                         seljecDn   = dfjecDn.Filter(fullcut).Define('weight',weightStr)
@@ -519,10 +568,10 @@ def analyze(tTree,sample,doAllSys,iPlot,plotDetails,category,region,isCategorize
                                 hist_muRDn.Write()
                                 hist_muFUp.Write()
                                 hist_muFDn.Write()
-                                if tag=='allWlep' or tag=="tagTjet" or tag=="untagWlep":
+                                if tag=='allWlep' or tag=="tagTjet":
                                         hist_pNetTtagUp.Write()
                                         hist_pNetTtagDn.Write()
-                                elif tag=="allTlep" or tag=="tagWjet" or tag=="untagTlep":
+                                elif tag=="allTlep" or tag=="tagWjet":
                                         hist_pNetWtagUp.Write()
                                         hist_pNetWtagDn.Write()
                                 if doMuRF:
