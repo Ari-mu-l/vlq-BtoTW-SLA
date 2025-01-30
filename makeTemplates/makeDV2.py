@@ -15,7 +15,7 @@ outDir = f'templates{makeRegion}_Oct2024_{Nbins}bins_valUpDn'
 if not os.path.exists(outDir):
     os.makedirs(outDir)
 
-outFileDV2 = TFile.Open(f'{outDir}/templates_BpMass_ABCDnn_138fbfb_rebinned{RB}_{modifyBinTag}.root', 'RECREATE')
+outFileDV2 = TFile.Open(f'{outDir}/templates_BpMass_ABCDnn_138fbfb_rebinned{RB}_{modifyBinTag}{smoothTag}.root', 'RECREATE')
 
 def touchupHist(region):
     inFileName = f'templates{region}_Oct2024_{Nbins}bins/templates_BpMass_ABCDnn_138fbfb_rebinned{RB}_{modifyBinTag}{smoothTag}.root'

@@ -47,14 +47,16 @@ saveKey = '' # tag for plot names
 datalabel = 'data_obs'
 shiftlist = ['Up','Down'] # change to Down for future
 sig1='BpM1000' #  choose the 1st signal to plot
-sig1leg='B (1.0 TeV, 36 fb)'
+sig1leg='B (1.0 TeV, 1 pb)'
 sig2='BpM1800' #  choose the 2nd signal to plot
-sig2leg='B (1.8 TeV, 1 fb)'
-
+sig2leg='B (1.8 TeV, 1 pb)'
+if isCategorized:
+        sig1leg='B (1.0 TeV, 36 fb)'
+        sig2leg='B (1.8 TeV, 1 fb)'
 
 scaleSignals = True
 #if not isCategorized: scaleSignals = True
-sigScaleFact = 25
+sigScaleFact = 100
 print('Scaling signals?',scaleSignals)
 print('Scale factor = ',sigScaleFact)
 tempsig='templates_'+iPlot+'_'+lumiInTemplates+''+isRebinned+'.root'#+'_Data18.root'
@@ -95,7 +97,11 @@ else:
 doAllSys = True
 
 doNormByBinWidth=False
-if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebinned: doNormByBinWidth = True
+if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebinned:
+        if 'rebinned1' not in isRebinned and 'Jan2025' in pfix:
+                doNormByBinWidth = False
+        else:
+                doNormByBinWidth = True
 
 doOneBand = True
 if not doAllSys: doOneBand = True # Don't change this!
@@ -157,6 +163,7 @@ def formatUpperHist(histogram,th1hist):
                 for ibin in range(1,th1hist.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
                 histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetRangeUser(1,5)
                 histogram.GetXaxis().SetTitleOffset(1.0)
                 histogram.GetXaxis().SetTitle('B quark decay mode')
 
@@ -214,6 +221,7 @@ def formatLowerHist(histogram):
                 for ibin in range(1,histogram.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
                 histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetRangeUser(1,5)
                 histogram.GetXaxis().SetTitleOffset(1.0)
                 histogram.GetXaxis().SetTitle('B quark decay mode')
 
@@ -249,7 +257,7 @@ totBkgTemp1 = {}
 totBkgTemp2 = {}
 totBkgTemp3 = {}
 for tag in taglist:
-        perNGeV = 5 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
+        perNGeV = 25 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
         print('------------------ ',tag,' with perNGeV = ',perNGeV,' -----------------------')
 
         tagStr=tag
@@ -257,7 +265,7 @@ for tag in taglist:
                 histPrefix=iPlot+'_'+lumiInTemplates+'_'
                 catStr='is'+isEM+'_'+tagStr
                 histPrefix+=catStr
-                if isCategorized: histPrefix+='_'+region
+                if isCategorized: histPrefix+='_'+region.replace('HST','highST')
                 totBkg = 0.
                 totMajor = 0.
                 totMinor = 0.
@@ -461,7 +469,9 @@ for tag in taglist:
                 if scaleFact2==0: scaleFact2=1
                 if sigScaleFact>0:
                         scaleFact1=sigScaleFact
-                        scaleFact2=sigScaleFact*4
+                        scaleFact2=sigScaleFact
+                        if isCategorized:
+                                scaleFact1 *= 0.25
                 if not scaleSignals:
                         scaleFact1=1
                         scaleFact2=1
@@ -620,12 +630,21 @@ for tag in taglist:
                 tagString = ''
                 regionString = ''
                 if isCategorized:
-                        tagString = tag
+                        if tag == 'tagTjet':
+                                tagString = 'Case 1'
+                        elif tag == 'tagWjet':
+                                tagString = 'Case 2'
+                        elif tag == 'untagTlep':
+                                tagString = 'Case 3'
+                        else:
+                                tagString = 'Case 4'
                         regionString = 'region '+region
                         if region == 'V' or (region == 'V2' and 'untag' not in tag):
-                                regionString = 'VR: region D, ST < 850 GeV'                                
+                                regionString = 'VR'                                
                         elif region == 'V2' and 'untag' in tag:
-                                regionString = 'VR: region D, full ST'
+                                regionString = 'VR'
+                        elif region == 'D':
+                                regionString = 'SR'
                 if tagString.endswith(', '): tagString = tagString[:-2]		
                 if not yLog:
                         chLatex.DrawLatex(0.7, 0.54, flvString)

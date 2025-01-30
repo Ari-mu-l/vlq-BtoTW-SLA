@@ -16,11 +16,13 @@ time='%i_%i_%i'%(cTime.hour,cTime.minute,cTime.second)
 pfix = 'templates'+region
 if not categorize: pfix='kinematics'+region
 
-pfix+='_Oct2024_420bins'
+pfix+='_Jan2025'
 
 plotList = [#distribution name as defined in "doHists.py"
-        'BpMass', #:('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
-        #'BpMass_ABCDnn', #:('Bprime_mass_ABCDnn',linspace(0,5000,51).tolist(),';B quark mass [GeV]')
+        #'minDR_lepb',
+        #'OS1FatJetDR',
+        #'BpMass', #:('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
+        'BpMass_ABCDnn', #:('Bprime_mass_ABCDnn',linspace(0,5000,51).tolist(),';B quark mass [GeV]')
         #'ST', #:('gcJet_ST',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
         #'ST_ABCDnn', #:('gcJet_ST_ABCDnn',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)')
 

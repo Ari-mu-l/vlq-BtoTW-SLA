@@ -25,9 +25,8 @@ gROOT.SetBatch(1)
 start_time = time.time()
 
 # ------------- File location and total lumi ---------------
-step1Dir = 'root://cmseos.fnal.gov//store/user/lpchtop/BtoTW_Oct2024_fullRun2/'
+step1Dir = 'root://cmseos.fnal.gov//store/user/lpchtop/BtoTW_Jan2025_fullRun2/'
 step1Dir_ABCDnn = 'root://cmseos.fnal.gov//store/user/xshen/BtoTW_Oct2024_fullRun2/'
-step1Dir_dataPV = 'root://cmseos.fnal.gov//store/user/lpchtop/BtoTW_Oct2024_fullRun2_addPV/'
 
 # ------------- Arguments and default values ------------
 iPlot = 'BpMass' #choose a discriminant from plotList below!
@@ -82,7 +81,9 @@ if len(sys.argv)>6: taglist=[str(sys.argv[6])]
 else: 
 	taglist = ['all']
 	if isCategorized: 
-                taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
+                #taglist=['tagTjet','tagWjet','untagTlep','untagWlep']
+                #taglist=['tagTjet','tagWjet','untagTlep','untagWlep','allWlep','allTlep']
+                taglist=['allWlep','allTlep'] # TEMP
 
 # ------------- Definition of plots to make ------------------
 ### TO-DO: add ABCDnn branches
@@ -127,8 +128,9 @@ plotList = {#discriminantName:(discriminantLJMETName, binning, xAxisLabel)
         'NFatJets':('NFatJets',linspace(0, 10, 11).tolist(),';AK8 jet multiplicity'),
         'NOSFatJets':('NOS_gcFatJets',linspace(0, 5, 6).tolist(),';AK8 opp-side jets'),
         'NSSFatJets':('NSS_gcFatJets',linspace(0, 5, 6).tolist(),';AK8 same-side jets'),
-        'minDR_twoAK8s':('minDR_leadAK8otherAK8',linspace(0,5,51).tolist(),';min #Delta R(leading AK8 jet, other AK8 jet) [GeV]'),
-        'minDR_twoAK4s':('minDR_leadAK4otherAK4',linspace(0,5,51).tolist(),';min #Delta R(leading AK4 jet, other AK4 jet) [GeV]'),
+        'minDR_twoAK8s':('minDR_leadAK8otherAK8',linspace(0,5,51).tolist(),';min #Delta R(leading AK8 jet, other AK8 jet)'),
+        'minDR_twoAK4s':('minDR_leadAK4otherAK4',linspace(0,5,51).tolist(),';min #Delta R(leading AK4 jet, other AK4 jet)'),
+        'minDR_lepb':('minDR_lepb',linspace(0,5,51).tolist(),';min #Delta R(l,b)'),
         'PtRel':('ptrel_atMinDR_lepJets',linspace(0,500,51).tolist(),';p_{T,rel}(l, closest jet) [GeV]'),
         'PtRelAK8':('ptrel_atMinDR_lepFatJets',linspace(0,500,51).tolist(),';p_{T,rel}(l, closest AK8 jet) [GeV]'),
         'minDR':('minDR_lepJets',linspace(0,5,51).tolist(),';#Delta R(l, closest jet) [GeV]'),
@@ -149,6 +151,7 @@ plotList = {#discriminantName:(discriminantLJMETName, binning, xAxisLabel)
         'OS1FatJetProbTvJ':('gcOSFatJet_pNetTvsQCD[0]',linspace(0,1.2,51).tolist(),';B decay AK8 pNet t-v-QCD score'),
         'OS1FatJetProbWvJ':('gcOSFatJet_pNetWvsQCD[0]',linspace(0,1.2,51).tolist(),';B decay AK8 pNet W-v-QCD score'),
         'OS1FatJetTag':('gcOSFatJet_pNetTag[0]',linspace(0,4,5).tolist(),';B decay AK8 pNet tag (0: J, 1: t, 2: W, 3: both)'),
+        'OS1FatJetDR':('gcOSFatJet_DR',linspace(0,5,51).tolist(),';#Delta R(l, B decay AK8)'),
         'nT':('gcFatJet_nT',linspace(0,5,6).tolist(),';N pNet t-tagged jets'),
         'nW':('gcFatJet_nW',linspace(0,5,6).tolist(),';N pNet W-tagged jets'),
         'Wmass':('W_mass',linspace(0,500,51).tolist(),';reco W mass [GeV]'),
@@ -169,8 +172,8 @@ plotList = {#discriminantName:(discriminantLJMETName, binning, xAxisLabel)
         'tdrWbMLJ':('DR_W_b_minMlj',linspace(0,6.3,51).tolist(),';reco t, #DeltaR(W,b) (minMlj method)'),
         'tdrWbSSB':('DR_W_b_SSb',linspace(0,6.3,51).tolist(),';reco t, #DeltaR(W,b) (SSb method)'),
         # 'BpMass':('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
-        #'BpMass':('Bprime_mass',linspace(0,2500,501).tolist(),';B quark mass [GeV]'), #TEMP
-        'BpMass':('Bprime_mass',linspace(400,2500,421).tolist(),';B quark mass [GeV]'), #TEMP
+        'BpMass':('Bprime_mass',linspace(400,2500,2101).tolist(),';B quark mass [GeV]'), #For alpha-ratio method
+        #'BpMass':('Bprime_mass',linspace(0,2500,51).tolist(),';B quark mass [GeV]'), #For kinematics plots
         'BpPt':('Bprime_pt',linspace(0,3000,51).tolist(),';B quark p_{T} [GeV]'),
         'BpEta':('Bprime_eta',linspace(-5,5,51).tolist(),';B quark #eta'),
         'BpPhi':('Bprime_phi',linspace(-3.14,3.14,51).tolist(),';B quark #phi'),
@@ -178,7 +181,7 @@ plotList = {#discriminantName:(discriminantLJMETName, binning, xAxisLabel)
         'BpPtBal':('Bprime_ptbal',linspace(0,3,51).tolist(),';B quark t/W p_{T} ratio'),
         'BpChi2':('Bprime_chi2',linspace(0,1000,51).tolist(),';B quark reconstruction #chi^{2}'), # CHECK ME, what range?
         'BpDecay':('Bdecay_obs',linspace(0,5,6).tolist(),';B quark mode (1: Tjet+lepW, 2: Wjet+lepT, 3: AK8+lepW, 4: AK8+lepT'),
-        'BpMass_ABCDnn':('Bprime_mass_ABCDnn',linspace(400,2500,421).tolist(),';B quark mass [GeV]'),
+        'BpMass_ABCDnn':('Bprime_mass_ABCDnn',linspace(400,2500,2101).tolist(),';B quark mass [GeV]'),
         #'BpMass_ABCDnn':('Bprime_mass_ABCDnn',linspace(400,2500,43).tolist(),';B quark mass [GeV]'),
         #'ST_ABCDnn':('gcJet_ST_ABCDnn',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
 }
