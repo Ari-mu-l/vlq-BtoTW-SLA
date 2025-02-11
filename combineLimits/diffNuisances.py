@@ -153,17 +153,17 @@ for i in range(fpf_s.getSize()):
                 if options.plotfile:
                     if fit_name=='b':
                         nuis_p_i+=1
-                    if options.pullDef and nuis_p!=None:
-                        #nx,ned,neu = CP.returnPullAsym(options.pullDef,nuis_x.getVal(),mean_p,nuis_x.getErrorHi(),sigma_pu,abs(nuis_x.getErrorLo()),abs(sigma_pd))
-                        gr_fit_b.SetPoint(nuis_p_i-1,nuis_p_i-0.5+0.1,nx)
-                        gr_fit_b.SetPointError(nuis_p_i-1,0,0,ned,neu)
-                    else:
-                        gr_fit_b.SetPoint(nuis_p_i-1,nuis_p_i-0.5+0.1,nuis_x.getVal())
-                        gr_fit_b.SetPointError(nuis_p_i-1,0,0,abs(nuis_x.getErrorLo()),nuis_x.getErrorHi())
-                    hist_fit_b.SetBinContent(nuis_p_i,nuis_x.getVal())
-                    hist_fit_b.SetBinError(nuis_p_i,nuis_x.getError())
-                    hist_fit_b.GetXaxis().SetBinLabel(nuis_p_i,name)
-                    gr_fit_b.GetXaxis().SetBinLabel(nuis_p_i,name)
+                        if options.pullDef and nuis_p!=None:
+                            #nx,ned,neu = CP.returnPullAsym(options.pullDef,nuis_x.getVal(),mean_p,nuis_x.getErrorHi(),sigma_pu,abs(nuis_x.getErrorLo()),abs(sigma_pd))
+                            gr_fit_b.SetPoint(nuis_p_i-1,nuis_p_i-0.5+0.1,nx)
+                            gr_fit_b.SetPointError(nuis_p_i-1,0,0,ned,neu)
+                        else:
+                            gr_fit_b.SetPoint(nuis_p_i-1,nuis_p_i-0.5+0.1,nuis_x.getVal())
+                            gr_fit_b.SetPointError(nuis_p_i-1,0,0,abs(nuis_x.getErrorLo()),nuis_x.getErrorHi())
+                        hist_fit_b.SetBinContent(nuis_p_i,nuis_x.getVal())
+                        hist_fit_b.SetBinError(nuis_p_i,nuis_x.getError())
+                        hist_fit_b.GetXaxis().SetBinLabel(nuis_p_i,name)
+                        gr_fit_b.GetXaxis().SetBinLabel(nuis_p_i,name)
                 if fit_name=='s':
                     if options.pullDef and nuis_p!=None:
 		        #nx,ned,neu = CP.returnPullAsym(options.pullDef,nuis_x.getVal(),mean_p,nuis_x.getErrorHi(),sigma_pu,abs(nuis_x.getErrorLo()),abs(sigma_pd))
@@ -384,8 +384,8 @@ if options.plotfile:
     hist_prefit.SetTitle("Nuisance Parameters")
     hist_prefit.SetLineColor(ROOT.kBlack)
     hist_prefit.SetFillColor(ROOT.kGray)
-    hist_prefit.SetMaximum(6)
-    hist_prefit.SetMinimum(-6)
+    hist_prefit.SetMaximum(3)
+    hist_prefit.SetMinimum(-3)
     hist_prefit.Draw("E2")
     hist_prefit.Draw("histsame")
     gr_fit_b.Draw("EPsame")
