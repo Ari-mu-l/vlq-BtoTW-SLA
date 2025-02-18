@@ -86,7 +86,7 @@ else:
                                'major'                       
                 ]
         ABCDnnProcList = ['major']#'qcd','wjets','singletop','ttbar']
-minorProcList = ['ewk', 'ttx']
+minorProcList = ['ttx','ewk']
 
 
 if plotABCDnn:
@@ -130,6 +130,9 @@ if isCategorized == True:
         if ('D' in region or 'C' in region or 'Y' in region or region=='all') and 'BpMass' in iPlot and 'validation' not in pfix:
                 partialBlind = True
                 print(f'Partial blind {iPlot} for {region}.')
+
+if year=='2016':
+        partialBlind = False
 
 lumiSys = 0.016 # lumi uncertainty
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
@@ -257,7 +260,7 @@ totBkgTemp1 = {}
 totBkgTemp2 = {}
 totBkgTemp3 = {}
 for tag in taglist:
-        perNGeV = 25 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
+        perNGeV = 10 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
         print('------------------ ',tag,' with perNGeV = ',perNGeV,' -----------------------')
 
         tagStr=tag
@@ -293,10 +296,11 @@ for tag in taglist:
                 if plotNorm:
                         hData.Scale(1/hData.Integral())
 
-                if plotABCDnn and not partialBlind and 'validation' not in pfix and 'V' not in region: # to scale training regions of ABCDnn
-                        factor = (hData.Integral()-totMinor)/totMajor
-                        for proc in ABCDnnProcList:
-                                bkghists[proc+catStr].Scale(factor)
+                #if plotABCDnn and not partialBlind and 'validation' not in pfix and 'V' not in region: # to scale training regions of ABCDnn
+                #        print('IM SCALING BY THE FACTOR')
+                #        factor = (hData.Integral()-totMinor)/totMajor
+                #        for proc in ABCDnnProcList:
+                #                bkghists[proc+catStr].Scale(factor)
 
                 for proc in bkgProcList:
                         try:
@@ -498,7 +502,7 @@ for tag in taglist:
                 if region=='WJCR':
                         bkgProcListNew[bkgProcList.index("top")],bkgProcListNew[bkgProcList.index("ewk")]=bkgProcList[bkgProcList.index("ewk")],bkgProcList[bkgProcList.index("top")]
                 if plotABCDnn:
-                        bkgProcListNew = ["ABCDnn"] + minorProcList
+                        bkgProcListNew = minorProcList + ["ABCDnn"]
                         #print(bkgProcListNew)
                 for proc in bkgProcListNew:
                         try: 

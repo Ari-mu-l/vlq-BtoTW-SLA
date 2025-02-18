@@ -13,6 +13,10 @@ from utils import *
 gROOT.SetBatch(1)
 start_time = time.time()
 
+#yearList = ["2016"]
+
+rebin = 10 # 20 for 2016 (105 bins) and 10 for full Run2 (210bins)
+
 if len(sys.argv)>1:
 	iPlot = str(sys.argv[1])
 else:   
@@ -33,7 +37,7 @@ else:
 if len(sys.argv)>4:
         pfix+=str(sys.argv[4])
 else:
-        pfix+='_Jan2025_2100bins'
+        pfix+='_Jan2025'
 outDir=f'{os.getcwd()}/{pfix}/'
 
 print('Grouping hists for iPlot',iPlot,', region',region,', isCategorized',isCategorized,', and folder',pfix)
@@ -80,6 +84,7 @@ groupHists = True # TEMP: turn this on to group histograms
 getYields = True # TEMP: turn this on to get yield tables
 if len(yearList) == 1:
         getYields = False
+        uncorrList_sf = []
 
 corrList_sf = systListFull.copy()
 mySystList = systListFull
@@ -122,6 +127,7 @@ if groupHists:
                         else:
                                 hists.Add(dataHistFile.Get(inPrefix+'_'+samples_data[dat].prefix))
                 outHistFile.cd()
+                hists.Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction 
                 hists.Write()
                 dataHistFile.Close()
 
@@ -252,8 +258,10 @@ if groupHists:
                                                         systHistsWrite[f'{histoPrefix}__{proc}__{syst}{shiftyear}Down'].Add(nomHists[f'{histoPrefix}__{proc}{nomyear}'])
 
                         outHistFile.cd()
+                        nomHistAllYears.Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction 
                         nomHistAllYears.Write()
                         for systHist in systHistsWrite:
+                                systHistsWrite[systHist].Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction
                                 systHistsWrite[systHist].Write()
                         bkgHistFile.Close()
                      
@@ -309,8 +317,10 @@ if groupHists:
                                                         systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'].Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
 
                         outHistFile.cd()
+                        nomHistsAllYears.Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction
                         nomHistsAllYears.Write()
                         for systHist in systHists:
+                                systHists[systHist].Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction
                                 systHists[systHist].Write()
                 sigHistFile.Close()
         outHistFile.Close()

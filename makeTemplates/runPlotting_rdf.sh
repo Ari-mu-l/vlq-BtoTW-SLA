@@ -49,21 +49,60 @@ for iPlot in $plotList; do
     #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420binsTU 0.2 3 True
     #python3 modifyBinning.py $iPlot templatesD_Oct2024_420binsTU 0.2 4 True
     #python3 modifyBinning.py $iPlot templatesD_Oct2024_420binsTU 0.2 3 True
-    python3 modifyBinning.py $iPlot templatesD_Oct2024_2100bins 0.2 5 True
-    python3 modifyBinning.py $iPlot templatesV_Oct2024_2100bins 0.2 5 True
-    python3 modifyBinning.py $iPlot templatesV2_Oct2024_2100bins 0.2 5 True
+    #python3 modifyBinning.py $iPlot templatesD_Oct2024_420bins 0.2 5 True
+    #python3 modifyBinning.py $iPlot templatesV_Oct2024_420bins 0.2 5 True
+    #python3 modifyBinning.py $iPlot templatesV2_Oct2024_420bins 0.2 5 True
 
-    python3 modifyBinning_smoothJEC.py D
-    python3 modifyBinning_smoothJEC.py V
-    python3 modifyBinning_smoothJEC.py V2
+    #python3 modifyBinning_smoothJEC.py D
+    #python3 modifyBinning_smoothJEC.py V
+    #python3 modifyBinning_smoothJEC.py V2
 
-    python3 plotHists.py $iPlot D True _Jan2025_2100bins False True
-    python3 plotHists.py $iPlot V True _Jan2025_2100bins False False
-    python3 plotHists.py $iPlot V2 True _Jan2025_2100bins False True
+    #python3 plotHists.py $iPlot V2 True _Jan2025_42bins False True
+    #python3 plotHists.py $iPlot D True _Jan2025_210bins False True
+    #python3 plotHists.py $iPlot V True _Jan2025_210bins False True
     #python3 plotHists.py $iPlot V True _Oct2024_420bins_model6 False True _rebinned5_stat0p2_valUpDn
     #python3 plotHists.py $iPlot V2 True _Oct2024_420bins_model6 False True _rebinned5_stat0p2_valUpDnFromV_smoothed_TVJJ
     #python3 plotHists.py $iPlot D True _Oct2024_420bins_model6 False True _rebinned5_stat0p2_valUpDnFromVWithD_smoothed_TVJJ
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsCorr2016 False True
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr 0.2 1 
+    #python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr
+    #python3 uncorrUncert.py D False
+    #python3 plotHists.py $iPlot D True _Jan2025_105binsCorr False True _rebinned1_stat0p2_smoothed_TVJJ_UC
+    
+    # python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr2016AvgCorrUC4 0.2 1
+    # python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr2016AvgCorrUC4
+    #python3 uncorrUncert.py D False Jan2025_105binsCorr2016AvgCorrUC4 _2016
+    # python3 plotHists.py $iPlot D True _Jan2025_105binsCorr2016AvgCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC 2016
 
+    # python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr2016AvgTrainCorrUC4 0.2 1
+    # python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr2016AvgTrainCorrUC4
+    # python3 uncorrUncert.py D False Jan2025_105binsCorr2016AvgTrainCorrUC4 _2016
+    # python3 plotHists.py $iPlot D True _Jan2025_105binsCorr2016AvgTrainCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC 2016
+
+    # python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr2016WeightCorrUC4 0.2 1
+    # python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr2016WeightCorrUC4
+    # python3 uncorrUncert.py D False Jan2025_105binsCorr2016WeightCorrUC4 _2016
+    # python3 plotHists.py $iPlot D True _Jan2025_105binsCorr2016WeightCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC 2016
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr2016WeightTrainCorrUC4 0.2 1
+    #python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr2016WeightTrainCorrUC4
+    #python3 uncorrUncert.py D False Jan2025_105binsCorr2016WeightTrainCorrUC4 _2016
+    #python3 plotHists.py $iPlot D True _Jan2025_105binsCorr2016WeightTrainCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC 2016
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsCorr2016BCorrUC4 0.2 1
+    #python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsCorr2016BCorrUC4
+    python3 uncorrUncert.py D False Jan2025_105binsCorr2016BCorrUC4 _2016
+    python3 plotHists.py $iPlot D True _Jan2025_105binsCorr2016BCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC 2016
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsCorrBCorrUC4 0.2 1
+    #python3 modifyBinning_smooth2Dcorr.py D Jan2025_210binsCorrBCorrUC4
+    #python3 uncorrUncert.py D False Jan2025_210binsCorrBCorrUC4
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsCorrBCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsCorrBCorrUC4 0.2 1
+    #python3 modifyBinning_smooth2Dcorr.py V2 Jan2025_210binsCorrBCorrUC4
+    #python3 uncorrUncert.py V2 False Jan2025_210binsCorrBCorrUC4
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsCorrBCorrUC4 False True _rebinned1_stat0p2_smoothed_TVJJ_UC
     
     #python3 plotHists.py $iPlot D True _Oct2024_420bins False True _rebinned2_stat0p2
     # python3 plotHists.py $iPlot C True _Oct2024_420bins False True _rebinned_stat0p1

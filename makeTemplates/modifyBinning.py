@@ -42,7 +42,7 @@ print("templateDir: "+templateDir)
 combinefile = 'templates_'+iPlot+'_'+lumiInTemplates+'.root'
 print("file: "+combinefile)
 
-doTwoSided = True
+doTwoSided = False
 doTruncated = False
 if 'templatesD_' not in folder: doTruncated = False
 normalizeRENORM = True #only for signals
@@ -100,7 +100,8 @@ def findfiles(path, filtre):
             yield os.path.join(root, f)
 
 #Setup the selection of the files to be rebinned: templates_BpMass_138fbfb.root
-rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' not in file and combinefile in file]
+rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' not in file and 'smoothed' not in file and iPlot in file]
+print(rfiles)
 
 print("templateDir: "+templateDir)
 print("iPlot: "+iPlot)
@@ -263,14 +264,15 @@ for rfile in rfiles:
         outputRfiles = {}
         tfiles[iRfile] = TFile(rfile)	
         if not rebin4chi2:
-                if 'templatesV_' in folder or 'templatesHST_' in folder:
-                        outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDn.root'),'RECREATE')
-                elif 'templatesV2_' in folder:
-                        outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnFromV.root'),'RECREATE')
-                        #outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDn.root'),'RECREATE')
-                elif 'templatesD_' in folder:
-                        outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnFromVWithD.root'),'RECREATE')
-                        #outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnWithD.root'),'RECREATE')
+                if doVRunc:
+                        if 'templatesV_' in folder or 'templatesHST_' in folder:
+                                outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDn.root'),'RECREATE')
+                        elif 'templatesV2_' in folder:
+                                outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnFromV.root'),'RECREATE')
+                                #outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDn.root'),'RECREATE')
+                        elif 'templatesD_' in folder:
+                                outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnFromVWithD.root'),'RECREATE')
+                                #outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'_valUpDnWithD.root'),'RECREATE')
                 else:
                         outputRfiles[iRfile] = TFile(rfile.replace('.root','_rebinned'+str(rebinX)+'_stat'+str(stat).replace('.','p')+'.root'),'RECREATE')
         else: 
@@ -308,6 +310,8 @@ for rfile in rfiles:
                         if '__pdf' in hist:
                                 if 'Up' not in hist or 'Down' not in hist: continue
                         if any([item in hist and not removalKeys[item] for item in removalKeys.keys()]): continue
+
+
                         rebinnedHists[hist].Write()
                         yieldHistName = hist
                         yieldsAll[yieldHistName] = rebinnedHists[hist].Integral()
