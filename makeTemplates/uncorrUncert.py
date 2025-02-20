@@ -36,8 +36,23 @@ fileName = f'{templateDir}/templates_{iPlot}_138fbfb{year}_rebinned1_stat0p2_smo
 #     lowTh  = 1200 # TEMP: update this
 #     medTh  = 1800
 
-lowTh = {"correct": 1200, "train": 1240}
-medTh = {"correct": 1400, "train": 1840}
+lowTh = {"case1":{"correct": 1200,
+                  "train": 950 #1240 for weightedAvg
+                  }
+         "case2":{"correct": 1200,
+                  "train": 1250
+                  }
+         "case3":{"correct": 1200,
+                  "train": 1700
+                  }
+         "case4":{"correct": 1200,
+                  "train": 999 # no need for splitting
+                  }
+         }
+
+medTh = {"correct": 1400,
+         #"train": 1840  # for weigtedAvg
+         }
 highTh = {"correct": 2000}
 
 tagList = ["tagTjet", "tagWjet", "untagTlep", "untagWlep"]
@@ -59,15 +74,16 @@ if scanThresholds=="True":
     json_obj = json.dumps(binEdgesDict)
     with open(f'{templateDir}/binEdges{year}.json','w') as outfile:
         outfile.write(json_obj)
+    print(f'Binning wrote to {templateDir}/binEdges{year}.json')
 else:
     rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_UC.root'), 'RECREATE')
     # save untouched hists
     if 'Train' in postFix:
-        allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' not in hist.GetName() or 'train' not in hist.GetName()]
-        corrHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' in hist.GetName() or 'train' in hist.GetName()]
+        allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' not in hist.GetName() and 'train' not in hist.GetName()]
+        #corrHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' in hist.GetName() or 'train' in hist.GetName()]
     else:
         allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' not in hist.GetName()]
-        corrHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' in hist.GetName()]
+        #corrHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' in hist.GetName()]
     for histName in allHists:
         hist = rootFileIn.Get(histName).Clone()
         rootFileOut.cd()
@@ -79,47 +95,48 @@ else:
         else:
             uncertList = ['correct']
         for uncert in uncertList:
-            if (uncert in histName) and uncert=="correct":
-                histNomName = histName.replace('__'+histName.split('_')[-1],'')
-                histShift = rootFileIn.Get(histName)
-                histMassRange1 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange1'))
-                histMassRange2 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange2'))
-                histMassRange3 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange3'))
-                histMassRange4 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange4'))
+            #if uncert in histName:
+            #BpMass_ABCDnn_138fbfb_isL_tagTjet_D__major__correctMassRange1Up
+            histNomName = histName.replace('__'+histName.split('_')[-1],'')
+            histShift = rootFileIn.Get(histName)
+            histMassRange1 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange1'))
+            histMassRange2 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange2'))
+            histMassRange3 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange3'))
+            histMassRange4 = rootFileIn.Get(histNomName).Clone(histName.replace(f'{uncert}',f'{uncert}MassRange4'))
 
-                binTh1 = histShift.FindBin(lowTh[uncert]+1)
-                binTh2 = histShift.FindBin(medTh[uncert]+1)
+            binTh1 = histShift.FindBin(lowTh[uncert]+1)
+            binTh2 = histShift.FindBin(medTh[uncert]+1)
 
-                if uncert=="correct":
-                    if 'tagTjet' in histName and year=='_2016':
-                        binTh3 = histShift.FindBin(1980+1)
-                    else:
-                        binTh3 = histShift.FindBin(highTh[uncert]+1)
+            if uncert=="correct":
+                if 'tagTjet' in histName and year=='_2016':
+                    binTh3 = histShift.FindBin(1980+1)
                 else:
-                    binTh3 = 999
-                        
-                nbins = histShift.GetNbinsX()
+                    binTh3 = histShift.FindBin(highTh[uncert]+1)
+            else:
+                binTh3 = 999
 
-                for i in range(nbins+1):
-                    if i<binTh1:
-                        histMassRange1.SetBinContent(i,histShift.GetBinContent(i))
-                        histMassRange1.SetBinError(i,histShift.GetBinError(i))
-                    elif i>=binTh1 and i<binTh2:
-                        histMassRange2.SetBinContent(i,histShift.GetBinContent(i))
-                        histMassRange2.SetBinError(i,histShift.GetBinError(i))
-                    elif i>=binTh2 and i<binTh3:
-                        histMassRange3.SetBinContent(i,histShift.GetBinContent(i))
-                        histMassRange3.SetBinError(i,histShift.GetBinError(i))
-                    else:
-                        histMassRange4.SetBinContent(i,histShift.GetBinContent(i))
-                        histMassRange4.SetBinError(i,histShift.GetBinError(i))
-                rootFileOut.cd()
-                histMassRange1.Write()
-                histMassRange2.Write()
-                histMassRange3.Write()
-                if uncert=="correct":
-                    histMassRange4.Write()
-        
+            nbins = histShift.GetNbinsX()
+
+            for i in range(nbins+1):
+                if i<binTh1:
+                    histMassRange1.SetBinContent(i,histShift.GetBinContent(i))
+                    histMassRange1.SetBinError(i,histShift.GetBinError(i))
+                elif i>=binTh1 and i<binTh2:
+                    histMassRange2.SetBinContent(i,histShift.GetBinContent(i))
+                    histMassRange2.SetBinError(i,histShift.GetBinError(i))
+                elif i>=binTh2 and i<binTh3:
+                    histMassRange3.SetBinContent(i,histShift.GetBinContent(i))
+                    histMassRange3.SetBinError(i,histShift.GetBinError(i))
+                else:
+                    histMassRange4.SetBinContent(i,histShift.GetBinContent(i))
+                    histMassRange4.SetBinError(i,histShift.GetBinError(i))
+            rootFileOut.cd()
+            histMassRange1.Write()
+            histMassRange2.Write()
+            histMassRange3.Write()
+            if uncert=="correct":
+                histMassRange4.Write()
+
     rootFileOut.Close()
 
 rootFileIn.Close()
