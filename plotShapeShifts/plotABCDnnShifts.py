@@ -13,7 +13,7 @@ gROOT.SetBatch(1)
 region = 'D'
 discriminant = 'BpMass_ABCDnn' # not plotting uncertainty shifts for minor backgrounds
 inDirPostFix = 'Jan2025_210binsCorrBTrainCorrUC4'
-rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ_UC'
+rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
 isCategorized = True
 
 lumi = 138
@@ -59,14 +59,11 @@ systnames = {
         #'peak':'ABCDnn Peak',
         #'closure':'ABCDnn CR-to-SR',
         #'train': 'ABCDnn Training',
-        #'correct': 'ABCDnn Closure correction',
-        #'correctLowM': 'ABCDnn Closure correction for low mass',
-        #'correctMedM': 'ABCDnn Closure correction for medium mass',
-        #'correctHighM': 'ABCDnn Closure correction for high mass',
+        'correct': 'ABCDnn Closure correction',
         'trainMassRange1': 'ABCDnn Training for mass range up to 1200',
 	'trainMassRange2': 'ABCDnn Training for mass 1200 to 1400',
-        #'trainMassRange3': 'ABCDnn Training for mass 1400 to 2000',
-        #'trainMassRange4': 'ABCDnn Training for mass 2000 to Inf',
+        'trainMassRange3': 'ABCDnn Training for mass 1400 to 2000',
+        'trainMassRange4': 'ABCDnn Training for mass 2000 to Inf',
         'correctMassRange1': 'ABCDnn Closure correction for mass range up to 1200',
         'correctMassRange2': 'ABCDnn Closure correction for mass 1200 to 1400',
         'correctMassRange3': 'ABCDnn Closure correction for mass 1400 to 2000',
