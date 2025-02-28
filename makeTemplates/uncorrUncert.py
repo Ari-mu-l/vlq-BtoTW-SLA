@@ -29,53 +29,39 @@ else:
 templateDir = f'templates{region}_{postFix}'
 fileName = f'{templateDir}/templates_{iPlot}_138fbfb{year}_rebinned1_stat0p2_smoothed_TVJJ.root' # after rebin and smoothing
 
-# if year=='_2016': # assuming _2016.root
-#     lowTh  = 1180
-#     medTh  = 1600
-# else:
-#     lowTh  = 1200 # TEMP: update this
-#     medTh  = 1800
+if year=='_2016':
+    lowTh = {"tagTjet"  :{"correct":1620,"train": 9999}, #, 1080
+             "tagWjet"  :{"correct": 840,"train": 840},
+             "untagTlep":{"correct": 520,"train": 840},
+             "untagWlep":{"correct": 560,"train": 740}
+             }
+    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
+             "tagWjet"  :{"correct": 1540,"train": 9999}, #, 1520
+             "untagTlep":{"correct": 1960,"train": 1720},
+             "untagWlep":{"correct": 9999,"train": 1780}
+             }
+    highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
+              "tagWjet"  :{"correct": 9999,"train": 9999},
+              "untagTlep":{"correct": 9999,"train": 9999},
+              "untagWlep":{"correct": 9999,"train": 9999}
+              }
+else:
+    lowTh = {"tagTjet"  :{"correct": 9999,"train": 9999}, #1830, 950
+             "tagWjet"  :{"correct": 680,"train": 900},
+             "untagTlep":{"correct": 600,"train": 610},
+             "untagWlep":{"correct": 450,"train": 810}
+             }
+    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
+             "tagWjet"  :{"correct": 1540,"train": 1080}, #1080
+             "untagTlep":{"correct": 1900,"train": 1710},
+             "untagWlep":{"correct": 610,"train": 2100}
+             }
+    highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
+              "tagWjet"  :{"correct": 9999,"train": 9999},
+              "untagTlep":{"correct": 9999, "train": 9999},
+              "untagWlep":{"correct": 9999, "train": 9999}
+              }
 
-lowTh = {"tagTjet":{"correct":1520,
-                    "train": 950
-                    },
-         "tagWjet":{"correct": 680,
-                    "train": 1250
-                    },
-         "untagTlep":{"correct": 600,
-                      "train": 1700
-                      },
-         "untagWlep":{"correct": 450,
-                      "train": 9999
-                      }
-         }
-
-medTh = {"tagTjet":{"correct": 1830,
-                    "train": 9999
-                    },
-         "tagWjet":{"correct": 1540,
-                    "train": 9999
-                    },
-         "untagTlep":{"correct": 1900,
-                      "train": 9999
-                      },
-         "untagWlep":{"correct": 610,
-                      "train": 9999
-                      }
-         }
-highTh = {"tagTjet":{"correct": 9999,
-                     "train": 9999
-                     },
-          "tagWjet":{"correct": 9999,
-                     "train": 9999
-                     },
-          "untagTlep":{"correct": 9999,
-                       "train": 9999
-                       },
-          "untagWlep":{"correct": 9999,
-                       "train": 9999
-                       }
-          }
 
 tagList = ["tagTjet", "tagWjet", "untagTlep", "untagWlep"]
 
@@ -107,9 +93,9 @@ else:
     
     uncertList = []
     if 'Train' in postFix:
-        uncertList.Append('train')
-    if 'CorrUncert' in postFix:
-        uncertList.Append('correct')
+        uncertList.append('train')
+    if 'CorrUC' in postFix:
+        uncertList.append('correct')
         
     # save untouched hists
     if len(uncertList)==2:
@@ -136,12 +122,7 @@ else:
 
                 binTh1 = histShift.FindBin(lowTh[tag][uncert]+1)
                 binTh2 = histShift.FindBin(medTh[tag][uncert]+1)
-
-                # TEMP TODO: add years to dictionary
-                if 'tagTjet' in histName and year=='_2016':
-                    binTh3 = histShift.FindBin(1980+1)
-                else:
-                    binTh3 = histShift.FindBin(highTh[tag][uncert]+1)
+                binTh3 = histShift.FindBin(highTh[tag][uncert]+1)
 
                 nbins = histShift.GetNbinsX()
 
