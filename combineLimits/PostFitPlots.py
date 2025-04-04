@@ -32,8 +32,11 @@ path1 = limitdir+'/cmb/'+mass1
 path2 = limitdir+'/cmb/'+mass2
 
 isSR = False
-if '_D' in limitdir: isSR = True
-doMorph = False
+if '_D' in limitdir and 'partialBlind' not in limitdir: isSR = True
+unblind = True # unblind
+doMorph = True
+
+plotFit = 'fit_s' # fit_b
 
 os.chdir(path1)
 
@@ -42,12 +45,11 @@ if not isSR:
     shapesfile = 'CRPostFitShapes.root'
     if not os.path.exists(shapesfile):
         print('Creating pre and post-fit histograms from CR')
-        print('Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:fit_b --postfit --sampling --print')
-        os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:fit_b --postfit --sampling --print')
-
+        print('Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --sampling --print')
+        os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --sampling --print')
 
 else:
-    if doMorph:
+    if doMorph and not unblind:
         shapesfile = 'SRMorphedPrefitShapes.root'
         if not os.path.exists(shapesfile):
             masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1'
@@ -60,15 +62,17 @@ else:
             os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w higgsCombineMorphed.FitDiagnostics.mH120.root --output SRMorphedPrefitShapes.root -m '+mass1+' --print')
     else:
         shapesfile = 'SRPostFitShapes_'+mass1+'.root'
-        if not os.path.exists(outDir+'/'+shapesfile):
-            print('Creating pre and post-fit histograms from SR')
-            print('Command = PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:fit_b --postfit')
-            os.system('PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:fit_b --postfit --skip-proc-errs=1')
-        os.chdir(path2)
-        if not os.path.exists(outDir+'/'+shapesfile.replace(mass1,mass2)):
-            print('Creating pre and post-fit histograms from SR')
-            print('Command = PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:fit_b --postfit')
-            os.system('PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:fit_b --postfit --skip-proc-errs=1')
+        # if not os.path.exists(path1+'/'+shapesfile):
+        #     print('Creating pre and post-fit histograms from SR')
+        #     #print('Command = PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
+        #     #os.system('PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --skip-proc-errs=1')
+        #     print('Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
+        #     os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
+        # os.chdir(f'../../../{path2}')
+        # if not os.path.exists(path2+'/'+shapesfile.replace(mass1,mass2)):
+        #     print('Creating pre and post-fit histograms from SR')
+        #     print(f'Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
+        #     os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
 
 
 def formatUpperHist(histogram,th1hist):
@@ -101,6 +105,7 @@ def formatUpperHist(histogram,th1hist):
     else:
         uPad.SetLogy()
         histogram.SetMaximum(1000*histogram.GetMaximum())
+        histogram.SetMaximum(histogram.GetMaximum())
 
 		
 def formatLowerHist(histogram):
@@ -121,10 +126,10 @@ def formatLowerHist(histogram):
 
 if isSR:
     os.chdir(outDir)
-print('Opening',shapesfile,' -- will plot signals like',sig1.replace(mass1,''))
-tFile = TFile.Open(shapesfile)
+    print('Opening',shapesfile,' -- will plot signals like',sig1.replace(mass1,''))
+tFile = TFile.Open(f'{path1}/{shapesfile}')
 if isSR:
-    tFile2 = TFile.Open(shapesfile.replace(mass1,mass2))
+    tFile2 = TFile.Open(f'{path2}/{shapesfile.replace(mass1,mass2)}')
 
 chns = []
 iPlot = ''
@@ -139,10 +144,10 @@ bkghistsmerged = {}
 for chn in chns:
 
     blind = False
-    if isSR and ('Case1' in chn or 'Case2' in chn): blind = True
+    if isSR and not unblind and ('Case1' in chn or 'Case2' in chn): blind = True
     yLog = False
 
-    perNGeV = 50
+    perNGeV = 10
     print('------------------ ',chn,' with perNGeV = ',perNGeV,'-----------------------')
     
     for proc in bkgProcList:
@@ -151,8 +156,8 @@ for chn in chns:
     hDatamerged = tFile.Get(chn+'/data_obs').Clone()
     bkgHTgerrmerged = tFile.Get(chn+'/TotalBkg').Clone(chn+'__totbkg')
     hsig1merged = tFile.Get(chn.replace('postfit','prefit')+'/'+sig1.replace(mass1,'')).Clone(chn+'__sig1merged')
-    hsig1merged.Scale(xsec[sig1[3:]])
-    if isSR: hsig1merged.Scale(1000)
+    if isSR: hsig1merged.Scale(xsec[sig1[3:]]*10000)
+    if '1000' in sig1: hsig1merged.Scale(0.25)
 
     histrange = [hDatamerged.GetBinLowEdge(1),hDatamerged.GetBinLowEdge(hDatamerged.GetNbinsX()+1)]
     gaeDatamerged = TGraphAsymmErrors(hDatamerged.Clone(hDatamerged.GetName().replace("data_obs","gaeDATA")))
@@ -186,11 +191,13 @@ for chn in chns:
     hsig1merged.SetLineColor(kBlack)
     hsig1merged.SetFillStyle(0)
     hsig1merged.SetLineWidth(3)
-
+    
     if isSR:
         hsig2merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig2.replace('1800','')).Clone(chn+'__sig2merged')
-        hsig2merged.Scale(xsec[sig2[3:]]*1000)
+        hsig2merged.Scale(xsec[sig2[3:]]*10000)
         normByBinWidth(hsig2merged,perNGeV)
+        print('hsig1merged yield', hsig1merged.Integral())
+        print('hsig2merged yield', hsig2merged.Integral())
         hsig2merged.SetLineColor(kBlack)
         hsig2merged.SetFillStyle(0)
         hsig2merged.SetLineStyle(2)
@@ -259,7 +266,7 @@ for chn in chns:
     stackbkgHTmerged.Draw("SAME HIST")
     hsig1merged.Draw("SAME HIST")
     if isSR:
-        hsig2merged.Draw("SAME HIST")
+        hsig2merged.Draw("SAME HIST") # unblind
     if not blind: 
         gaeDatamerged.Draw("PZ") #redraw data so its not hidden
     uPad.RedrawAxis()
@@ -274,7 +281,7 @@ for chn in chns:
     chLatexmerged.SetTextAlign(12) # align left
     flvString = 'e/#mu+jets'
     if not isSR:
-        flvString = 'e/#mu (VR)'
+        flvString = 'e/#mu (VR)' # unblind
     tagString = taglabels[chn.split('_')[0]]
     if yLog:
         chLatexmerged.DrawLatex(0.18, 0.71, flvString)    
@@ -303,7 +310,7 @@ for chn in chns:
         legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
         if isSR:
-            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left
+            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left # unblind
         else:
             legmerged.AddEntry(0,"","")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+X","f") #right
@@ -313,7 +320,7 @@ for chn in chns:
         legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f") #right
         if isSR:
-            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left
+            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left # unblind
         else:
             legmerged.AddEntry(0,"","")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
