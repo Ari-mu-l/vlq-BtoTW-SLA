@@ -17,7 +17,7 @@ if year=='':
 else:
         bins = 105
 discriminant = 'BpMass_ABCDnn' # not plotting uncertainty shifts for minor backgrounds
-inDirPostFix = 'Jan2025_{bins}binsBtargetHoleCorrBTrain_smooth_rebin{year}'
+inDirPostFix = f'Jan2025_{bins}binsBtargetHoleCorrBTrain_smooth_rebin{year}'
 #rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
 #rfilePostFix = '_smoothed_TVJJ_rebinned1_stat0p2'
 rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV'
