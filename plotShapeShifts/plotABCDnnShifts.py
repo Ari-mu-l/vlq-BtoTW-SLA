@@ -11,14 +11,21 @@ setTDRStyle()
 gROOT.SetBatch(1)
 
 region = 'D'
+year = '' # '_2016'
+if year=='':
+        bins = 210
+else:
+        bins = 105
 discriminant = 'BpMass_ABCDnn' # not plotting uncertainty shifts for minor backgrounds
-inDirPostFix = 'Jan2025_210binsCorrBTrainCorrUC4'
-rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
+inDirPostFix = 'Jan2025_{bins}binsBtargetHoleCorrBTrain_smooth_rebin{year}'
+#rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
+#rfilePostFix = '_smoothed_TVJJ_rebinned1_stat0p2'
+rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV'
 isCategorized = True
 
 lumi = 138
 outDir = os.getcwd()+'/templates'+region+'_'+inDirPostFix
-templateFile = f'/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/templates{region}_{inDirPostFix}/templates_{discriminant}_{lumiStr}{rfilePostFix}.root'
+templateFile = f'/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/templates{region}_{inDirPostFix}/templates_{discriminant}_{lumiStr}{year}{rfilePostFix}.root'
 
 if not os.path.exists(outDir): os.system('mkdir '+outDir)
 if not os.path.exists(outDir+'/abcdnn'): os.system('mkdir '+outDir+'/abcdnn')
@@ -58,16 +65,16 @@ systnames = {
         #'tail':'ABCDnn Tail',
         #'peak':'ABCDnn Peak',
         #'closure':'ABCDnn CR-to-SR',
-        #'train': 'ABCDnn Training',
+        'train': 'ABCDnn Training',
         'correct': 'ABCDnn Closure correction',
-        'trainMassRange1': 'ABCDnn Training for mass range up to 1200',
-	'trainMassRange2': 'ABCDnn Training for mass 1200 to 1400',
-        'trainMassRange3': 'ABCDnn Training for mass 1400 to 2000',
-        'trainMassRange4': 'ABCDnn Training for mass 2000 to Inf',
-        'correctMassRange1': 'ABCDnn Closure correction for mass range up to 1200',
-        'correctMassRange2': 'ABCDnn Closure correction for mass 1200 to 1400',
-        'correctMassRange3': 'ABCDnn Closure correction for mass 1400 to 2000',
-        'correctMassRange4': 'ABCDnn Closure correction for mass 2000 to Inf',
+        # 'trainMassRange1': 'ABCDnn Training for mass range up to 1200',
+	# 'trainMassRange2': 'ABCDnn Training for mass 1200 to 1400',
+        # 'trainMassRange3': 'ABCDnn Training for mass 1400 to 2000',
+        # 'trainMassRange4': 'ABCDnn Training for mass 2000 to Inf',
+        # 'correctMassRange1': 'ABCDnn Closure correction for mass range up to 1200',
+        # 'correctMassRange2': 'ABCDnn Closure correction for mass 1200 to 1400',
+        # 'correctMassRange3': 'ABCDnn Closure correction for mass 1400 to 2000',
+        # 'correctMassRange4': 'ABCDnn Closure correction for mass 2000 to Inf',
         'pNetTtag':'ParticleNet t SF',
         'pNetWtag':'PartlcleNet W SF',
 }
