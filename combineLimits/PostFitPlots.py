@@ -20,23 +20,27 @@ outDir = os.getcwd()
 mass1val = int(sys.argv[2])
 mass1 = str(mass1val) #'1000'
 mass2 = '1800'
+mass3 = '1300'
 sig1 = 'BpM'+mass1
 sig2 = 'BpM1800'
-sig1leg = 'B ('+str(mass1val/1000.0)+' TeV)'
-sig2leg = 'B (1.8 TeV)'
+sig3 = 'BpM1300'
+sig1leg = 'B ('+str(mass1val/1000.0)+' TeV, 36 fb) x25'
+sig2leg = 'B ('+'1.8 TeV, 1 fb) x100'
+sig3leg = 'B ('+'1.3 TeV, 1 fb) x100'
 
 taglabels = {'Case1':'t jet + lept. W','Case2':'W jet + lept. t','Case3':'jet + lept. t','Case4':'jet + lept. W'}
 
 name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024','').replace('limits_templatesABCDnn_DV2_Oct2024','')
 path1 = limitdir+'/cmb/'+mass1
 path2 = limitdir+'/cmb/'+mass2
+path3 = limitdir+'/cmb/'+mass3
 
 isSR = False
 if '_D' in limitdir and 'partialBlind' not in limitdir: isSR = True
 unblind = True # unblind
 doMorph = True
 
-plotFit = 'fit_s' # fit_b
+plotFit = 'fit_b' # fit_s
 
 os.chdir(path1)
 
@@ -61,18 +65,15 @@ else:
             os.system('combine -M FitDiagnostics -d morphedWorkspace.root --snapshotName initialFit --saveWorkspace --bypassFrequentistFit -t -1 -n Morphed --setParameters '+masks)
             os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w higgsCombineMorphed.FitDiagnostics.mH120.root --output SRMorphedPrefitShapes.root -m '+mass1+' --print')
     else:
-        shapesfile = 'SRPostFitShapes_'+mass1+'.root'
-        # if not os.path.exists(path1+'/'+shapesfile):
-        #     print('Creating pre and post-fit histograms from SR')
-        #     #print('Command = PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
-        #     #os.system('PostFitShapesFromWorkspace -d combined.txt -w workspace.root --output '+outDir+'/'+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --skip-proc-errs=1')
-        #     print('Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
-        #     os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile+' -m '+str(mass1)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
-        # os.chdir(f'../../../{path2}')
-        # if not os.path.exists(path2+'/'+shapesfile.replace(mass1,mass2)):
-        #     print('Creating pre and post-fit histograms from SR')
-        #     print(f'Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
-        #     os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output '+shapesfile.replace(mass1,mass2)+' -m '+str(mass2)+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit')
+        for mass in [mass1, mass2, mass3]:
+            os.chdir(f'{outDir}/{limitdir}/cmb/{mass}')
+            shapesfile = f'SRPostFitShapes_{mass}.root'
+            #if not os.path.exists(path1+'/'+shapesfile):
+            print('Creating pre and post-fit histograms from SR')
+            cmd = f'PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output {shapesfile} -m {mass} -f fitDiagnosticsTest.root:{plotFit} --postfit'
+            print(f'Command = {cmd}')
+            os.system(cmd)
+        shapesfile = f'SRPostFitShapes_{mass1}.root'
 
 
 def formatUpperHist(histogram,th1hist):
@@ -124,12 +125,14 @@ def formatLowerHist(histogram):
     histogram.GetYaxis().SetRangeUser(-2.99,2.99)
     histogram.GetYaxis().CenterTitle()
 
-if isSR:
-    os.chdir(outDir)
-    print('Opening',shapesfile,' -- will plot signals like',sig1.replace(mass1,''))
+    
+os.chdir(outDir)
+print('Opening',shapesfile,' -- will plot signals like',sig1.replace(mass1,''))
 tFile = TFile.Open(f'{path1}/{shapesfile}')
 if isSR:
     tFile2 = TFile.Open(f'{path2}/{shapesfile.replace(mass1,mass2)}')
+    tFile3 = TFile.Open(f'{path3}/{shapesfile.replace(mass1,mass3)}')
+    
 
 chns = []
 iPlot = ''
@@ -193,15 +196,23 @@ for chn in chns:
     hsig1merged.SetLineWidth(3)
     
     if isSR:
-        hsig2merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig2.replace('1800','')).Clone(chn+'__sig2merged')
+        hsig2merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig2.replace(mass2,'')).Clone(chn+'__sig2merged')
         hsig2merged.Scale(xsec[sig2[3:]]*10000)
+        if '1000' in sig2: hsig2merged.Scale(0.25)
         normByBinWidth(hsig2merged,perNGeV)
-        print('hsig1merged yield', hsig1merged.Integral())
-        print('hsig2merged yield', hsig2merged.Integral())
         hsig2merged.SetLineColor(kBlack)
         hsig2merged.SetFillStyle(0)
         hsig2merged.SetLineStyle(2)
         hsig2merged.SetLineWidth(3)
+
+        hsig3merged = tFile3.Get(chn.replace('postfit','prefit')+'/'+sig3.replace(mass3,'')).Clone(chn+'__sig3merged')
+        hsig3merged.Scale(xsec[sig3[3:]]*10000)
+        if '1000' in sig3: hsig3merged.Scale(0.25)
+        normByBinWidth(hsig3merged,perNGeV)
+        hsig3merged.SetLineColor(kBlack)
+        hsig3merged.SetFillStyle(0)
+        hsig3merged.SetLineStyle(2)
+        hsig3merged.SetLineWidth(3)
 
     gaeDatamerged.SetMarkerStyle(20)
     gaeDatamerged.SetMarkerSize(1.5)
@@ -245,6 +256,16 @@ for chn in chns:
         #lPad.SetGridy()
         lPad.Draw()
 
+        # # second panel requested by the conveners
+        # lPad2=TPad("lPad","",0,0,1,yDiv)
+        # lPad.SetTopMargin(0)
+        # lPad.SetBottomMargin(.4)
+        # lPad.SetRightMargin(rMargin)
+        # lPad.SetLeftMargin(.12)
+        # if not yLog: lPad.SetLeftMargin(0.13)
+        # #lPad.SetGridy()                                                                                                         
+        lPad.Draw()
+
     hDatamerged.SetMaximum(1.2*max(hDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
     hDatamerged.SetMinimum(0.015)    
     hDatamerged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
@@ -266,7 +287,8 @@ for chn in chns:
     stackbkgHTmerged.Draw("SAME HIST")
     hsig1merged.Draw("SAME HIST")
     if isSR:
-        hsig2merged.Draw("SAME HIST") # unblind
+        hsig2merged.Draw("SAME HIST")
+        hsig3merged.Draw("SAME HIST")
     if not blind: 
         gaeDatamerged.Draw("PZ") #redraw data so its not hidden
     uPad.RedrawAxis()
@@ -310,7 +332,8 @@ for chn in chns:
         legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
         if isSR:
-            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left # unblind
+            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left
+            legmerged.AddEntry(hsig3merged,sig3leg,"l")  #left
         else:
             legmerged.AddEntry(0,"","")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+X","f") #right
@@ -320,7 +343,8 @@ for chn in chns:
         legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f") #right
         if isSR:
-            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left # unblind
+            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left
+            legmerged.AddEntry(hsig3merged,sig3leg,"l")
         else:
             legmerged.AddEntry(0,"","")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
@@ -372,7 +396,12 @@ for chn in chns:
             if(hDatamerged.GetBinContent(binNo) > bkgHTmerged.GetBinContent(binNo)):
                 dataerror = gaeDatamerged.GetErrorYlow(binNo-1)
                 MCerror = bkgHTgerrmerged.GetBinError(binNo)
-            pullmerged.SetBinContent(binNo,(hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2))
+            #pullmerged.SetBinContent(binNo,(hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2))
+            #pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2) # original def of pull
+            pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(bkgHTmerged.GetBinContent(binNo))# requested by the conveners
+            pullmerged.SetBinContent(binNo,pull)
+            if pull>=1:
+                print(chn, binNo, pull)
         pullmerged.SetMaximum(3)
         pullmerged.SetMinimum(-3)
         pullmerged.SetFillColor(kGray+2)
@@ -380,16 +409,16 @@ for chn in chns:
         formatLowerHist(pullmerged)
         pullmerged.Draw("HIST")
 
-    savePrefixMerged = 'PostFitPlots/'
+    savePrefixMerged = f'{path1}/PostFitPlots/'
     if not os.path.exists(savePrefixMerged): os.system('mkdir -p '+savePrefixMerged)
     savePrefixMerged+=iPlot+'_'+str(lumi).replace('.','p')+'fb_'+chn+'_NBBW_pull'
     if blind: savePrefixMerged+='_blind'
     if yLog: savePrefixMerged+='_logy'
     if doprelim: savePrefixMerged+='_prelim'
 
-    c1merged.SaveAs(savePrefixMerged+".pdf")
-    c1merged.SaveAs(savePrefixMerged+".png")
-    c1merged.SaveAs(savePrefixMerged+".root")
+    c1merged.SaveAs(f'{savePrefixMerged}.pdf')
+    c1merged.SaveAs(f'{savePrefixMerged}.png')
+    c1merged.SaveAs(f'{savePrefixMerged}.root')
     #c1merged.SaveAs(savePrefixMerged+".C")
 
     for proc in bkgProcList:
