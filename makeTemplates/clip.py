@@ -2,7 +2,7 @@ from ROOT import *
 
 region = 'D'
 year = ''
-option = 'JumpExcC2Seg2' #'TurnOn','JumpAll', 'JumpExcC1Seg1', 'JumpExcC1Seg2', 'JumpExcC1Seg3', 'JumpExcC2Seg1','JumpExcC2Seg2'
+option = 'JumpAll' #'JumpExcC2Seg2' #'TurnOn','JumpAll', 'JumpExcC1Seg1', 'JumpExcC1Seg2', 'JumpExcC1Seg3', 'JumpExcC2Seg1','JumpExcC2Seg2'
 inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin{year}'
 rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV'
 infileName = f'templates{region}_{inDirPostFix}/templates_BpMass_ABCDnn_138fbfb{year}{rfilePostFix}.root'
@@ -25,7 +25,7 @@ if option=='TurnOn':
         outfile.WriteObject(hist, histName)
 elif 'Jump' in option:
     clipCase1 = [[25,32],[50,65],[89,100]]
-    clipCase2 = [[165,184],[218,240]]
+    clipCase2 = [[165-162,184-162],[218-162,240-162]]
     for histName in histNameList:
         hist = infile.Get(histName).Clone(f'{histName}_clip')
         nBin = hist.GetNbinsX()
