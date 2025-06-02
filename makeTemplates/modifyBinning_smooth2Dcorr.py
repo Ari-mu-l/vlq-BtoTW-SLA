@@ -44,7 +44,10 @@ def findfiles(path, filtre):
             yield os.path.join(root, f)
 
 #Setup the selection of the files to be rebinned: HiggsTagTemplate_tW1p0_bZ0p0_bH0p0_BBM1800.root
-rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' in file and 'smoothed' not in file and 'plots' not in file] #'corr' in file 
+# smooth AFTER rebin
+#rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' in file and 'smoothed' not in file and 'plots' not in file] #'corr' in file
+# smooth BEFORE rebin
+rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' not in file and 'smoothed' not in file and 'plots' not in file]
 tfile = TFile(rfiles[0])
 
 iRfile=0
@@ -108,8 +111,17 @@ for rfile in rfiles:
         majorsmooth = TGraphSmooth("normal")
 
         frac = 0.05
-        if 'tagTjet' in hist:
-            frac = 0.1 #needs more smoothing
+        if '2016' not in templateDir:
+            if 'tagTjet' in hist:
+                if region=='D':
+                    frac = 0.1 # 0.1 #needs more smoothing. # preApp5
+                elif region=='V2':
+                    frac = 0.1 #0.15
+            if 'tagWjet' in hist:
+                if region=='V2':
+                    frac = 0.05
+            if 'untagWlep' in hist:
+                frac = 0.03
         majorgraph = majorsmooth.SmoothLowess(majorgraph,"",frac)
         for ibin in range(1,majorhist.GetNbinsX()):
             newbin = majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin))
@@ -136,9 +148,16 @@ for rfile in rfiles:
         up = rebinnedHists[hist].Clone()                       # to be replaced
         down = rebinnedHists[hist.replace(upTag,downTag)].Clone()  # original major
 
-        frac = 0.05
-        if 'tagTjet' in hist:
-            frac = 0.1        
+        frac = 0.05 #0.05 # preApp5
+        if '2016' not in templateDir:
+            if 'tagTjet' in hist:
+                if region=='D':
+                    frac = 0.05 #0.1 # preApp5
+            if 'tagWjet' in	hist:
+                if region=='V2':
+                    frac = 0.04 #0.04 # preApp5
+            if 'untagWlep' in hist:
+                frac = 0.01
         downgraph = TGraph()
         for ibin in range(1,down.GetNbinsX()):
             downgraph.SetPoint(ibin-1, down.GetXaxis().GetBinCenter(ibin), down.GetBinContent(ibin))
@@ -148,10 +167,14 @@ for rfile in rfiles:
             down.SetBinContent(ibin,downgraph.Eval(down.GetXaxis().GetBinCenter(ibin)))
 
         corr = majorhist.Clone("corr")
+        corr_copy = majorhist.Clone("corrCopy")
         corr.Add(down,-1)
         up.Add(down,corr,1.0,2.0)
         for ibin in range(1,up.GetNbinsX()+1):
             if up.GetBinContent(ibin) < 0:
+                print(hist)
+                print('after smoothing:')
+                print(f'bin {ibin}, nominal: {corr_copy.GetBinContent(ibin)}, corr: {corr.GetBinContent(ibin)}, down: {down.GetBinContent(ibin)}, up: {up.GetBinContent(ibin)}')
                 up.SetBinContent(ibin,0)
         
         # origmajorname = hist[:hist.find('__correct')] ## no smoothing
@@ -273,7 +296,21 @@ for rfile in rfiles:
     for hist in jecUphists+jerUphists:
         #print('\t',hist)
 
-        frac = 0.1
+        frac = 0.1 #AN-v6
+        # frac = 0.08 # 0.1 causes a spike in jec2016
+
+        # if 'jec16APV' in hist:
+        #     frac = 0.05
+        
+        # if 'jer' in hist:
+        #     frac = 0.05
+
+        # if 'tagTjet' in hist and 'jer2016' in hist:
+        #     frac = 0.06
+
+        # if 'tagWjet' in hist and 'jer2017' in hist:
+        #     #print(f'Increase frac for {hist}')
+        #     frac = 0.1
 
         up = rebinnedHists[hist].Clone()
         down = rebinnedHists[hist.replace(upTag,downTag)].Clone()

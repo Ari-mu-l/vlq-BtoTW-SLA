@@ -1,20 +1,24 @@
-# python3 makeDV2.py D2V 5
+# python3 combineDV2.py Jan2025_210binsCorrBCorrUC3
 import os, sys
 from ROOT import *
 import numpy as np
 
 #templatesD_Jan2025_105binsCorr/templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2_smoothed_TVJJ_UC.root
 
-outDir = f'templatesDV2_Jan2025_210binsCorrBCorrUC4'
+dirPostFix = sys.argv[1]
+filePostFix = sys.argv[2] #'_rebinned1_stat0p2_smoothed_TVJJ'
+outDir = f'templatesDV2_{dirPostFix}'
 if not os.path.exists(outDir):
     os.makedirs(outDir)
 
-outFileName = f'{outDir}/templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2_smoothed_TVJJ_UC.root'
+outFileName = f'{outDir}/templates_BpMass_ABCDnn_138fbfb{filePostFix}.root'
 outFileDV2 = TFile.Open(outFileName, 'RECREATE') 
 
 #def touchupHist(region):
 for region in ['D', 'V2']:
-    inFileName = f'{outDir}/templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2_smoothed_TVJJ_UC.root'.replace('DV2', region)
+    inFileName = f'{outDir}/templates_BpMass_ABCDnn_138fbfb{filePostFix}.root'.replace('DV2',region)
+    if 'UC' not in inFileName:
+        print('Not combining uncorrelated files!')
     inFile = TFile.Open(inFileName, 'READ')
 
     # if modifyHist:
@@ -31,6 +35,8 @@ for region in ['D', 'V2']:
         if 'major' in hist.GetName():
             nBins = hist_out.GetNbinsX()
             for i in range(nBins):
+                #if hist_out.GetBinContent(i)==0:
+                #print(f'Bin{i} in {hist.GetName()} has 0 content.')
                 if hist_out.GetBinContent(i)<0:
                     print(f'Bin{i} in {hist.GetName()} has negative content. Setting to 0...')
                     hist_out.SetBinContent(i, 0)

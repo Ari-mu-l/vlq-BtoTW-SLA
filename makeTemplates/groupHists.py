@@ -13,9 +13,11 @@ from utils import *
 gROOT.SetBatch(1)
 start_time = time.time()
 
-#yearList = ["2016"]
+#yearList = ["2018"]
 
-rebin = 10 # 20 for 2016 (105 bins) and 10 for full Run2 (210bins)
+rebin = 20 # 20 for 2016 (105 bins) and 10 for full Run2 (210bins)
+#rebin=10
+#rebin=25
 
 if len(sys.argv)>1:
 	iPlot = str(sys.argv[1])
@@ -114,10 +116,11 @@ if groupHists:
 
                 dataHistFile = TFile.Open(f'{outDir}{cat[2:]}/datahists_{iPlot}.root', "READ")
                 isFirstHist = True
-                if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
-                        inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
-                else:
-                        inPrefix = histoPrefix
+                inPrefix = histoPrefix
+                #if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
+                #        inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
+                #else:
+                #        inPrefix = histoPrefix
                 for dat in samples_data:
                         if samples_data[dat].year not in yearList:
                                 continue
@@ -145,11 +148,12 @@ if groupHists:
                                 corrList = systListABCDnn
                                 uncorrList = []
                         else:
-                                if isCategorized and iPlot=='BpMass':
-                                        if (region=='BV' or region=='BhighST' or region=='highST' or proc=="ttbar" or proc=="qcd" or proc=="wjets" or proc=="singletop"):
-                                                inPrefix = f'{iPlot}_{lumiStr}_{cat}_{region}'
-                                        else:
-                                                inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
+                                inPrefix = histoPrefix
+                                # if isCategorized and iPlot=='BpMass':
+                                #         if (region=='BV' or region=='BhighST' or region=='highST' or proc=="ttbar" or proc=="qcd" or proc=="wjets" or proc=="singletop"):
+                                #                 inPrefix = f'{iPlot}_{lumiStr}_{cat}_{region}'
+                                #         else:
+                                #                 inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
                                 systematicList = mySystList
                                 corrList = corrList_sf
                                 uncorrList = uncorrList_sf
@@ -178,7 +182,6 @@ if groupHists:
                                 
                                 # Group nominal and correlated systs for each year
                                 if isFirstHistDir[year]:
-                                        #print('Trying to get',f'{inPrefix}_{bkgPrefix}')
                                         nomHists[f'{histoPrefix}__{proc}{year}'] = bkgHistFile.Get(f'{inPrefix}_{bkgPrefix}').Clone(f'{histoPrefix}__{proc}{year}')
                                         isFirstHistDir[year] = False
                                         if doAllSys:
@@ -267,10 +270,11 @@ if groupHists:
                      
                 sigHistFile = TFile.Open(f'{outDir}{cat[2:]}/sighists_{iPlot}.root', "READ")
                 systematicList = mySystList
-                if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
-                        inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
-                else:
-                        inPrefix = histoPrefix
+                inPrefix = histoPrefix
+                # if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
+                #         inPrefix = histoPrefix.replace('BpMass','BpMass_ABCDnn')
+                # else:
+                #         inPrefix = histoPrefix
                 for mass in massList:
                         systHists = {}
                         # add nominal and correlated systs

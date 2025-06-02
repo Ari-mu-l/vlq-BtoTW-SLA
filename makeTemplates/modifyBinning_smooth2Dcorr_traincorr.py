@@ -113,16 +113,23 @@ for rfile in rfiles:
         frac = 0.05
         if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 smoothing
             print('GETTING FULL RUN2') # for debug
-            if 'tagTjet' in hist:
-                if region=='D':
-                    frac = 0.1 # 0.1 #needs more smoothing. # preApp5
-                elif region=='V2':
-                    frac = 0.1 #0.15
-            if 'tagWjet' in hist:
-                if region=='V2':
-                    frac = 0.05
-            if 'untagWlep' in hist:
-                frac = 0.03
+            # if region=="V2":
+            #     if 'tagTjet' in hist:
+            #         frac = 0.1 # 0.1
+            #     if 'tagWjet' in hist:
+            #         frac = 0.1 # 0.05
+            #     if 'untagWlep' in hist:
+            #         frac = 0.04
+            # elif region=="D":
+            #     if 'tagTjet' in hist:
+            #         frac = 0.1 #0.1
+            #     if 'tagWjet' in hist:
+            #         frac = 0.08
+            #     if 'untagWlep' in hist:
+            #         frac = 0.04
+            # else:
+            #     print('Region not considered!')
+            #     exit()
         else:
             if '2016APV' in templateDir:
                 if 'jet' in hist:
@@ -170,14 +177,23 @@ for rfile in rfiles:
 
         frac = 0.05 #0.05 # preApp5
         if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 corr
-            if 'tagTjet' in hist:
-                if region=='D':
-                    frac = 0.05 #0.1 # preApp5
-            if 'tagWjet' in	hist:
-                if region=='V2':
-                    frac = 0.04 #0.04 # preApp5
-            if 'untagWlep' in hist:
-                frac = 0.01
+            if region=="V2":
+                if 'tagTjet' in hist:
+                    frac = 0.1
+                if 'tagWjet' in hist:
+                    frac = 0.1
+                if 'untagWlep' in hist:
+                    frac = 0.04 #0.01
+            elif region=="D":
+                if 'tagTjet' in hist:
+                    frac = 0.1
+                if 'tagWjet' in hist:
+                    frac = 0.08
+                if 'untagWlep' in hist:
+                    frac = 0.04
+            else:
+                print('Region not considered!')
+                exit()
         else:
             if '2016APV' in templateDir:
                 if 'jet' in hist:
@@ -338,6 +354,3 @@ tfile.Close()
 print(">> Smoothing Done!")
 
 print("--- %s minutes ---" % (round((time.time() - start_time)/60,2)))
-
-
-

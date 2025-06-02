@@ -33,12 +33,12 @@ if year=='_2016':
     lowTh = {"tagTjet"  :{"correct":1620,"train": 9999}, #, 1080
              "tagWjet"  :{"correct": 840,"train": 840},
              "untagTlep":{"correct": 520,"train": 840},
-             "untagWlep":{"correct": 560,"train": 740}
+             "untagWlep":{"correct": 560,"train": 740} #preapp5
              }
     medTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
              "tagWjet"  :{"correct": 1540,"train": 9999}, #, 1520
              "untagTlep":{"correct": 1960,"train": 1720},
-             "untagWlep":{"correct": 9999,"train": 1780}
+             "untagWlep":{"correct": 9999,"train": 1780} # preapp 5
              }
     highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
               "tagWjet"  :{"correct": 9999,"train": 9999},
@@ -46,19 +46,35 @@ if year=='_2016':
               "untagWlep":{"correct": 9999,"train": 9999}
               }
 else:
-    lowTh = {"tagTjet"  :{"correct": 9999,"train": 9999}, #1830, 950
-             "tagWjet"  :{"correct": 680,"train": 900},
-             "untagTlep":{"correct": 600,"train": 610},
-             "untagWlep":{"correct": 450,"train": 810}
+    # lowTh = {"tagTjet"  :{"correct": 470,"train": 950}, #470,950
+    #          "tagWjet"  :{"correct": 680,"train": 900},
+    #          "untagTlep":{"correct": 610,"train": 1710}, #610, 610
+    #          "untagWlep":{"correct": 490,"train": 9999} #490,820 #{"correct": 450,"train": 810} #preapp5
+    #          }
+    # medTh = {"tagTjet"  :{"correct": 920,"train": 9999}, #920,9999
+    #          "tagWjet"  :{"correct": 1540,"train": 1080}, #1540,1080
+    #          "untagTlep":{"correct": 1500,"train": 9999}, #1500, 1710
+    #          "untagWlep":{"correct": 610,"train": 9999} #610,2100#{"correct": 610,"train": 2100}#preapp5
+    #          }
+    # highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
+    #           "tagWjet"  :{"correct": 9999,"train": 9999},
+    #           "untagTlep":{"correct": 1920, "train": 9999}, #1920,9999
+    #           "untagWlep":{"correct": 9999, "train": 9999}
+    #           }
+
+    lowTh = {"tagTjet"  :{"correct": 920,"train": 9999}, #470,950 
+             "tagWjet"  :{"correct": 680,"train": 9999},
+             "untagTlep":{"correct": 610,"train": 9999}, #610, 610
+             "untagWlep":{"correct": 9999,"train": 9999} #490,820 #{"correct": 450,"train": 810} #preapp5
              }
-    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
-             "tagWjet"  :{"correct": 1540,"train": 1080}, #1080
-             "untagTlep":{"correct": 1900,"train": 1710},
-             "untagWlep":{"correct": 610,"train": 2100}
+    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999}, #920,9999
+             "tagWjet"  :{"correct": 1540,"train": 9999}, #1540,1080
+             "untagTlep":{"correct": 1920,"train": 9999}, #1500, 1710
+             "untagWlep":{"correct": 9999,"train": 9999} #610,2100#{"correct": 610,"train": 2100}#preapp5
              }
     highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
               "tagWjet"  :{"correct": 9999,"train": 9999},
-              "untagTlep":{"correct": 9999, "train": 9999},
+              "untagTlep":{"correct": 9999, "train": 9999}, #1920,9999
               "untagWlep":{"correct": 9999, "train": 9999}
               }
 

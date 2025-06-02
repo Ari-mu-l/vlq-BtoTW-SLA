@@ -1,3 +1,4 @@
+# python3 doCondorHists.py D datasig
 import os,sys,datetime,itertools,math
 
 thisDir = os.getcwd()
@@ -22,7 +23,9 @@ plotList = [#distribution name as defined in "doHists.py"
         #'minDR_lepb',
         #'OS1FatJetDR',
         #'BpMass', #:('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
-        'BpMass_ABCDnn', #:('Bprime_mass_ABCDnn',linspace(0,5000,51).tolist(),';B quark mass [GeV]')
+        #'BpMass_pad',
+        'BpMass_padfull',
+        #'BpMass_ABCDnn', #:('Bprime_mass_ABCDnn',linspace(0,5000,51).tolist(),';B quark mass [GeV]')
         #'ST', #:('gcJet_ST',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)'),
         #'ST_ABCDnn', #:('gcJet_ST_ABCDnn',linspace(0, 5000, 51).tolist(),';S_{T} (GeV)')
 

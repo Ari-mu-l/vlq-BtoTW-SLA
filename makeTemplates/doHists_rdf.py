@@ -60,11 +60,11 @@ doBkgs = True
 
 # this is a list of group dictionaries. "wjets" has entries like "WJetsHT2002018":WJetsHT2002018, where the 2nd is the class
 bkgList = {#"ewk"      : samples_electroweak,            # only works alone, can't be with others
-        "ttx"      : samples_ttbarx,
+        #"ttx"      : samples_ttbarx,
         #"qcd"      : samples_qcd,
         #"wjets"    : samples_wjets,
         #"ttbar"    : samples_ttbar,
-        #"singletop": samples_singletop,
+        "singletop": samples_singletop,
 }
 
 ### TO-DO: in samples.py, make up an entry for each year for ABCDnn with dummy information where needed.
@@ -171,8 +171,9 @@ plotList = {#discriminantName:(discriminantLJMETName, binning, xAxisLabel)
         'tphiSSB':('t_phi_SSb',linspace(-3.2,3.2, 65).tolist(),';reco t phi (SSb method)'),
         'tdrWbMLJ':('DR_W_b_minMlj',linspace(0,6.3,51).tolist(),';reco t, #DeltaR(W,b) (minMlj method)'),
         'tdrWbSSB':('DR_W_b_SSb',linspace(0,6.3,51).tolist(),';reco t, #DeltaR(W,b) (SSb method)'),
-        # 'BpMass':('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
-        'BpMass':('Bprime_mass',linspace(400,2500,2101).tolist(),';B quark mass [GeV]'), #For alpha-ratio method
+        'BpMass_padfull':('Bprime_mass',linspace(0,4000,51).tolist(),';B quark mass [GeV]'),
+        'BpMass_pad':('Bprime_mass',linspace(300,2500,45).tolist(),';B quark mass [GeV]'), #For alpha-ratio method of 2D padding
+        'BpMass':('Bprime_mass',linspace(400,2500,2101).tolist(),';B quark mass [GeV]'), # for ABCDnn application
         #'BpMass':('Bprime_mass',linspace(0,2500,51).tolist(),';B quark mass [GeV]'), #For kinematics plots
         'BpPt':('Bprime_pt',linspace(0,3000,51).tolist(),';B quark p_{T} [GeV]'),
         'BpEta':('Bprime_eta',linspace(-5,5,51).tolist(),';B quark #eta'),

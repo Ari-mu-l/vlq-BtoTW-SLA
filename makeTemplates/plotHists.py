@@ -102,6 +102,7 @@ if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebin
                 doNormByBinWidth = False
         else:
                 doNormByBinWidth = True
+#doNormByBinWidth = False # TEMP: unblinding review
 
 doOneBand = True
 if not doAllSys: doOneBand = True # Don't change this!
@@ -133,6 +134,7 @@ if isCategorized == True:
 
 if year=='2016':
         partialBlind = False
+partialBlind = False # for making unblinded SR plots
 
 lumiSys = 0.016 # lumi uncertainty
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
