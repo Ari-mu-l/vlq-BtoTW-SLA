@@ -122,18 +122,11 @@ for rfile in rfiles:
         #    frac =0.07
         if region=="D":
             if 'tagTjet' in hist:
-                frac = 0.005
-            elif 'tagWjet' in hist:
-                frac = 0.005
+                frac = 0.03
             else:
                 frac = 0.04
         else:
-            if 'tagTjet' in hist:
-                frac = 0.06
-            elif 'tagWjet' in hist:
-                frac = 0.05
-            else:
-                frac = 0.04
+            frac = 0.05
         frac2 = 0.002 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
         #if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 smoothing
             #print('GETTING FULL RUN2') # for debug
@@ -188,9 +181,8 @@ for rfile in rfiles:
                if ibin<binThreshold:
                    majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
                else:
-                   #majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
+                   majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
                    #majorhist.SetBinContent(ibin,majorhist_original.GetBinContent(ibin))
-                   majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
             else:
                majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
             if oldbin != 0:

@@ -109,10 +109,8 @@ for rfile in rfiles:
         #print('\t',hist)
 
         #frac = 0.1 #AN-v6
-
-        # unblinding
-        #210
-        frac = 0.05 # 0.1 causes a spike in jec2016
+        # 210
+        # frac = 0.08 # 0.1 causes a spike in jec2016
 
         # if 'jec16APV' in hist:
         #    frac = 0.05
@@ -127,22 +125,37 @@ for rfile in rfiles:
         #    #print(f'Increase frac for {hist}')
         #    frac = 0.1
 
-        #105 #AN-v7
-        # frac = 0.07
-        # if 'jec2018' in hist and 'Wjet' in hist:
-        #     frac = 0.08
-        # if 'jec2018' in hist and 'untagTlep' in hist:
-        #     frac = 0.08
-        # if 'jec2016APV' in hist and 'Tjet' in hist:
-        #     frac = 0.09
-        # if 'jec2017' in hist and 'Wjet' in hist:
-        #     frac = 0.09
-        # if 'jec2017' in hist and 'Tjet' in hist:
-        #     frac = 0.08
-        # if 'jec2016APV' in hist and ('Wjet' in hist or 'untagTlep' in hist):
-        #     frac = 0.09
-        ##if ('jec2016' in hist and 'Tjet' in hist) or ('jer2016' in hist and 'jet' in hist) or ('jec2016APV' in hist and 'Tjet' in hist):
-        ##    frac = 0.05
+        #105
+        frac = 0.07
+        if 'jec2018' in hist and 'Wjet' in hist:
+            frac = 0.08
+        if 'jec2018' in hist and 'untagTlep' in hist:
+            frac = 0.08
+        if 'jec2016APV' in hist and 'Tjet' in hist:
+            frac = 0.09
+        if 'jec2017' in hist and 'Wjet' in hist:
+            frac = 0.09
+        if 'jec2017' in hist and 'Tjet' in hist:
+            frac = 0.08
+        if 'jec2016APV' in hist and ('Wjet' in hist or 'untagTlep' in hist):
+            frac = 0.09
+        #if ('jec2016' in hist and 'Tjet' in hist) or ('jer2016' in hist and 'jet' in hist) or ('jec2016APV' in hist and 'Tjet' in hist):
+        #    frac = 0.05
+
+        #frac = 0.07
+        
+        #if 'jer2016' in hist and 'Wjet' in hist:
+        #    frac = 0.09
+        # if 'jer18' in hist and 'jet' in hist:
+        #     frac = 0.06
+        # if 'jer17' in hist and 'Wlep' in hist:
+        #     frac = 0.06
+        # if 'jer16APV' in hist:
+        #     frac = 0.02
+        # if 'jer16' in hist and 'APV' not in hist and 'lep' in hist:
+        #     frac = 0.02
+        # if 'jec17' in hist or 'jec18' in hist:
+        #     frac = 0.1
             
 
         up = rebinnedHists[hist].Clone()
