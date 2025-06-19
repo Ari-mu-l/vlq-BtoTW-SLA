@@ -95,25 +95,57 @@ for iPlot in $plotList; do
     #python3 modifyBinning_smooth2Dcorr.py D Jan2025_105binsBtargetHoleCorrACTrain2016
     #python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrACTrain2016 False True _rebinned1_stat0p2_smoothed_TVJJ 2016
 
-    # smooth jecjer
-    #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_highSTC2C2
-    # rebin
-    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_highSTC2C2 0.2 1
-    # smooth traincorr
-    #python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_highSTC2C2
+    # # smooth jecjer
+    # python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    # # rebin
+    # python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    # # smooth traincorr
+    # python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
 
-    #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin False False _smoothedJJ_rebinned1_stat0p2_smoothedTV
+    # python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV
 
-    #python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin
-    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin 0.2 1
-    #python3 modifyBinning_smooth2Dcorr_traincorr.py V2 Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin
-    #python3 plotHists.py $iPlot V2 True _Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin False False _smoothedJJ_rebinned1_stat0p2_smoothedTV
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    #python3 modifyBinning_smooth2Dcorr_traincorr.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV
 
-    #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin
-    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin 0.2 1
-    #python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin
-    #python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrBTrain_smooth_rebin False False _smoothedJJ_rebinned1_stat0p2_smoothedTV
+    #####################################################
+    # ARC review save point 1: dynamic ST + 1D smoothig #
+    #####################################################
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    #python3 modifyBinning_smooth2Dcorr_traincorr.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _rebinned1_stat0p2_smoothedTV
+    
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    #python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _rebinned1_stat0p2_smoothedTV
+    #####################################################
 
+    ###################################################
+    # Tune 2D smoothing fraction for smoothing uncert #
+    ###################################################
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2
+    ###################################################
+
+    # Add smoothing uncertainty
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    #python3 modifyBinning_smooth2Dcorr_traincorr.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 modifyBinning_smooth2Dcorr_smooth.py V2 Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    ##python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _rebinned1_stat0p2_smoothedTV_smoothUncert
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert
+
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
+    python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    python3 modifyBinning_smooth2Dcorr_smooth.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
+    ##python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _rebinned1_stat0p2_smoothedTV_smoothUncert
+    python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert 
+    
     #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth2D_rebin
     #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth2D_rebin 0.2 1
     #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth2D_rebin False False _smoothedJJ_rebinned1_stat0p2
@@ -126,16 +158,21 @@ for iPlot in $plotList; do
     #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_2Dsmooth_rebin 0.2 1
     #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_2Dsmooth_rebin False False _smoothedJJ_rebinned1_stat0p2
 
-    ##### UNBLINDING ####
-    python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
-    python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
-    python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _smoothedJJ_rebinned1_stat0p2
+    # ##### UNBLINDING ####
+    # ANv7 2D smooth
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _smoothedJJ_rebinned1_stat0p2
 
-    python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
-    python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
-    python3 plotHists.py $iPlot V2 True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _smoothedJJ_rebinned1_stat0p2
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot V2 True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2
 
-    python3 combineDV2.py Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin _smoothedJJ_rebinned1_stat0p2
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2
+
+    # python3 combineDV2.py Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin _smoothedJJ_rebinned1_stat0p2
 
     #####################
     
@@ -145,6 +182,16 @@ for iPlot in $plotList; do
     
     #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_105bins 0.2 1
     #python3 plotHists.py $iPlot V2 True _Jan2025_105bins False False _rebinned1_stat0p2
+
+    ####################
+    # without 2D smoothing JECJER smoothing
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2 
+
+    #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
+    #python3 plotHists.py $iPlot D True _Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin False False _rebinned1_stat0p2
+
+    #########3
     
     #python3 modifyBinning_smooth2Dcorr_jecjer.py D Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin
     #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin 0.2 1
