@@ -48,7 +48,8 @@ def findfiles(path, filtre):
 #rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' in file and 'smoothed' not in file and 'plots' not in file] #'corr' in file
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root']
 #rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn*_smoothedJJ_rebinned1_stat0p2.root')]
-rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2.root')]
+#rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2.root')]
+rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root')]
 # smooth BEFORE rebin
 #rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' not in file and 'smoothed' not in file and 'plots' not in file]
 tfile = TFile(rfiles[0])
@@ -120,21 +121,38 @@ for rfile in rfiles:
         #    frac = 0.09
         #else:
         #    frac =0.07
+
+        # best setting for 1D smoothing without smoothUncert
+        # not enough for smoothUncert
+        # if region=="D":
+        #     if 'tagTjet' in hist:
+        #         frac = 0.005
+        #     elif 'tagWjet' in hist:
+        #         frac = 0.005
+        #     else:
+        #         frac = 0.04
+        # else:
+        #     if 'tagTjet' in hist:
+        #         frac = 0.06
+        #     elif 'tagWjet' in hist:
+        #         frac = 0.05
+        #     else:
+        #         frac = 0.04
+
+        frac = 0.09
         if region=="D":
-            if 'tagTjet' in hist:
-                frac = 0.005
-            elif 'tagWjet' in hist:
-                frac = 0.005
-            else:
-                frac = 0.04
-        else:
-            if 'tagTjet' in hist:
-                frac = 0.06
-            elif 'tagWjet' in hist:
-                frac = 0.05
-            else:
-                frac = 0.04
-        frac2 = 0.002 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
+            frac = 0.07
+        if 'untag' in hist:
+            frac = 0.07
+            
+        
+        # if region=="V2":
+        #     if 'tagTjet' in hist:
+        #         frac = 0.09
+        #     else:
+        #         frac = 0.06
+        
+        frac2 = 0.01 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
         #if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 smoothing
             #print('GETTING FULL RUN2') # for debug
             #frac = 0.07
@@ -188,9 +206,9 @@ for rfile in rfiles:
                if ibin<binThreshold:
                    majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
                else:
-                   #majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
+                   majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
                    #majorhist.SetBinContent(ibin,majorhist_original.GetBinContent(ibin))
-                   majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
+                   #majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
             else:
                majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
             if oldbin != 0:
@@ -208,12 +226,22 @@ for rfile in rfiles:
     for hist in valUphists:
         print('\t',hist)
 
-        # if 'jet' in hist:
-        #     frac = 0.05
-        # else:
-        #     frac = 0.02
-
         frac = 0.05
+
+        # if region=="D":
+        #     if 'tagTjet' in hist:
+        #         frac = 0.005
+        #     elif 'tagWjet' in hist:
+        #         frac = 0.005
+        #     else:
+        #         frac = 0.04
+        # else:
+        #     if 'tagTjet' in hist:
+        #         frac = 0.06
+        #     elif 'tagWjet' in hist:
+        #         frac = 0.05
+        #     else:
+        #         frac = 0.04
 
         majorhist = majorhists[hist[:hist.find('__correct')]]  # smoothed
         up = rebinnedHists[hist].Clone()                       # to be replaced

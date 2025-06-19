@@ -121,7 +121,8 @@ def findfiles(path, filtre):
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb.root']# use this line for uncorrected plots
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root']
 if 'ABCDnn' in iPlot:
-       rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_*_smoothedJJ.root')]
+        rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_*_smoothedJJ.root')] # with JECJER smoothing
+        #rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')] # without JECJER smoothing
 else:
        rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')]
 

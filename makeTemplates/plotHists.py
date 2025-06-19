@@ -134,7 +134,7 @@ if isCategorized == True:
 
 if year=='2016':
         partialBlind = False
-partialBlind = False # for making unblinded SR plots
+#partialBlind = False # for making unblinded SR plots
 
 lumiSys = 0.016 # lumi uncertainty
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
