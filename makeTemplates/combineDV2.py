@@ -29,24 +29,27 @@ for region in ['D', 'V2']:
 
     print(f'Opened {inFileName}...')
     for hist in inFile.GetListOfKeys():
-        hist_out = inFile.Get(hist.GetName()).Clone()
+        if ('_smoothUncert' not in filePostFix) and ('smooth' in hist): # skip smoothing histograms if not needing them
+            pass
+        else:
+            hist_out = inFile.Get(hist.GetName()).Clone()
 
-        # if modifyHist:
-        if 'major' in hist.GetName():
-            nBins = hist_out.GetNbinsX()
-            for i in range(nBins):
-                #if hist_out.GetBinContent(i)==0:
-                #print(f'Bin{i} in {hist.GetName()} has 0 content.')
-                if hist_out.GetBinContent(i)<0:
-                    print(f'Bin{i} in {hist.GetName()} has negative content. Setting to 0...')
-                    hist_out.SetBinContent(i, 0)
-                    #hist_out.SetBinError(i, np.sqrt(hist_out.GetBinContent(i))) # for creation bin diff from fit bin
-        #     outFile.WriteObject(hist_out, hist.GetName())
-        # if rebinHist:
-        #     hist_out.Rebin(10) #sanity check
-        #     outFile.WriteObject(hist_out, hist.GetName())
+            # if modifyHist:
+            if 'major' in hist.GetName():
+                nBins = hist_out.GetNbinsX()
+                for i in range(nBins):
+                    #if hist_out.GetBinContent(i)==0:
+                    #print(f'Bin{i} in {hist.GetName()} has 0 content.')
+                    if hist_out.GetBinContent(i)<0:
+                        print(f'Bin{i} in {hist.GetName()} has negative content. Setting to 0...')
+                        hist_out.SetBinContent(i, 0)
+                        #hist_out.SetBinError(i, np.sqrt(hist_out.GetBinContent(i))) # for creation bin diff from fit bin
+            #     outFile.WriteObject(hist_out, hist.GetName())
+            # if rebinHist:
+            #     hist_out.Rebin(10) #sanity check
+            #     outFile.WriteObject(hist_out, hist.GetName())
 
-        outFileDV2.WriteObject(hist_out, hist.GetName())
+            outFileDV2.WriteObject(hist_out, hist.GetName())
             
     inFile.Close()
     # if modifyHist or rebinHist:

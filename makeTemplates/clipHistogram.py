@@ -9,19 +9,21 @@ from ROOT import TFile, TH1D, TGraph, TGraphSmooth
 start_time = time.time()
 
 region = sys.argv[1] #'V2'
+if len(sys.argv)>2:
+    postFix = sys.argv[2]
+else:
+    postFix = ''
 inputDir = f'templates{region}_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST'
 outputDir = f'{inputDir}_clipped'
 
 newBinLo = 600
 newBinHi = 2500
 
-filename = 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert.root'
+filename = f'templates_BpMass_ABCDnn_138fbfb{postFix}.root'
 inFile = TFile.Open(f'{inputDir}/{filename}', 'READ')
-try:
-    outFile = TFile.Open(f'{outputDir}/{filename}', 'RECREATE')
-except:
+if not os.path.isdir(outputDir):
     os.mkdir(outputDir)
-    outFile = TFile.Open(f'{outputDir}/{filename}', 'RECREATE')
+outFile = TFile.Open(f'{outputDir}/{filename}', 'RECREATE')
 
 for k in inFile.GetListOfKeys():
     histName = k.GetName()

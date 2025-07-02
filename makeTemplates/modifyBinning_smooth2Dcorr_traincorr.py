@@ -139,18 +139,13 @@ for rfile in rfiles:
         #     else:
         #         frac = 0.04
 
-        frac = 0.09
         if region=="D":
             frac = 0.07
-        if 'untag' in hist:
-            frac = 0.07
-            
-        
-        # if region=="V2":
-        #     if 'tagTjet' in hist:
-        #         frac = 0.09
-        #     else:
-        #         frac = 0.06
+        if region=="V2":
+            if 'jet' in hist:
+                frac = 0.09
+            else:
+                frac = 0.07
         
         frac2 = 0.01 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
         #if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 smoothing

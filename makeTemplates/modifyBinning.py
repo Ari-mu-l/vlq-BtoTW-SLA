@@ -234,7 +234,10 @@ for chn in totBkgHists.keys():
 
         ## Going right to left -- if the last entry isn't 0 add it
         if '_42' in folder or 'Jan2025' in folder:
-                if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
+                if 'clipped' in folder:
+                        if xbinsListTemp[chn][-1]!=600: xbinsListTemp[chn].append(600)
+                else:
+                        if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
         else:
                 if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0)
 
