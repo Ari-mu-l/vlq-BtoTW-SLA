@@ -139,15 +139,30 @@ for rfile in rfiles:
         #     else:
         #         frac = 0.04
 
+        #############################
+        # the working combination
+        #############################
         if region=="D":
-            frac = 0.07
+         frac = 0.07
         if region=="V2":
-            if 'jet' in hist:
-                frac = 0.09
-            else:
-                frac = 0.07
-        
+         if 'jet' in hist:
+             frac = 0.09
+         else:
+             frac = 0.07
+
         frac2 = 0.01 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
+
+        ######################################################
+        # the working combination for smoothUncert from frac
+        ######################################################
+        #frac = 0.06
+        
+        ###################################
+
+        # tune frac for smoothUncert
+        #frac = 0.14
+        #frac2 = 0.01
+        
         #if '2016' not in templateDir and '2017' not in templateDir and '2018' not in templateDir: # full run2 smoothing
             #print('GETTING FULL RUN2') # for debug
             #frac = 0.07
@@ -190,7 +205,7 @@ for rfile in rfiles:
         majorgraph = majorsmooth.SmoothLowess(majorgraph,"",frac)
         majorgraph2 = majorsmooth2.SmoothLowess(majorgraph,"",frac2)
         binThreshold = majorhist.GetXaxis().FindFixBin(700)
-        for ibin in range(1,majorhist.GetNbinsX()):
+        for ibin in range(1,majorhist.GetNbinsX()): # no +1 before the change in Jul8
             newbin = majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin))
             oldbin = majorhist.GetBinContent(ibin)
             # smooth all

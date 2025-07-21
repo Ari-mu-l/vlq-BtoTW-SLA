@@ -15,7 +15,7 @@ start_time = time.time()
 
 #yearList = ["2018"]
 
-rebin = 20 # 20 for 2016 (105 bins) and 10 for full Run2 (210bins)
+rebin = 10 # 20 for 2016 (105 bins) and 10 for full Run2 (210bins)
 #rebin=10
 #rebin=25
 
