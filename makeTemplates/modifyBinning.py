@@ -68,7 +68,7 @@ theory_xsec = {"BpM800":0.1187124,
                "BpM2200":1.0} # no theory xsec for 2200
 sigProcList = ['BpM'+str(mass) for mass in massList]
 bkgProcList = ['ttbar','singletop','wjets','ttx','ewk','qcd'] #put the most dominant process first
-if 'ABCDnn' in iPlot:
+if 'ABCDnn' in iPlot: # SWITCH
         bkgProcList = ['major','ttx','ewk'] #put the most dominant process first
 #ABCDProcList = ['',]
 
@@ -102,11 +102,11 @@ removalKeys['__muRDown'] = False
 removalKeys['__muF'] = False
 if 'kinematics' not in folder: removalKeys['__muRFcorrd'] = False
 removalKeys['__pdf'] = False
-if 'ABCDnn' in iPlot:
-        removalKeys['__ttbar'] = False
-        removalKeys['__wjets'] = False
-        removalKeys['__singletop'] = False
-        removalKeys['__qcd'] = False
+if 'ABCDnn' in iPlot: # SWITCH
+       removalKeys['__ttbar'] = False
+       removalKeys['__wjets'] = False
+       removalKeys['__singletop'] = False
+       removalKeys['__qcd'] = False
 
 def findfiles(path, filtre):
     for root, dirs, files in os.walk(path):
@@ -121,7 +121,7 @@ def findfiles(path, filtre):
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb.root']# use this line for uncorrected plots
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root']
 if 'ABCDnn' in iPlot:
-        rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_*_smoothedJJ.root')] # with JECJER smoothing
+        rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_*_smoothedJJ.root')] # with JECJER smoothing #SWITCH
         #rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')] # without JECJER smoothing
 else:
        rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')]
@@ -367,7 +367,7 @@ for rfile in rfiles:
                 #	if sighist.GetBinContent(ibin) == 0: print 'chn = '+chn+', mass = '+sigName+', empty minMlb > '+str(sighist.GetBinLowEdge(ibin))                
                 
                 #For ABCDnn, combine the major backgrounds into one histogram
-                if 'ABCDnn' in iPlot:
+                if 'ABCDnn' in iPlot: # Switch
                         ttbarhists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if '__ttbar' in k.GetName() and chn in k.GetName()]
                         #print(str(ttbarhists))
                         for hist in ttbarhists:
@@ -392,7 +392,7 @@ for rfile in rfiles:
 
                 #Construct or apply the validation region uncertainty:
                 if doVRunc:
-                        if 'ABCDnn' in iPlot:
+                        if 'ABCDnn' in iPlot: # SWITCH
                                 majorname = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if '__major' in k.GetName() and chn in k.GetName() and upTag not in k.GetName() and downTag not in k.GetName()][0]                                
                                 datahist = rebinnedHists[majorname.replace('__major','__data_obs')]
                                 majorhist = rebinnedHists[majorname]

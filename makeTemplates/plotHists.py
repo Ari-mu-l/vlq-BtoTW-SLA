@@ -67,7 +67,9 @@ plotLowSide = True
 if 'ABCDnn' in iPlot:
         plotABCDnn = True
 
-if len(isRebinned)>1 and 'ABCDnn' in iPlot:
+#plotABCDnn = False # SWITCH. Added for ARC plot ABCDnn by category request
+
+if len(isRebinned)>1 and 'ABCDnn' in iPlot: # SWITCH. Added for ARC plot ABCDnn by category request
         bkgProcList = ['ewk', 'ttx', 'major']
         ABCDnnProcList = ['major']
 else:
@@ -86,6 +88,8 @@ else:
                                'major'                       
                 ]
         ABCDnnProcList = ['major']#'qcd','wjets','singletop','ttbar']
+#bkgProcList = ['qcd','ttx','ewk','wjets','singletop','ttbar'] # SWITCH. Added for ARC plot ABCDnn by category request
+#ABCDnnProcList = ['major'] # SWITCH. Added for ARC plot ABCDnn by category request
 minorProcList = ['ttx','ewk']
 
 
@@ -498,6 +502,8 @@ for tag in taglist:
                 except:
                         drawQCD = False
                         pass
+
+                #drawQCD = True # SWITCH
 
                 stackbkgHT = THStack("stackbkgHT","")
                 bkgProcListNew = bkgProcList[:]

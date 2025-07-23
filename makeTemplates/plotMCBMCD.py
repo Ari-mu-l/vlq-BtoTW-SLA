@@ -7,6 +7,12 @@ ROOT.gROOT.SetBatch(True)
 fileB = ROOT.TFile.Open(f'templatesB_Jan2025_210bins/templates_BpMass_138fbfb.root','READ')
 fileD = ROOT.TFile.Open(f'templatesD_Jan2025_210bins/templates_BpMass_138fbfb.root','READ')
 
+shapeOnly = True
+if shapeOnly:
+    shapeTag = '_shapeOnly'
+else:
+    shapeTag = ''
+    
 outDir = 'MCB_MCD_comparsion_plots'
 if not os.path.isdir(outDir):
     os.mkdir(outDir)
@@ -23,18 +29,20 @@ for tag in tagList:
         histMajorB.Add(histB)
         histMajorD.Add(histD)
 
-    histMajorB.Scale(1/histMajorB.Integral())
-    histMajorD.Scale(1/histMajorD.Integral())
+    if shapeOnly:
+        histMajorB.Scale(1/histMajorB.Integral())
+        histMajorD.Scale(1/histMajorD.Integral())
 
     c1 = ROOT.TCanvas(f'c1_{tag}','')
     histMajorB.Draw()
-    c1.SaveAs(f'{outDir}/histMajorMC_{tag}_B.png')
+    c1.SaveAs(f'{outDir}/histMajorMC{shapeTag}_{tag}_B.png')
 
     c2 = ROOT.TCanvas(f'c2_{tag}','')
     histMajorD.Draw()
-    c2.SaveAs(f'{outDir}/histMajorMC_{tag}_D.png')
+    c2.SaveAs(f'{outDir}/histMajorMC{shapeTag}_{tag}_D.png')
 
     c3 = ROOT.TCanvas(f'c3_{tag}','')
     histMajorB.Divide(histMajorD)
+    histMajorB.GetYaxis().SetRangeUser(0.2, 2.5)
     histMajorB.Draw()
-    c3.SaveAs(f'{outDir}/histMajorMCRatio_{tag}_BvsD.png')
+    c3.SaveAs(f'{outDir}/histMajorMCRatio{shapeTag}_{tag}_BvsD.png')

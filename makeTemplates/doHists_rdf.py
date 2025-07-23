@@ -56,15 +56,15 @@ print('Set pfix to '+pfix)
 
 doData = False
 doSigs = False
-doBkgs = True
+doBkgs = False
 
 # this is a list of group dictionaries. "wjets" has entries like "WJetsHT2002018":WJetsHT2002018, where the 2nd is the class
-bkgList = {#"ewk"      : samples_electroweak,            # only works alone, can't be with others
+bkgList = {"ewk"      : samples_electroweak,            # only works alone, can't be with others
         #"ttx"      : samples_ttbarx,
         #"qcd"      : samples_qcd,
         #"wjets"    : samples_wjets,
         #"ttbar"    : samples_ttbar,
-        "singletop": samples_singletop,
+        #"singletop": samples_singletop,
 }
 
 ### TO-DO: in samples.py, make up an entry for each year for ABCDnn with dummy information where needed.
