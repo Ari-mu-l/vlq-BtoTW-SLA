@@ -24,10 +24,13 @@ if not isSR and not os.path.exists(filename):
 
     # no masking is needed here since only V will be in the workspace.
     # check whether the 1 pb normalization is fine for getting r ~ 1
-
     print("Running Fit Diagnostics for initial workspace")
-    print('Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -1  --verbose 1 --saveShapes --plots --setParameters signalScale=1')# 
-    os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -1  --verbose 1 --saveShapes --plots --setParameters signalScale=1') # 
+    if 'V2' in limitdir:
+        print('Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -1  --verbose 1 --saveShapes --plots --setParameters signalScale=1')#
+        os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -1  --verbose 1 --saveShapes --plots --setParameters signalScale=1') #
+    else: # unblinded D
+        print('Command = combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -1  --verbose 1 --saveShapes --plots')
+        os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --cminDefaultMinimizerStrategy 0 --rMin -5  --verbose 1 --saveShapes --plots')
     
     print("Creating initialFit snapshot file: initialFitWorkspace.root")
     w_f = TFile.Open('higgsCombineTest.FitDiagnostics.mH120.root')

@@ -29,8 +29,17 @@ cd -
 
 if [[ "$INDEX" == 1 ]]; then
     echo '------- Running background-only GOF with data ---------'
-    echo 'combine -M GoodnessOfFit workspace.root --algo=saturated --fixedSignalStrength=0'
-    combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated --fixedSignalStrength=0
+    # Before unblind
+    #echo 'combine -M GoodnessOfFit workspace.root --algo=saturated --fixedSignalStrength=0'
+    #combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated --fixedSignalStrength=0
+    # UNBLIND
+    # chi-square
+    echo 'combine -M GoodnessOfFit workspace.root --algo=saturated'
+    combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated
+    #echo 'combine -M GoodnessOfFit workspace.root --algo=KS'
+    #combine -M GoodnessOfFit ${WORKSPACE} --algo=KS
+    #echo 'combine -M GoodnessOfFit workspace.root --algo=AD'
+    #combine -M GoodnessOfFit ${WORKSPACE} --algo=AD
     data=$?
     if [[ $data -ne 0 ]]; then
 	rm *.root
@@ -39,8 +48,16 @@ if [[ "$INDEX" == 1 ]]; then
 fi
 
 echo "---------- 'Running background-only GOF with toys, after frequentist fit -------------"
-echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --toysFreq --fixedSignalStrength=0'
-combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --fixedSignalStrength=0
+# Before unblind
+#echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --toysFreq --fixedSignalStrength=0'
+#combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --fixedSignalStrength=0
+# UNBLIND
+echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED} --toysFreq'
+combine -M GoodnessOfFit ${WORKSPACE} --algo=saturated -t ${NTOYS} -s ${SEED}
+#echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=KS -t ${NTOYS} -s ${SEED} --toysFreq'
+#combine -M GoodnessOfFit ${WORKSPACE} --algo=KS -t ${NTOYS} -s ${SEED}
+#echo 'Command = combine -M GoodnessOfFit ${WORKSPACE} --algo=AD -t ${NTOYS} -s ${SEED} --toysFreq'
+#combine -M GoodnessOfFit ${WORKSPACE} --algo=AD -t ${NTOYS} -s ${SEED}
 fitted=$?
 if [[ $fitted -ne 0 ]]; then
     rm *.root

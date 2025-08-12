@@ -27,16 +27,19 @@ elif whichjob == 'gof':
     condorDir = condorDir.replace('Injection','GOF')
 
 if whichjob == 'inject':
-    name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','')+'InjR'+str(rInj).replace('.','p')+'CDMS0'
+    name = limitdir.replace('limits_templatesABCDnn_V2_Jan2025_','').replace('limits_templatesABCDnn_DV2_Jan2025_','')+'InjR'+str(rInj).replace('.','p')+'CDMS0'
 else:
-    name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','')+'GOF'
+    name = limitdir.replace('limits_templatesABCDnn_V2_Jan2025_','').replace('limits_templatesABCDnn_DV2_Jan2025_','')+'GOF'
 path = limitdir+'/cmb/'+mass
 outDir=outputDir[10:]+'/'+limitdir+'_'+mass
 condorDir += limitdir+'_'+mass
 
 isSR = False
-if '_D' in limitdir: isSR = True
-if isSR:
+#if '_DV2' in limitdir: isSR = True
+#if '_D' in limitdir: isSR = True 
+
+#if isSR and '_DV2' in limitdir:
+if '_DV2' in limitdir:
     toysperjob = 25
     filename = 'morphedWorkspace.root'
     maskstring = '--setParameters mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, remask V after V-only fit
@@ -45,6 +48,7 @@ if isSR:
 else:
     toysperjob = 25
     filename = 'initialFitWorkspace.root'
+    #maskstring = '--setParameters mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=1,mask_Case4_D=1' # unblind step2 requested test: gof with case1 and case2
     maskstring = '' # shouldn't need to change anything
 
 if whichjob == 'gof': filename = 'workspace.root' # GOF always just starts from the bare workspace, assuming CR categories only
@@ -65,7 +69,7 @@ for i in range(0,nToys,toysperjob):
     count+=1
     dict={'RUNDIR':runDir, 'EXEC':executable, 'CONDORDIR':condorDir, 'OUTPUTDIR':outDir, 'PATH':path, 'WORKSPACE':filename, 'NTOYS':toysperjob, 'RINJ':rInj, 'RMIN':rInj-10, 'RMAX':rInj+10,
           'NAME':name, 'MASKS':maskstring, 'TARBALL':tarfile, 'INDEX':ijob, 'SEED':seed}
-
+    
     if not EOSpathExists(outDir+'/fitDiagnostics'+name+'_'+str(ijob)+'.root'): ## this is a super baseline failure checker -- if there's a file, don't resubmit
 
         jdfName=condorDir+'/%(NAME)s_%(INDEX)s.job'%dict

@@ -6,7 +6,7 @@ limitdir = sys.argv[1]
 mass = sys.argv[2]
 rInj = float(sys.argv[3])
 
-name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','')+'InjR'+str(rInj).replace('.','p')+'CDMS0'
+name = limitdir.replace('limits_templatesABCDnn_V2_Jan2025_','').replace('limits_templatesABCDnn_DV2_Jan2025_','')+'InjR'+str(rInj).replace('.','p')+'CDMS0'
 path = limitdir+'/cmb/'+mass
 
 rootfiles = EOSlist_root_files('/store/user/xshen/CombineV10_BpInjection/'+limitdir+'_'+mass+'/')	

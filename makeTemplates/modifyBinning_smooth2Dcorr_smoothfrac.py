@@ -36,10 +36,16 @@ def findfiles(path, filtre):
 #smoothFrac = ['0p01','0p02','0p03','0p04','0p05','0p06','0p07','0p08','0p09']
 #smoothFrac = ['0p01','0p045','0p18','0p035','0p14']
 #smoothFrac = ['0p005','0p01','0p02','0p035','0p14']
-smoothFrac = ['0p01','0p005','0p02','0p03','0p12']
+if region=='D':
+    #smoothFrac = ['0p01','0p005','0p02','0p03','0p12']
+    smoothFrac = ['0p01','0p005','0p02','0p035','0p14']
+else:
+    #smoothFrac = ['0p01','0p03','0p12']
+    smoothFrac = ['0p01','0p045','0p18','0p035','0p14']
 #smoothFrac = ['0p01','0p03','0p12']
 #smoothFrac = ['0p01','0p025','0p1']
 # nominal file
+#rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_smoothedTV.root'] # TEMP: ARC request full region B
 rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV.root']
 tfile = TFile(rfiles[0])
 
@@ -50,7 +56,7 @@ allHists = [k.GetName() for k in tfile.GetListOfKeys() if '__smooth' not in k.Ge
 majornames = [k.GetName() for k in tfile.GetListOfKeys() if '__major' in k.GetName() and upTag not in k.GetName() and downTag not in k.GetName()]
 print('Nominal major histograms:',majornames)
     
-outputRfile = TFile(rfiles[0].replace('.root','_smoothUncert.root'),'RECREATE')
+outputRfile = TFile(rfiles[0].replace('.root','_smoothfracUncert.root'),'RECREATE')
     
 print("PROGRESS:")
 
@@ -64,6 +70,7 @@ for histName in allHists:
 # get lists of major histograms with different smoothing
 alternativeHists = {}
 for frac in smoothFrac:
+    #rfile = TFile(f'{templateDir[:-1]}_{frac}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_smoothedTV.root')# TEMP: ARC request full region B
     rfile = TFile(f'{templateDir[:-1]}_{frac}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV.root')
     alternativeHists[frac] = {}
     for histName in majornames:
@@ -73,9 +80,10 @@ for frac in smoothFrac:
     rfile.Close()
 
 # get smooth envelope
-nominal_smoothFrac = {#"V2":{"tagTjet":"0p09", "tagWjet":"0p09", "untagTlep": "0p07", "untagWlep": "0p07"},
-                      "V2":{"tagTjet":"0p06", "tagWjet":"0p06", "untagTlep": "0p06", "untagWlep": "0p06"},
-                      "D":{"tagTjet":"0p06", "tagWjet":"0p06", "untagTlep": "0p06", "untagWlep": "0p06"}}
+nominal_smoothFrac = {"V2":{"tagTjet":"0p09", "tagWjet":"0p09", "untagTlep": "0p07", "untagWlep": "0p07"},
+                      "D":{"tagTjet":"0p07", "tagWjet":"0p07", "untagTlep": "0p07", "untagWlep": "0p07"}}
+                      #"V2":{"tagTjet":"0p06", "tagWjet":"0p06", "untagTlep": "0p06", "untagWlep": "0p06"},
+                      #"D":{"tagTjet":"0p06", "tagWjet":"0p06", "untagTlep": "0p06", "untagWlep": "0p06"}}
 
 shiftHists = {}
 for histName in majornames:
@@ -167,7 +175,7 @@ for histName in majornames:
             #histUp.SetBinContent(i, histNom.GetBinContent(i) + shift)
 
     if smooth and region=='D' and 'jet' in histName:
-        frac = 0.04
+        frac = 0.04 # TEMP
         # else:
         #     frac = 0.04
 
@@ -198,8 +206,8 @@ for histName in majornames:
             histDn.SetBinContent(ibin, max(0,newdnratio*centralval))
         
     outputRfile.cd()
-    histUp.Write(f'{histName}__smoothUp')
-    histDn.Write(f'{histName}__smoothDown')
+    histUp.Write(f'{histName}__smoothfracUp')
+    histDn.Write(f'{histName}__smoothfracDown')
 
 outputRfile.Close()
-print(f"Created {rfiles[0].replace('.root','_smoothUncert.root')}")
+print(f"Created {rfiles[0].replace('.root','_smoothfracUncert.root')}")

@@ -2,18 +2,14 @@
 echo "This script is iterative -- do a chunk, then comment what's done and uncomment the next step..."
 echo "MAKE SURE YOU ARE ON EL9!!!"
 
-# echo "--------------- Working on unblinded SR  -------------------"
-#dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin #_210bins_smooth3 #_alternative2_no1;95;0cjecjer #_jecjer0p07 #_test #_moreSmooth #_test #_BB2k3a #k5b #_asym #_test #_largeRateUncert #_smooth2D_rebin #_test #_1Dtrain #nonBoosted #Boosted #_maskC3C4 #_largeRateUncert
-#dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothUncert
-#dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_clipped_smoothUncert_smoothAfterClip #_case2B #_test #_padded #_JumpExcC2Seg1 #_clip #_JumpAll
-#dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert_noSmoothTail #_largeRateUncert2
-dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert #_largeRateUncert #_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_Case2DB_largeRateUncert2_C1C2SmallSmooth #_smoothfracUncert_Case2DB
-#dir=limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smooth2DfracUncert #Frac2Symm0p06 #NoSmoothTail #SymmNotAbs #2SymmNoSmooth #Symm #NoSmooth
-#dir=limits_templatesABCDnn_DV2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_Boosted #_smoothUncert_Boosted
+# echo "--------------- Working on SR  -------------------"
+dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_2017 #_test #_1Dtrain #nonBoosted #Boosted #_maskC3C4 #_largeRateUncert
 mass=1200
 
 #echo "Creating initial fit workspace:"
 #python3 -u runInitialFit.py $dir $mass
+#python3 -u runInitialFit.py $dir 1300
+#python3 -u runInitialFit.py $dir 1800
 
 #combine -M GoodnessOfFit $dir/cmb/$mass/workspace.root --algo KS
 #combine -M GoodnessOfFit $dir/cmb/$mass/workspace.root --algo saturated --fixedSignalStrength 0 -t 5 --toysFrequentist
@@ -22,32 +18,32 @@ mass=1200
 #python3 -u runCondorToys.py gof $dir $mass 500
 
 #echo "Running impact test: "
-#python3 -u runImpacts.py $dir $mass local 0
+python3 -u runImpacts.py $dir $mass local 0
 
 # ########## PAUSE UNTIL FINISHED ####################
 
 #echo "Plotting GOF results:"python3 -u GoFPlotter.py $dir $mass
-python3 -u GoFPlotter.py $dir $mass
+#python3 -u GoFPlotter.py $dir $mass
 
 #python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts0p0.json --output $dir/cmb/$mass/impacts0p0 --summary --blind
 
 # STEP 2
 #python3 -u runInitialFit.py $dir 1300
 #python3 -u runInitialFit.py $dir 1800
-python3 -u PostFitPlots.py $dir $mass
+#python3 -u PostFitPlots.py $dir $mass 
 
 
 # echo "--------------- Working on VR  -------------------"
 
 #dir=limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain2016
-mass=1200
+#mass=1200
 
 #echo "Creating initial fit workspace:"
 #python3 -u runInitialFit.py $dir $mass
 
 #echo "Running nuisance plot: CHECK LINES 382 and 411 FOR RANGES IF SYSTEMATICS CHANGE"
-python3 -u diffNuisances.py -g $dir/$BR/cmb/$mass/nuisancepulls.root $dir/$BR/cmb/$mass/fitDiagnosticsTest.root --abs >& $dir/$BR/cmb/$mass/nuisancepulls.txt
+#python3 -u diffNuisances.py -g $dir/$BR/cmb/$mass/nuisancepulls.root $dir/$BR/cmb/$mass/fitDiagnosticsTest.root --abs >& $dir/$BR/cmb/$mass/nuisancepulls.txt
 
 #echo "Running covariance plot: CHECK LINES 23/24 and 48/49 FOR RANGES IF SYSTEMATICS CHANGE"
 #python3 -u covariancePlotter.py $dir $mass

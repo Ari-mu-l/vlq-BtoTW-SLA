@@ -6,11 +6,12 @@ limitdir = sys.argv[1]
 mass = sys.argv[2]
 
 path = limitdir+'/cmb/'+mass
-name = limitdir.replace('limits_templatesABCDnn_V2_Oct2024_','').replace('limits_templatesABCDnn_DV2_Oct2024_','').replace('limits_templatesABCDnn_ABCV2V2_Oct2024_','')
+name = limitdir.replace('limits_templatesABCDnn_V2_Jan2025_','').replace('limits_templatesABCDnn_DV2_Jan2025_','').replace('limits_templatesABCDnn_ABCV2V2_Jan2025_','')
 
 os.chdir(path)
 
-if not os.path.exists('covariance_fit_b.png'):
+#if not os.path.exists('covariance_fit_b.png'):
+if not os.path.exists('initialFitWorkspace.root') and not os.path.exists('morphedWorkspace.root'):
     print("Running FitDiagnostics with plots")
     os.system('combine -M FitDiagnostics -d workspace.root --saveWorkspace --plots --saveShapes')
 

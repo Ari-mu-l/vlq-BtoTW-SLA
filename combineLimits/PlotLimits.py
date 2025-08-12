@@ -20,8 +20,8 @@ signal = 'B'
 # combination=False
 # if len(sys.argv) > 5: combination = bool(eval(sys.argv[5]))
 
-blind=True
-morphed=True
+blind=False
+morphed=False #turned off for unblinding
 ACLS = False
 saveKey=''
 if ACLS: saveKey+='_ACLS'
@@ -230,7 +230,7 @@ def PlotLimits(limitDir,limitFile,tempKey):
     else: expected95.GetYaxis().SetRangeUser(.0005+.00001,20.1)
     expected95.GetXaxis().SetRangeUser(800,2000)
     expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
-    expected95.GetYaxis().SetTitle("#sigma (Bbj #rightarrow tWbj) [pb]")
+    expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) [pb]")
     expected95.GetYaxis().SetTitleOffset(1.05)
 
     expected68.Draw("3same")
@@ -337,7 +337,9 @@ obsLims = []
 for tempKey in tempKeys:
         if blind: 
                 if not morphed:
-                        expTemp,obsTemp = PlotLimits(limitDir,'limits_cmb_cmb.json',tempKey)
+                        #expTemp,obsTemp = PlotLimits(limitDir,'limits_cmb_cmb.json',tempKey)
+                        expTemp,obsTemp = PlotLimits(limitDir,'limitsM_cmb_cmb.json',tempKey)
+                        #expTemp,obsTemp = PlotLimits(limitDir,'limitsUB_cmb_cmb.json',tempKey) # TEMP
                 else:
                         expTemp,obsTemp = PlotLimits(limitDir,'limitsM_cmb_cmb.json',tempKey)
         else:

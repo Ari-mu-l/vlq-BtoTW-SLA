@@ -33,8 +33,8 @@ if blind and isSR:
     #options = ' --bypassFrequentistFit -t -1 --expectSignal 0'
 else:
     filename = 'workspace.root'
-    options = ''
-    #options = '--setParameters signalScale=0.01'
+    #options = ''
+    options = '--setParameters signalScale=0.1 --freezeParameters signalScale'
     #options = ' --setParameters signalScale=0.05'
 
 
@@ -46,7 +46,6 @@ if docrab == 'local': #Bp likely doesn't need crab, fits are fast and not as man
     #### Debug ####
     #os.system(f'combine -M MultiDimFit {filename}') # passes with no problem
     #print("Running Impacts initial fit")
-    #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --robustFit 1 --cminDefaultMinimizerStrategy 0 {options}') 
     os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --robustFit 1 {options}')
     #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --cminDefaultMinimizerStrategy 0 --verbose 1 {options}')
     #print('Command = combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --doInitialFit --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+options) #--cminDefaultMinimizerStrategy 0 
@@ -56,9 +55,7 @@ if docrab == 'local': #Bp likely doesn't need crab, fits are fast and not as man
 
     #print("Running over each nuisance")
     ##print('Command = combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+' --doFits --parallel 5'+options) #--cminDefaultMinimizerStrategy 0
-    #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doFits --robustFit 1 --cminDefaultMinimizerStrategy 0 --parallel 5 {options}> doFitsM{str(mass)}.txt')
     os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doFits --robustFit 1 --parallel 5 {options}> doFitsM{str(mass)}.txt')
-    #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doFits --cminDefaultMinimizerStrategy 0 --parallel 5 {options}> doFitsM{str(mass)}.txt')
     #os.system('combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+' --doFits --parallel 5'+options)#--cminDefaultMinimizerStrategy 0
     #os.system('combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+' --doFits --parallel 5 --cminDefaultMinimizerStrategy 0 '+options) # we don't have discrete NPs though
 

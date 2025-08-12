@@ -49,7 +49,11 @@ def findfiles(path, filtre):
 #rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root']
 #rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn*_smoothedJJ_rebinned1_stat0p2.root')]
 #rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_rebinned1_stat0p2.root')]
-rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root')]
+if 'smoothB' in templateDir:
+    rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothBUncert_smoothedJJ_rebinned1_stat0p2.root')]
+else:
+    rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root')]
+#rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root')] #TEMP: ARC request full region B
 # smooth BEFORE rebin
 #rfiles = [file for file in findfiles(templateDir, '*.root') if 'rebinned' not in file and 'smoothed' not in file and 'plots' not in file]
 tfile = TFile(rfiles[0])
@@ -143,14 +147,20 @@ for rfile in rfiles:
         # the working combination
         #############################
         if region=="D":
-         frac = 0.07
+            if 'jet' in hist:
+                frac = 0.04
+            else:
+                frac = 0.07
         if region=="V2":
          if 'jet' in hist:
              frac = 0.09
          else:
              frac = 0.07
 
-        frac2 = 0.01 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
+        #frac = 0.14
+        #frac2 = 0.01 # 0.1 had p-value of 0.025 # 0.005 had a p-value of 0.03
+        # commented frac2 out for smooth2DUncert + smoothfracUncert, because cov=2 for b-only
+        # should leave it in for smooth2DUncert_only
 
         ######################################################
         # the working combination for smoothUncert from frac
@@ -203,7 +213,7 @@ for rfile in rfiles:
         #             frac = 0.07
             
         majorgraph = majorsmooth.SmoothLowess(majorgraph,"",frac)
-        majorgraph2 = majorsmooth2.SmoothLowess(majorgraph,"",frac2)
+        #majorgraph2 = majorsmooth2.SmoothLowess(majorgraph,"",frac2)
         binThreshold = majorhist.GetXaxis().FindFixBin(700)
         for ibin in range(1,majorhist.GetNbinsX()): # no +1 before the change in Jul8
             newbin = majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin))
@@ -216,8 +226,8 @@ for rfile in rfiles:
                if ibin<binThreshold:
                    majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
                else:
-                   majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
-                   #majorhist.SetBinContent(ibin,majorhist_original.GetBinContent(ibin))
+                   #majorhist.SetBinContent(ibin,majorgraph2.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
+                   majorhist.SetBinContent(ibin,majorhist_original.GetBinContent(ibin))
                    #majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))
             else:
                majorhist.SetBinContent(ibin,majorgraph.Eval(majorhist.GetXaxis().GetBinCenter(ibin)))

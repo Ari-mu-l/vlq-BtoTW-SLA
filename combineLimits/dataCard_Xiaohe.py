@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import os,sys,time,math,datetime,itertools
 from ROOT import TFile,TH1F
 
@@ -18,12 +17,12 @@ import CombineHarvester.CombineTools.ch as ch
 #V2, DV2 for ABCDnn
 #V2 or ABCV2V2, for MC CRs, DV2, ABCDCV2V2 for MC SRs
 boosted = False
-region = 'DV2' #TEMP: change region here
+region = 'D' #TEMP: change region here
 fileDir = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
-template = 'templates'+region+'_Oct2024_420binsTU' 
+template = 'templates'+region+'_Oct2024_420bins_valUpDn'
 saveKey = 'ABCDnn_'+region 
 dateKey = '_Oct2024'
-outputdir = 'limits_templates'+saveKey+dateKey+'_420RB3_TUValSmooth'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
+outputdir = 'limits_templates'+saveKey+dateKey+'_420RB5_valUpDnPartialD'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
 discrim = 'BpMass_ABCDnn'
 
 if 'ABCDnn' in saveKey:
@@ -32,6 +31,8 @@ if 'ABCDnn' in saveKey:
                 regionlist = ['V2','D']
         elif region == 'DV':
                 regionlist = ['V','D']
+        elif region == 'D2V':
+                regionlist = ['V','D2']
                 
 if 'MC' in saveKey:
         regionlist = ['V2']
@@ -41,6 +42,8 @@ if 'MC' in saveKey:
                 regionlist = ['A','B','C','D','CV2','V2']
         elif region == 'DV2':
                 regionlist = ['D','V2']
+        elif reion == 'D2V':
+                regionlist = ['V','D2']
         discrim = 'BpMass'
 
 print('SETUP:')
@@ -48,7 +51,6 @@ print('region = ',region)
 print('discrim = ',discrim)
 print('templatedir = ',template)
 print('output = ',outputdir)
-
         
 massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000]
 
@@ -135,8 +137,8 @@ def add_systematics(cb):
                 # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'lastbin', 'shape', ch.SystMap()(1.0))
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'train', 'shape', ch.SystMap()(1.0))
                 cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'val', 'shape', ch.SystMap()(1.0))
-                cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abcdRateC1', 'lnN', ch.SystMap()(1.02))
-                cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abcdRateC2', 'lnN', ch.SystMap()(1.02))
+                cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abcdRateC1', 'lnN', ch.SystMap()(1.1))
+                cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abcdRateC2', 'lnN', ch.SystMap()(1.1))
                 cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'abcdRateC3', 'lnN', ch.SystMap()(1.02))
                 cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'abcdRateC4', 'lnN', ch.SystMap()(1.08))
 
@@ -356,7 +358,7 @@ if __name__ == '__main__':
                 isABCDnn = True
 
         ### CHANGE THE rebinnedX HERE IF YOU CHANGE X
-        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned3_stat0p2_smoothed.root' #TEMP. Check rebinnedX
+        rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned5_stat0p1_smoothed.root' #TEMP. Check rebinnedX
         if 'TW100' in outputdir:
                 rfile = fileDir+template+'/templates_'+discrim+'_138fbfb_rebinned_TW100_stat0p2.root'
         os.system('cp '+rfile+' ./'+outputdir+'/')

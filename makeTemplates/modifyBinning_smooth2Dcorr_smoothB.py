@@ -14,7 +14,7 @@ postfix = sys.argv[2]
 templateDir = os.getcwd()+'/templates'+region+'_'+postfix+'/'
 print('templateDir:',templateDir)
 
-smooth = True # keep False as long as not symmetrizing in this script
+smooth = False # KEEP FALSE. SMOOTH DONE IN THE LAST STEP IN A SEPARATE SCRIPT
 rebin = False
 
 #rebin = False
@@ -33,28 +33,30 @@ def findfiles(path, filtre):
             yield os.path.join(root, f)
 
 # add smoothing uncertainty after smoothing
-#rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_smoothedTV.root')] # TEMP: ARC request full region B
-rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV.root')]
-tfile = TFile(rfiles[0])
+rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb.root')]
+#rfiles = [file for file in findfiles(templateDir, 'templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV.root')]
+tfile_smoothB = TFile(rfiles[0])
+tfile_nom = TFile(rfiles[0].replace('smoothB','2Dsmooth'))
+#tfile_nom = TFile(rfiles[0].replace('smoothB','2Dsmooth').replace('.root','_smoothedTV.root'))
 
 checkscale = True
 
 print("SMOOTHING FILE:",rfiles[0])
-allHists = [k.GetName() for k in tfile.GetListOfKeys() if '__smooth' not in k.GetName()]
-majornames = [k.GetName() for k in tfile.GetListOfKeys() if '__major' in k.GetName() and upTag not in k.GetName() and downTag not in k.GetName()]
+allHists = [k.GetName() for k in tfile_nom.GetListOfKeys() if '__smooth' not in k.GetName()]
+majornames = [k.GetName() for k in tfile_nom.GetListOfKeys() if '__major' in k.GetName() and upTag not in k.GetName() and downTag not in k.GetName()]
 print('Nominal major histograms:',majornames)
 
 if rebin:
-    outputRfile = TFile(rfiles[0].replace('.root','_smooth2DUncert_rebinned.root'),'RECREATE')
+    outputRfile = TFile(rfiles[0].replace('.root','_smoothBUncert_rebinned.root'),'RECREATE')
 else:
-    outputRfile = TFile(rfiles[0].replace('.root','_smooth2DUncert.root'),'RECREATE')
+    outputRfile = TFile(rfiles[0].replace('.root','_smoothBUncert.root'),'RECREATE')
     
     
 print("PROGRESS:")
 
 # Save other histograms to file
 for histName in allHists:
-    hist = tfile.Get(histName)
+    hist = tfile_nom.Get(histName)
     hist.SetDirectory(0)
     outputRfile.cd()
     print(histName)
@@ -78,10 +80,10 @@ for histName in allHists:
 
 # Add smooth shift
 for hist in majornames:
-    histNom = tfile.Get(hist).Clone('nom')
-    histDn = tfile.Get(hist).Clone('dn')
-    histShift = tfile.Get(f'{hist}__smoothUp').Clone('shift')
-    histUp = tfile.Get(f'{hist}__smoothUp').Clone('up')
+    histNom = tfile_nom.Get(hist).Clone(f'{hist}_nom')
+    histDn = tfile_nom.Get(hist).Clone(f'{hist}_dn')
+    histShift = tfile_smoothB.Get(hist).Clone(f'{hist}_shift') # full B nom as histUp
+    histUp = tfile_smoothB.Get(hist).Clone(f'{hist}_up')
     
     # shift = up - nom
     histShift.Add(histNom,-1.0)
@@ -89,35 +91,35 @@ for hist in majornames:
     # dn = nom - shift
     histDn.Add(histShift,-1.0)
 
-    if smooth:
-        if 'jet' in hist:
-            frac = 0.05
-        else:
-            frac = 0.04
+    # if smooth:
+    #     if 'jet' in hist:
+    #         frac = 0.07 #0.05 
+    #     else:
+    #         frac = 0.07
 
-        upratio = histUp.Clone('upratio')
-        dnratio = histDn.Clone('dnratio')
-        upratio.Divide(histNom)
-        dnratio.Divide(histNom)
-        upgraph = TGraph()
-        dngraph = TGraph()
-        for ibin in range(1,histDn.GetNbinsX()):
-            upgraph.SetPoint(ibin-1, upratio.GetXaxis().GetBinCenter(ibin), upratio.GetBinContent(ibin))
-            dngraph.SetPoint(ibin-1, dnratio.GetXaxis().GetBinCenter(ibin), dnratio.GetBinContent(ibin))
-        upratio.Delete()
-        dnratio.Delete()
+    #     upratio = histUp.Clone('upratio')
+    #     dnratio = histDn.Clone('dnratio')
+    #     upratio.Divide(histNom)
+    #     dnratio.Divide(histNom)
+    #     upgraph = TGraph()
+    #     dngraph = TGraph()
+    #     for ibin in range(1,histDn.GetNbinsX()):
+    #         upgraph.SetPoint(ibin-1, upratio.GetXaxis().GetBinCenter(ibin), upratio.GetBinContent(ibin))
+    #         dngraph.SetPoint(ibin-1, dnratio.GetXaxis().GetBinCenter(ibin), dnratio.GetBinContent(ibin))
+    #     upratio.Delete()
+    #     dnratio.Delete()
 
-        upsmooth = TGraphSmooth("normal")
-        dnsmooth = TGraphSmooth("normal")
-        upgraph = upsmooth.SmoothLowess(upgraph,"",frac)
-        dngraph = dnsmooth.SmoothLowess(dngraph,"",frac)
+    #     upsmooth = TGraphSmooth("normal")
+    #     dnsmooth = TGraphSmooth("normal")
+    #     upgraph = upsmooth.SmoothLowess(upgraph,"",frac)
+    #     dngraph = dnsmooth.SmoothLowess(dngraph,"",frac)
 
-        for ibin in range(1,histUp.GetNbinsX()+1):
-            newupratio = upgraph.Eval(histUp.GetXaxis().GetBinCenter(ibin))
-            newdnratio = dngraph.Eval(histDn.GetXaxis().GetBinCenter(ibin))
-            centralval = histNom.GetBinContent(ibin)
-            histUp.SetBinContent(ibin, max(0,newupratio*centralval))
-            histDn.SetBinContent(ibin, max(0,newdnratio*centralval))
+    #     for ibin in range(1,histUp.GetNbinsX()+1):
+    #         newupratio = upgraph.Eval(histUp.GetXaxis().GetBinCenter(ibin))
+    #         newdnratio = dngraph.Eval(histDn.GetXaxis().GetBinCenter(ibin))
+    #         centralval = histNom.GetBinContent(ibin)
+    #         histUp.SetBinContent(ibin, max(0,newupratio*centralval))
+    #         histDn.SetBinContent(ibin, max(0,newdnratio*centralval))
 
     if rebin:
         if (histUp.GetNbinsX()%2)!=0:
@@ -135,8 +137,8 @@ for hist in majornames:
             histUp_new.Rebin(2)
             histDn_new.Rebin(2)
             outputRfile.cd()
-            histUp_new.Write(f'{hist}__smooth2DUp')
-            histDn_new.Write(f'{hist}__smooth2DDown')
+            histUp_new.Write(f'{hist}__smoothBUp')
+            histDn_new.Write(f'{hist}__smoothBDown')
 
             continue
         
@@ -144,11 +146,13 @@ for hist in majornames:
         histDn.Rebin(2)
         
     outputRfile.cd()
-    histUp.Write(f'{hist}__smooth2DUp')
-    histDn.Write(f'{hist}__smooth2DDown')
-
+    histUp.Write(f'{hist}__smoothBUp')
+    histDn.Write(f'{hist}__smoothBDown')
+    
+tfile_nom.Close()
+tfile_smoothB.Close()
 outputRfile.Close()
 if rebin:
-    print(f"Created {rfiles[0].replace('.root','_smooth2DUncert_rebinned.root')}")
+    print(f"Created {rfiles[0].replace('.root','_smoothBUncert_rebinned.root')}")
 else:
-    print(f"Created {rfiles[0].replace('.root','_smooth2DUncert.root')}")
+    print(f"Created {rfiles[0].replace('.root','_smoothBUncert.root')}")

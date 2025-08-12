@@ -8,21 +8,23 @@ from ROOT import TFile, TObject, RooArgSet
 limitdir = sys.argv[1]
 path = limitdir+'/'
 os.chdir(path)
-blind = True
-morph = True
+blind = True # unblind
+morph = True #unblind
 
 print('====================================================================')
 print('==   Launching limits for in',limitdir)
 print('==   ...')
 
 if not morph:
-    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V=1,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1' # unmask D, mask V
+    masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=1,mask_Case4_D=0,mask_Case1_V=0,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1' # unmask D, mask V
     if 'DV2' in limitdir:
         masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=0,mask_Case4_D=0,mask_Case1_V2=1,mask_Case2_V2=1,mask_Case3_V2=1,mask_Case4_V2=1' # unmask D, mask V
     if 'MC' in limitdir:
         masks = 'mask_Case1_D=0,mask_Case2_D=0,mask_Case3_D=1,mask_Case4_D=1,mask_Case1_V=1,mask_Case2_V=1,mask_Case3_V=1,mask_Case4_V=1,mask_Case3_A=1,mask_Case4_A=1,mask_Case3_B=1,mask_Case3_B=1,mask_Case3_C=1,mask_Case4_C=1' # unmask D, mask V
     if '36fb' not in limitdir:
         masks = masks+',signalScale=0.01' # 10 fb
+    else:
+        masks = masks+',signalScale=0.005'
 
     if blind:
 
@@ -59,8 +61,8 @@ else:
         # CMDS0 needed for tests in 1200. rMin/Max wasn't needed, but shouldn't hurt (will allow < 0)
         # Some messages about uncert matrix in s+b, but none about b-only
         print("Running Fit Diagnostics for initial workspace with SR channels masked")
-        print('Command = combine -M FitDiagnostics -d workspace.root --rMin -2 --rMax 2 --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
-        os.system('combine -M FitDiagnostics -d workspace.root --rMin -2 --rMax 2 --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
+        print('Command = combine -M FitDiagnostics -d workspace.root --rMin -1 --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
+        os.system('combine -M FitDiagnostics -d workspace.root --rMin -1 --saveWorkspace -n Masked --cminDefaultMinimizerStrategy 0 --setParameters '+masks)
         
         print("Creating initialFit snapshot file: morphedWorkspace.root")
         w_f = TFile.Open('higgsCombineMasked.FitDiagnostics.mH120.root')

@@ -60,8 +60,12 @@ elif '2018' in  templateDir:
     rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_2018.root']
     year = '2018'
 else:
-    rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb.root']
-    year = ''
+    if 'smoothB' in templateDir:
+        rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb_smoothBUncert.root']
+        year = ''
+    else:
+        rfiles = [f'{templateDir}/templates_BpMass_ABCDnn_138fbfb.root']
+        year = ''
 tfile = TFile(rfiles[0])
 
 iRfile=0
@@ -96,7 +100,7 @@ for rfile in rfiles:
             if rebin and 'untagWlep' in hist:
                 tmphist.Rebin(len(xbins)-1,hist,xbins)
 
-            tmphist.Write()
+            tmphist.Write(hist)
         else:
             rebinnedHists[hist]=tfiles[iRfile].Get(hist).Clone(hist)
             rebinnedHists[hist].SetDirectory(0)
