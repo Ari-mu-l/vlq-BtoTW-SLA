@@ -13,19 +13,30 @@ gROOT.SetBatch(1)
 region = 'D'
 year = '' # '_2016'
 if year=='':
-        bins = 210
+        bins = 210 #210
 else:
         bins = 105
 discriminant = 'BpMass_ABCDnn' # not plotting uncertainty shifts for minor backgrounds
-inDirPostFix = f'Jan2025_{bins}binsBtargetHoleCorrBTrain_smooth_rebin{year}'
+#inDirPostFix = f'Jan2025_{bins}binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin{year}' # 2D smooth
+#inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST'
+#inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert' # 1D smooth
+inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert' # ARC request: compare full region B correction
 #rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
-#rfilePostFix = '_smoothed_TVJJ_rebinned1_stat0p2'
-rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV'
+#rfilePostFix = '_smoothedJJ_rebinned1_stat0p2' # 2D smooth
+#rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV' # 1D smooth
+#rfilePostFix = '_rebinned1_stat0p2_smoothedTV'
+#rfilePostFix = '_rebinned1_stat0p2'
+rfilePostFix = '_smoothBUncert_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothedB'
+#rfilePostFix = '_smoothedJJ_smoothedTV_smoothBUncert'
+#rfilePostFix = '_smoothedJJ_smoothedTV_smoothfracUncert'
+#rfilePostFix = '_smoothedJJ_smoothedTV_smooth2DUncert'
+#rfilePostFix = '_rebinned1_stat0p2_smoothedTV_smoothUncert'
 isCategorized = True
 
 lumi = 138
 outDir = os.getcwd()+'/templates'+region+'_'+inDirPostFix
 templateFile = f'/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/templates{region}_{inDirPostFix}/templates_{discriminant}_{lumiStr}{year}{rfilePostFix}.root'
+#templateFile = f'/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/combineLimits/limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothUncertFrac2Symm0p07/templates_{discriminant}_{lumiStr}{year}{rfilePostFix}.root'
 
 if not os.path.exists(outDir): os.system('mkdir '+outDir)
 if not os.path.exists(outDir+'/abcdnn'): os.system('mkdir '+outDir+'/abcdnn')
@@ -67,6 +78,10 @@ systnames = {
         #'closure':'ABCDnn CR-to-SR',
         'train': 'ABCDnn Training',
         'correct': 'ABCDnn Closure correction',
+        #'smooth': 'Smoothing alternatives',
+        'smoothB': 'correction from full B',
+        'smooth2D': 'Smoothing from 2D',
+        'smoothfrac': 'Vary 1D smoothing frac',
         # 'trainMassRange1': 'ABCDnn Training for mass range up to 1200',
 	# 'trainMassRange2': 'ABCDnn Training for mass 1200 to 1400',
         # 'trainMassRange3': 'ABCDnn Training for mass 1400 to 2000',
