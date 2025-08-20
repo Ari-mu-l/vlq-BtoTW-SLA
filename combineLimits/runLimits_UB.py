@@ -9,7 +9,6 @@ limitdir = sys.argv[1]
 path = limitdir+'/'
 os.chdir(path)
 blind = False # unblind
-morph = True
 
 print('====================================================================')
 print('==   Launching limits for in',limitdir)

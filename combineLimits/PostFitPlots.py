@@ -36,7 +36,7 @@ path2 = limitdir+'/cmb/'+mass2
 path3 = limitdir+'/cmb/'+mass3
 
 isSR = False
-partialUnblind = True
+partialUnblind = False
 if '_D' in limitdir and 'partialBlind' not in limitdir:
     isSR = True
     unblind = True # unblind
@@ -150,11 +150,12 @@ def formatLowerHist(histogram, lpad):
         histogram.GetYaxis().SetLabelSize(0.14)
         histogram.GetYaxis().SetTitleSize(0.14)
         histogram.GetYaxis().SetTitleOffset(.35)
+        histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{#Err}')
         #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{#sqrt{bkg}}')
-        histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{bkgErr}')
+        #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{bkgErr}')
         histogram.GetYaxis().SetNdivisions(7)
         #histogram.GetYaxis().SetRangeUser(-2.99,2.99)
-        histogram.GetYaxis().SetRangeUser(-10,10)
+        histogram.GetYaxis().SetRangeUser(-5,5)
         histogram.GetYaxis().CenterTitle()
 
     
@@ -170,8 +171,8 @@ chns = []
 iPlot = ''
 
 iPlot = 'BpMass_ABCDnn'
-#chns = [k.GetName() for k in tFile.GetListOfKeys() if k.GetName().endswith('_postfit')]
-chns = [k.GetName() for k in tFile.GetListOfKeys()]
+chns = [k.GetName() for k in tFile.GetListOfKeys() if k.GetName().endswith('_postfit')]
+#chns = [k.GetName() for k in tFile.GetListOfKeys()]
 bkgProcList = ['ttx','ewk','major']
 bkgHistColors = {'major': kRed-7,'ewk':kMagenta-6,'ttx':kAzure+2}
 bkghists = {}
@@ -181,7 +182,7 @@ bkghistsmerged = {}
 for chn in chns:
 
     blind = False #False
-    partialUnblind = True
+    partialUnblind = False
     #if isSR and not unblind and ('Case1' in chn or 'Case2' in chn):
     #    blind = True
     if isSR and not unblind and ('Case1' in chn or 'Case2' in chn):
@@ -341,8 +342,9 @@ for chn in chns:
         hsig1merged.SetMaximum(1.5*max(hDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
         formatUpperHist(hsig1merged,hsig1merged)
         hsig1merged.Draw("HIST")
-
+        
     stackbkgHTmerged.Draw("SAME HIST")
+    #stackbkgHTmerged.Draw("SAME PE")
     hsig1merged.Draw("SAME HIST")
     #if isSR:
         #hsig2merged.Draw("SAME HIST")
@@ -448,10 +450,13 @@ for chn in chns:
         #formatUpperHist(hDatamerged,hDatamerged)
         lPad.cd()
         pullmerged=hDatamerged.Clone(chn+"pullmerged")
+        # for deficit at 1000
+        bin1000 = bkgHTgerrmerged.FindBin(1000+1)
         for binNo in range(1,hDatamerged.GetNbinsX()+1):
             # case for data < MC:
             dataerror = gaeDatamerged.GetErrorYhigh(binNo-1)
             MCerror = bkgHTgerrmerged.GetBinError(binNo)
+            MC = bkgHTgerrmerged.GetBinContent(binNo)
             # case for data > MC:
             if(hDatamerged.GetBinContent(binNo) > bkgHTmerged.GetBinContent(binNo)):
                 dataerror = gaeDatamerged.GetErrorYlow(binNo-1)
@@ -463,7 +468,12 @@ for chn in chns:
                 pull = 0
             else:
                 #print(hDatamerged.GetXaxis().GetBinCenter(binNo))
-                pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/MCerror # requested by Julie to understand the deficit in 1000 GeV
+                #pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/MCerror # requested by Julie to understand the deficit in 1000 GeV
+                #pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2)
+                #pull = 0
+                pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MC-MCerror**2)
+                if binNo==bin1000:
+                    print(bkgHTmerged.GetBinContent(binNo), pull, bkgHTmerged.GetBinContent(binNo)*pull)
             pullmerged.SetBinContent(binNo,pull)
             if pull>=1:
                 print(chn, binNo, pull)

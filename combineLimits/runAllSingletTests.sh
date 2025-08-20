@@ -7,7 +7,7 @@ echo "MAKE SURE YOU ARE ON EL9!!!"
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothUncert
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_clipped_smoothUncert_smoothAfterClip #_case2B #_test #_padded #_JumpExcC2Seg1 #_clip #_JumpAll
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert_noSmoothTail #_largeRateUncert2
-dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert #_largeRateUncert #_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_Case2DB_largeRateUncert2_C1C2SmallSmooth #_smoothfracUncert_Case2DB
+dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_smoothBUncert_largeRateUncert #_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_Case2DB_largeRateUncert2_C1C2SmallSmooth #_smoothfracUncert_Case2DB
 #dir=limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smooth2DfracUncert #Frac2Symm0p06 #NoSmoothTail #SymmNotAbs #2SymmNoSmooth #Symm #NoSmooth
 #dir=limits_templatesABCDnn_DV2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_Boosted #_smoothUncert_Boosted
 mass=1200
@@ -27,7 +27,7 @@ mass=1200
 # ########## PAUSE UNTIL FINISHED ####################
 
 #echo "Plotting GOF results:"python3 -u GoFPlotter.py $dir $mass
-python3 -u GoFPlotter.py $dir $mass
+#python3 -u GoFPlotter.py $dir $mass
 
 #python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts0p0.json --output $dir/cmb/$mass/impacts0p0 --summary --blind
 
@@ -47,7 +47,7 @@ mass=1200
 #python3 -u runInitialFit.py $dir $mass
 
 #echo "Running nuisance plot: CHECK LINES 382 and 411 FOR RANGES IF SYSTEMATICS CHANGE"
-python3 -u diffNuisances.py -g $dir/$BR/cmb/$mass/nuisancepulls.root $dir/$BR/cmb/$mass/fitDiagnosticsTest.root --abs >& $dir/$BR/cmb/$mass/nuisancepulls.txt
+#python3 -u diffNuisances.py -g $dir/$BR/cmb/$mass/nuisancepulls.root $dir/$BR/cmb/$mass/fitDiagnosticsTest.root --abs >& $dir/$BR/cmb/$mass/nuisancepulls.txt
 
 #echo "Running covariance plot: CHECK LINES 23/24 and 48/49 FOR RANGES IF SYSTEMATICS CHANGE"
 #python3 -u covariancePlotter.py $dir $mass

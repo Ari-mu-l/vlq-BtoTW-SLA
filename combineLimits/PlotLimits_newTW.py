@@ -225,7 +225,7 @@ def PlotLimits(limitDir,limitFile,tempKey):
 
     #mass2016_gr.Draw("same")
 
-    if not blind: observed.Draw("cpsame")
+    if not blind: observed.Draw("lpsame")
     theory_xsecS1_gr.SetLineColor(2)
     theory_xsecS1_gr.SetLineStyle(1)
     theory_xsecS1_gr.SetLineWidth(2)
@@ -328,7 +328,7 @@ def PlotLimits(limitDir,limitFile,tempKey):
 
     #mass2016_gr.Draw("same")
 
-    if not blind: observed.Draw("cpsame")
+    if not blind: observed.Draw("lpsame")
     theory_xsecD1_gr.SetLineColor(ROOT.kViolet)
     theory_xsecD1_gr.SetLineStyle(1)
     theory_xsecD1_gr.SetLineWidth(2)
