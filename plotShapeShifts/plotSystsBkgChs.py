@@ -9,13 +9,23 @@ from tdrStyle import *
 setTDRStyle()
 R.gROOT.SetBatch(1)
 
-discriminant = 'BpMass'
-rfilePostFix = '_rebinned_stat0p2'
+region = 'D'
+templatedir = 'templates'+region+'_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST'
+#templatedir = 'templates'+region+'_Jan2025_105binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin'
+discriminant = 'BpMass_ABCDnn'
+#rfilePostFix = ''
+#rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ'
+#rfilePostFix = '_smoothed_TVJJ_rebinned1_stat0p2'
+#rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV' # 1D smooth
+#rfilePostFix = '_smoothedJJ_rebinned1_stat0p2' # 2D smooth
+rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
 
 lumi = 138
 lumiStr = '_138fbfb'
-outDir = os.getcwd()+'/templatesD_Aug2024/'
-templateFile = '/uscms_data/d3/jmanagan/BtoTW/CMSSW_13_0_18/src/vlq-BtoTW-SLA/makeTemplates/templatesD_Aug2024/templates_'+discriminant+lumiStr+rfilePostFix+'.root'
+#outDir = os.getcwd()+'/templates'+region+'_Jan2025_210binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin/'
+outDir = os.getcwd()+f'/{templatedir}'
+templateFile = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'+templatedir+'/templates_'+discriminant+lumiStr+rfilePostFix+'.root'
+#templateFile = '/uscms/home/xshen/nobackup/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/combineLimits/limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin_alternative2/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2.root'
 
 if not os.path.exists(outDir): os.system('mkdir '+outDir)
 if not os.path.exists(outDir+'/bkgs'): os.system('mkdir '+outDir+'/bkgs')
@@ -26,80 +36,101 @@ channels = ['isL']
 tags = ['tagTjet','tagWjet','untagTlep','untagWlep']
 
 systnames = {
-        'elRecoSF':'El reco SF',
-        'elIdSF':'El ID SF',
-        'elIsoSF':'El iso SF',
-        'muRecoSF':'Mu reco SF',
-        'muIdSF':'Mu ID SF',
-        'muIsoSF':'Mu iso SF',        
-        'Pileup':'Pileup',
-        'Prefire':'Prefiring',
-        'jec2016APV':'JEC 16APV',
-        'jec2016':'JEC 16',
-        'jec2017':'JEC 17',
-        'jec2018':'JEC 18',
-        'jer2016APV':'JER 16APV',
-        'jer2016':'JER 16',
-        'jer2017':'JER 17',
-        'jer2018':'JER 18',
-        'jsf':'HT weight W+jets',
-        'toppt':'HT weight t#bar{t}',
-        'muRFcorrdNewSIG':'Ren./Fact. Sig',
-        'muRFcorrdNewTT':'Ren./Fact. t#bar{t}',
-        'muRFcorrdNewST':'Ren./Fact. single t',
-        'muRFcorrdNewTTX':'Ren./Fact. t#bar{t}+X',
-        'muRFcorrdNewWJT':'Ren./Fact. W+jets',
-        'muRFcorrdNewEWK':'Ren./Fact. DY+VV',
-        'muRFcorrdNewQCD':'Ren./Fact. QCD',
-        'pdfNew':'PDF',
-        'TrigEffEl2016APV':'El trigger 16APV',
-        'TrigEffEl2016':'El trigger 16',
-        'TrigEffEl2017':'El trigger 17',
-        'TrigEffEl2018':'El trigger 18',
-        'TrigEffMu2016APV':'Mu trigger 16APV',
-        'TrigEffMu2016':'Mu trigger 16',
-        'TrigEffMu2017':'Mu trigger 17',
-        'TrigEffMu2018':'Mu trigger 18',
-        'btagHFCO':'DeepJet HF correlated',
-        'btagHFUC2016APV':'DeepJet HF uncorrelated 16APV',
-        'btagHFUC2016':'DeepJet HF uncorrelated 16',
-        'btagHFUC2017':'DeepJet HF uncorrelated 17',
-        'btagHFUC2018':'DeepJet HF uncorrelated 18',
-        'btagLFCO':'DeepJet LF correlated',
-        'btagLFUC2016APV':'DeepJet HF uncorrelated 16APV',
-        'btagLFUC2016':'DeepJet LF uncorrelated 16',
-        'btagLFUC2017':'DeepJet LF uncorrelated 17',
-        'btagLFUC2018':'DeepJet LF uncorrelated 18',
-        'pNetTtag':'ParticleNet t SF',
-        'pNetWtag':'PartlcleNet W SF',
+        # 'elRecoSF':'El reco SF',
+        # 'elIdSF':'El ID SF',
+        # 'elIsoSF':'El iso SF',
+        # 'muRecoSF':'Mu reco SF',
+        # 'muIdSF':'Mu ID SF',
+        # 'muIsoSF':'Mu iso SF',        
+        # 'Pileup':'Pileup',
+        # 'PuJetSF':'PU Jet SF',
+        # 'Prefire':'Prefiring',
+        # 'jec2016APV':'JEC 16APV',
+        # 'jec2016':'JEC 16',
+        # 'jec2017':'JEC 17',
+        # 'jec2018':'JEC 18',
+        # 'jer2016APV':'JER 16APV',
+        # 'jer2016':'JER 16',
+        # 'jer2017':'JER 17',
+        # 'jer2018':'JER 18',
+        # 'jsf':'HT weight W+jets',
+        # 'toppt':'HT weight t#bar{t}',
+        #'muRFcorrdNewSIG':'Ren./Fact. Sig',
+        #'muRFcorrdNewTT':'Ren./Fact. t#bar{t}',
+        #'muRFcorrdNewST':'Ren./Fact. single t',
+        #'muRFcorrdNewTTX':'Ren./Fact. t#bar{t}+X',
+        #'muRFcorrdNewWJT':'Ren./Fact. W+jets',
+        #'muRFcorrdNewEWK':'Ren./Fact. DY+VV',
+        #'muRFcorrdNewQCD':'Ren./Fact. QCD',
+        'muREWK':'Ren. DY+VV',
+        'muRSIG':'Ren. Sig',
+        'muRTTX':'Ren. t#bar{t}+X',
+        'muFEWK':'Fact. DY+VV',
+        'muFSIG':'Fact. Sig',
+        'muFTTX':'Fact. t#bar{t}+X',
+        # 'pdfNew':'PDF',
+        # 'TrigEffEl2016APV':'El trigger 16APV',
+        # 'TrigEffEl2016':'El trigger 16',
+        # 'TrigEffEl2017':'El trigger 17',
+        # 'TrigEffEl2018':'El trigger 18',
+        # 'TrigEffMu2016APV':'Mu trigger 16APV',
+        # 'TrigEffMu2016':'Mu trigger 16',
+        # 'TrigEffMu2017':'Mu trigger 17',
+        # 'TrigEffMu2018':'Mu trigger 18',
+        # 'btagHFCO':'DeepJet HF correlated',
+        # 'btagHFUC2016APV':'DeepJet HF uncorrelated 16APV',
+        # 'btagHFUC2016':'DeepJet HF uncorrelated 16',
+        # 'btagHFUC2017':'DeepJet HF uncorrelated 17',
+        # 'btagHFUC2018':'DeepJet HF uncorrelated 18',
+        # 'btagLFCO':'DeepJet LF correlated',
+        # 'btagLFUC2016APV':'DeepJet HF uncorrelated 16APV',
+        # 'btagLFUC2016':'DeepJet LF uncorrelated 16',
+        # 'btagLFUC2017':'DeepJet LF uncorrelated 17',
+        # 'btagLFUC2018':'DeepJet LF uncorrelated 18',
+        # 'pNetTtag':'ParticleNet t SF',
+        # 'pNetWtag':'PartlcleNet W SF',
         }
+# if 'ABCDnn' in discriminant:
+#         systnames.pop('muRFcorrdNewTT')
+#         systnames.pop('muRFcorrdNewWJT')
+#         systnames.pop('muRFcorrdNewST')
+#         systnames.pop('muRFcorrdNewQCD'
+#                       )
 systematics = systnames.keys()
 
 RFile = R.TFile(templateFile)
 
 if not lumiStr[-2:] == 'fb': lumiStr += 'fb'
 for syst in systematics:
-        if syst == 'muRFcorrdNewSIG': continue
+        #if syst == 'muRFcorrdNewSIG': continue # WHY
+        if syst == 'muRSIG' or syst == 'muFSIG': continue
         # for systs where the histogram exists for only one process, adjust the list so they are process 0
-        if 'EWK' in syst:
-                bkgList = ['ewk','ttbar','singletop','wjets','ttx','qcd']
-        elif 'TTX' in syst:
-                bkgList = ['ttx','ttbar','singletop','wjets','ewk','qcd']
-        elif 'WJT' in syst:
-                bkgList = ['wjets','ttbar','singletop','ewk','ttx','qcd']
-        elif 'ST' in syst:
-                bkgList = ['singletop','ttbar','wjets','ewk','ttx','qcd']
-        elif 'QCD' in syst:
-                bkgList = ['qcd','ttbar','singletop','wjets','ewk','ttx']
+        if 'ABCDnn' in discriminant:
+                if 'EWK' in syst:
+                        bkgList = ['ewk','ttx']
+                elif 'TTX' in syst:
+                        bkgList = ['ttx','ewk']
+                else:
+                        bkgList = ['ewk','ttx']
         else:
-                bkgList = ['ttbar','singletop','wjets','ewk','ttx','qcd']
+                if 'EWK' in syst:
+                        bkgList = ['ewk','ttbar','singletop','wjets','ttx','qcd']
+                elif 'TTX' in syst:
+                        bkgList = ['ttx','ttbar','singletop','wjets','ewk','qcd']
+                elif 'WJT' in syst:
+                        bkgList = ['wjets','ttbar','singletop','ewk','ttx','qcd']
+                elif 'ST' in syst:
+                        bkgList = ['singletop','ttbar','wjets','ewk','ttx','qcd']
+                elif 'QCD' in syst:
+                        bkgList = ['qcd','ttbar','singletop','wjets','ewk','ttx']
+                else:
+                        bkgList = ['ttbar','singletop','wjets','ewk','ttx','qcd']
         for ch in channels:
                 for tag in tags:
-                        if ('Ttag' in syst and 'Tjet' not in tag and 'Wlep' not in tag) or ('Wtag' in syst and 'Wjet' not in tag and 'Tlep' not in tag):
+                        if ('Ttag' in syst and 'Tjet' not in tag) or ('Wtag' in syst and 'Wjet' not in tag):
                                 continue
                         print('-----------------------------'+syst+', '+ch+', '+tag+'--------------------------------')
                         histname = discriminant
-                        region = 'D'
                         #BpMass_138fbfb_isL_tagTjet_D__BpM800__pNetTtagUp
                         Prefix = histname+lumiStr+'_'+channels[0]+'_'+tag+'_'+region+'__'+bkgList[0]
                         try:
@@ -134,9 +165,9 @@ for syst in systematics:
                                                 hDn.Add(htempDown)
                                 except:pass
 
-                        normByBinWidth(hNm)
-                        normByBinWidth(hUp)
-                        normByBinWidth(hDn)
+                        normByBinWidth(hNm,50)
+                        normByBinWidth(hUp,50)
+                        normByBinWidth(hDn,50)
 
                         canv = R.TCanvas(Prefix+'__'+syst,Prefix+'__'+syst,1000,700)
                         yDiv = 0.35
@@ -180,7 +211,7 @@ for syst in systematics:
                         hUp.SetMarkerSize(.05)
                         hDn.SetMarkerSize(.05)
 
-                        hUp.GetYaxis().SetTitle("< Events / GeV >")
+                        hUp.GetYaxis().SetTitle("< Events / 50 GeV >")
 
                         hUp.GetYaxis().SetLabelSize(0.10)
                         hUp.GetYaxis().SetTitleSize(0.1)
@@ -239,7 +270,7 @@ for syst in systematics:
                         pullDown.GetYaxis().SetTitleSize(0.1)
                         pullDown.GetYaxis().SetTitleOffset(.55)
                         pullDown.GetYaxis().SetNdivisions(506)
-                        if 'muRF' in syst:
+                        if 'mu' in syst:
                                 pullUp.SetMinimum(-0.5)
                                 pullUp.SetMaximum(0.5)
                         else:
@@ -254,6 +285,7 @@ for syst in systematics:
                         legend = R.TLegend(0.4,0.65,0.7,0.90)
                         legend.SetShadowColor(0);
                         legend.SetFillColor(0);
+                        legend.SetFillStyle(0);
                         legend.SetLineColor(0);
                         legend.AddEntry(hNm,'Nominal','l')
                         legend.AddEntry(hUp,systnames[syst]+' Up','l')
@@ -304,6 +336,8 @@ for syst in systematics:
                         if ch=='isL': channelTxt = 'e/#mu+jets'
                         tagTxt = tag
                         sigbkgTxt = 'Total Bkg'
+                        if 'ABCDnn' in discriminant:
+                                sigbkgTxt = 'Minor Bkg'
                         Tex2.DrawLatex(textx, 0.85, channelTxt)
                         Tex2.DrawLatex(textx, 0.80, tagTxt)
                         Tex2.DrawLatex(textx, 0.75, sigbkgTxt)
@@ -314,8 +348,8 @@ for syst in systematics:
                         canv.SaveAs(outDir+'/bkgs/'+syst+'_'+ch+'_'+tag+'.root')
 
                         print('-----------------------------'+syst+', '+ch+', '+tag+' SIGNAL --------------------------------')
-                        if syst=='muRFcorrdNewTT': systtemp = 'muRFcorrdNewSIG'
-                        elif 'muRFcorrd' in syst: continue
+                        if 'TTX' in syst: systtemp = syst.replace('TTX','SIG')
+                        elif ('muR' in syst) or ('muF' in syst): continue
                         else: systtemp = syst
 
                         hNm.Reset()
@@ -330,12 +364,13 @@ for syst in systematics:
                                 continue
 
                         hNm = RFile.Get(Prefix.replace(channels[0],ch)).Clone()
+                        print(systtemp)
                         hUp = RFile.Get(Prefix.replace(channels[0],ch)+'__'+systtemp+'Up').Clone()
                         hDn = RFile.Get(Prefix.replace(channels[0],ch)+'__'+systtemp+'Down').Clone()
 
-                        normByBinWidth(hNm)
-                        normByBinWidth(hUp)
-                        normByBinWidth(hDn)
+                        normByBinWidth(hNm,50)
+                        normByBinWidth(hUp,50)
+                        normByBinWidth(hDn,50)
 
                         canv = R.TCanvas(Prefix+'__'+systtemp,Prefix+'__'+systtemp,1000,700)
                         yDiv = 0.35
@@ -378,7 +413,7 @@ for syst in systematics:
                         hUp.SetMarkerSize(.05)
                         hDn.SetMarkerSize(.05)
 
-                        hUp.GetYaxis().SetTitle("< Events / 1 GeV >")
+                        hUp.GetYaxis().SetTitle("< Events / 50 GeV >")
                         hUp.GetYaxis().SetLabelSize(0.10)
                         hUp.GetYaxis().SetTitleSize(0.1)
                         hUp.GetYaxis().SetTitleOffset(.6)
@@ -439,12 +474,12 @@ for syst in systematics:
                         pullDown.GetYaxis().SetTitleSize(0.1)
                         pullDown.GetYaxis().SetTitleOffset(.55)
                         pullDown.GetYaxis().SetNdivisions(506)
-                        if 'muRF' in systtemp or 'jec' in systtemp:
-                                pullUp.SetMinimum(-0.5)#min(pullDown.GetMinimum(),pullUp.GetMinimum()))
-                                pullUp.SetMaximum(0.5)#max(pullDown.GetMaximum(),pullUp.GetMaximum()))
+                        if 'mu' in systtemp: # or 'jec' in systtemp:
+                                pullUp.SetMinimum(-0.3)#min(pullDown.GetMinimum(),pullUp.GetMinimum()))
+                                pullUp.SetMaximum(0.3)#max(pullDown.GetMaximum(),pullUp.GetMaximum()))
                         else:
-                                pullUp.SetMinimum(-0.20)
-                                pullUp.SetMaximum(0.20)
+                                pullUp.SetMinimum(-0.10)
+                                pullUp.SetMaximum(0.10)
                         pullUp.Draw('hist')
                         pullDown.Draw('same hist')
                         lPad.RedrawAxis()

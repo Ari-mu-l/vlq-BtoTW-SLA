@@ -10,7 +10,7 @@ from tdrStyle import *
 setTDRStyle()
 gROOT.SetBatch(1)
 
-region = 'D'
+region = 'V2'
 year = '' # '_2016'
 if year=='':
         bins = 210 #210
@@ -18,15 +18,16 @@ else:
         bins = 105
 discriminant = 'BpMass_ABCDnn' # not plotting uncertainty shifts for minor backgrounds
 #inDirPostFix = f'Jan2025_{bins}binsBtargetHoleCorrABCpABCTrain_2Dsmooth_rebin{year}' # 2D smooth
-#inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST'
+inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST'
 #inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert' # 1D smooth
-inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert' # ARC request: compare full region B correction
+#inDirPostFix = f'Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert' # ARC request: compare full region B correction
 #rfilePostFix = '_rebinned1_stat0p2_smoothed_TVJJ' #_UC'
 #rfilePostFix = '_smoothedJJ_rebinned1_stat0p2' # 2D smooth
 #rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV' # 1D smooth
 #rfilePostFix = '_rebinned1_stat0p2_smoothedTV'
 #rfilePostFix = '_rebinned1_stat0p2'
-rfilePostFix = '_smoothBUncert_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothedB'
+#rfilePostFix = '_smoothBUncert_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothedB'
+rfilePostFix = '_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
 #rfilePostFix = '_smoothedJJ_smoothedTV_smoothBUncert'
 #rfilePostFix = '_smoothedJJ_smoothedTV_smoothfracUncert'
 #rfilePostFix = '_smoothedJJ_smoothedTV_smooth2DUncert'
