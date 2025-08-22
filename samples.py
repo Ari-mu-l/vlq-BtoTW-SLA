@@ -21,7 +21,7 @@ for syst in uncorrList_sf:
         systListFullPlots.append(syst+year)
 
 
-systListABCDnn = ['correct','train','pNetTtag','pNetWtag']
+systListABCDnn = ['correct','train','pNetTtag','pNetWtag', 'smooth2D'] #, 'smoothfrac'] #'smooth' #'smoothB'
 
 # out of date
 factorABCDnn = {'allWlep':'0.034045477',
@@ -55,6 +55,8 @@ class sample:
 # From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
 xsec = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
 # extrapolating from ln(xsec) fit I get 0.000238 for 2200
+for mass in xsec.keys():
+    xsec[mass] = xsec[mass]*0.5  # these xsec values need to be multiplied by the 0.5 BR explicitly
 
 Bprime_M1000_2016APV = sample("Bprime_M1000_2016APV", 1.0, "2016APV", "Bprime_M1000_2016APVULNanoList.txt", "/BprimeBtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
 Bprime_M1200_2016APV = sample("Bprime_M1200_2016APV", 1.0, "2016APV", "Bprime_M1200_2016APVULNanoList.txt", "/BprimeBtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
