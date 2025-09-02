@@ -1,4 +1,4 @@
-from ROOT import gROOT, TFile, TH1D, TCanvas, TLegend, TVectorD, TGraphAsymmErrors, TGraph, TLatex
+from ROOT import gROOT, TFile, TH1D, TCanvas, TLegend, TVectorD, TGraphAsymmErrors, TGraph, TLatex, TColor
 from array import array
 import math
 from math import *
@@ -80,7 +80,8 @@ theory_xsecS1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_dn))
 
 theory_xsecS1_gr = TGraphAsymmErrors(TVectorD(len(theory_mass),theory_mass),theory_xsecS1_v,TVectorD(len(theory_mass),masserr),TVectorD(len(theory_mass),masserr),theory_xsecS1_dn_v,theory_xsecS1_up_v)
 theory_xsecS1_gr.SetFillStyle(3001)
-theory_xsecS1_gr.SetFillColor(ROOT.kRed)
+red = TColor.GetColor("#e42536")
+theory_xsecS1_gr.SetFillColor(red) #ROOT.kRed
 			   
 theoryS1 = TGraph(len(theory_mass))
 for i in range(len(theory_mass)):
@@ -92,7 +93,8 @@ theory_xsecS5_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecS5_dn))
 
 theory_xsecS5_gr = TGraphAsymmErrors(TVectorD(len(theory_mass),theory_mass),theory_xsecS5_v,TVectorD(len(theory_mass),masserr),TVectorD(len(theory_mass),masserr),theory_xsecS5_dn_v,theory_xsecS5_up_v)
 theory_xsecS5_gr.SetFillStyle(3001)
-theory_xsecS5_gr.SetFillColor(ROOT.kBlue)
+blue = TColor.GetColor("#5790fc")
+theory_xsecS5_gr.SetFillColor(blue) # ROOT.kBlue
 			   
 theoryS5 = TGraph(len(theory_mass))
 for i in range(len(theory_mass)):
@@ -104,7 +106,8 @@ theory_xsecD1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecD1_dn))
 
 theory_xsecD1_gr = TGraphAsymmErrors(TVectorD(len(theory_mass),theory_mass),theory_xsecD1_v,TVectorD(len(theory_mass),masserr),TVectorD(len(theory_mass),masserr),theory_xsecD1_dn_v,theory_xsecD1_up_v)
 theory_xsecD1_gr.SetFillStyle(3001)
-theory_xsecD1_gr.SetFillColor(ROOT.kViolet)
+violet = TColor.GetColor("#964a8b")
+theory_xsecD1_gr.SetFillColor(violet) # ROOT.kViolet
 			   
 theoryD1 = TGraph(len(theory_mass))
 for i in range(len(theory_mass)):
@@ -202,9 +205,11 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected.SetLineWidth(2)
     expected.SetLineStyle(2)
     expected68 = TGraphAsymmErrors(massv,expv,masserrv,masserrv,exp68Lv,exp68Hv)
-    expected68.SetFillColor(ROOT.kGreen+1)
+    green = TColor.GetColor("#607641")
+    expected68.SetFillColor(green) # ROOT.kGreen+1
     expected95 = TGraphAsymmErrors(massv,expv,masserrv,masserrv,exp95Lv,exp95Hv)
-    expected95.SetFillColor(ROOT.kOrange)
+    yellow = TColor.GetColor("#F5BB54")
+    expected95.SetFillColor(yellow) # ROOT.kOrange
     #'''
     c1 = TCanvas("c1","Limits", 600, 500)
     c1.SetBottomMargin(0.12)
