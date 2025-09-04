@@ -27,6 +27,13 @@ plotList='BpMass_ABCDnn'
 #plotList='BpMass'
 for iPlot in $plotList; do
     echo $iPlot
+
+    ### plot for paper ###
+    python3 plotHists_paper.py BpMass all False _Jan2025 False False
+    python3 plotHists_paper.py BpDecay all False _Jan2025 False False
+    python3 plotHists_paper.py NBJets all False _Jan2025 False False
+    python3 plotHists_paper.py NJetsForward all False _Jan2025 False False
+    
     #python3 groupHists.py $iPlot A True _Jan2025
     #python3 groupHists.py $iPlot B True _Jan2025
     #python3 groupHists.py $iPlot C True _Jan2025
@@ -225,7 +232,19 @@ for iPlot in $plotList; do
     #python3 modifyBinning.py BpMass_ABCDnn templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST 0.2 1
     #python3 modifyBinning_smooth2Dcorr_traincorr.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
     #python3 modifyBinning_smooth2Dcorr_smooth2D.py D Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST
-    python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert
+    #python3 plotHists.py $iPlot D True _Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST False False _smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert
+    
+    #####################################
+    # ANv8: V2 plots without correction #
+    #####################################
+    #python3 modifyBinning_smooth2Dcorr_jecjer.py V2 Jan2025_210bins_noCorrection
+    #python3 modifyBinning.py BpMass_ABCDnn templatesV2_Jan2025_210bins_noCorrection
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned1_stat0p2
+    #python3 plotHists.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned3_stat0p2
+
+    ### Plot for paper ###
+    #python3 plotHists_paper.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned1_stat0p07
     
     #####################################################################
     # ARC request: compare smoothB for case 1 and 2 as smoothing uncert #
