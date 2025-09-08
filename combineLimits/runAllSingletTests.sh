@@ -8,6 +8,7 @@ echo "MAKE SURE YOU ARE ON EL9!!!"
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_clipped_smoothUncert_smoothAfterClip #_case2B #_test #_padded #_JumpExcC2Seg1 #_clip #_JumpAll
 #dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert_noSmoothTail #_largeRateUncert2
 dir=limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_smoothBUncert_largeRateUncert #_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth #_tail0p01 #_Case2DB_largeRateUncert2_C1C2SmallSmooth #_smoothfracUncert_Case2DB
+#dir=limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_2DsmoothUncert
 #dir=limits_templatesABCDnn_V2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_smooth2DfracUncert #Frac2Symm0p06 #NoSmoothTail #SymmNotAbs #2SymmNoSmooth #Symm #NoSmooth
 #dir=limits_templatesABCDnn_DV2_Jan2025_RB1_2DcorrBtargetHoleCorrBTrain_smooth_rebin_dynamicST_Boosted #_smoothUncert_Boosted
 mass=1200
@@ -29,12 +30,16 @@ mass=1200
 #echo "Plotting GOF results:"python3 -u GoFPlotter.py $dir $mass
 #python3 -u GoFPlotter.py $dir $mass
 
-#python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts0p0.json --output $dir/cmb/$mass/impacts0p0 --summary --blind
+#python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts0p0.json --output $dir/cmb/$mass/impacts0p0 --summary
 
 # STEP 2
 #python3 -u runInitialFit.py $dir 1300
 #python3 -u runInitialFit.py $dir 1800
-python3 -u PostFitPlots.py $dir $mass
+#python3 -u PostFitPlots.py $dir $mass
+
+#python3 -u runInitialFit.py $dir 800
+#python3 -u runInitialFit.py $dir 1400
+python3 -u PostFitPlots_paper.py $dir $mass # postfit plots for paper
 
 
 # echo "--------------- Working on VR  -------------------"
@@ -120,11 +125,11 @@ mass=1200
 #echo "Submitting toys to condor for 1800 R = exp0:"
 #python3 -u runCondorToys.py inject $dir $mass 0.38671875 500
 
-#mass=1200
+mass=1200
 #echo "Running impact test: "
-#python3 -u runImpacts.py $dir $mass local 1.24609375
+#python3 -u runImpacts.py $dir $mass local 1.2734375
 
-#python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts1p04.json --output $dir/cmb/$mass/impacts1p04 --summary
+#python3 -u /uscms_data/d3/jmanagan/CombineV10/CMSSW_14_1_0_pre4/bin/el9_amd64_gcc12/plotImpacts.py --input $dir/cmb/$mass/impacts1p2734375.json --output $dir/cmb/$mass/impacts1p2734375 --summary
 
 #echo "Plotting all injection results:"
 #mass=1200

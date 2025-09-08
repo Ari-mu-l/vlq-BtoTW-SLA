@@ -55,17 +55,17 @@ saveKey = '' # tag for plot names
 
 datalabel = 'data_obs'
 shiftlist = ['Up','Down'] # change to Down for future
-sig1='BpM1000' #  choose the 1st signal to plot
-sig1leg='B (1.0 TeV, 1 pb)'
-sig2='BpM1800' #  choose the 2nd signal to plot
-sig2leg='B (1.8 TeV, 1 pb)'
+sig1='BpM800' #  choose the 1st signal to plot
+sig1leg='B (0.8 TeV, 1 pb)' # singlet 1% xsec
+sig2='BpM1400' #  choose the 2nd signal to plot
+sig2leg='B (1.4 TeV, 1 pb)'
 if isCategorized:
-        sig1leg='B (1.0 TeV, 36 fb)'
-        sig2leg='B (1.8 TeV, 1 fb)'
+        sig1leg='B (1.0 TeV, 59.35 fb)'
+        sig2leg='B (1.8 TeV, 2.66 fb)'
 
-scaleSignals = True
+scaleSignals = False # no x100 on signal. use log plot
 #if not isCategorized: scaleSignals = True
-sigScaleFact = 100
+sigScaleFact = 1
 print('Scaling signals?',scaleSignals)
 print('Scale factor = ',sigScaleFact)
 tempsig='templates_'+iPlot+'_'+lumiInTemplates+''+isRebinned+'.root'#+'_Data18.root'
@@ -362,8 +362,8 @@ for tag in taglist:
                         hsig1.Scale(1/hsig1.Integral())
                         hsig2.Scale(1/hsig2.Integral())
                 if isCategorized:
-                        hsig1.Scale(xsec[sig1[3:]]) ## B singlet cross sections -- modbinning has the BR multiplier to get singlet!
-                        hsig2.Scale(xsec[sig2[3:]])
+                        hsig1.Scale(0.5*xsec[sig1[3:]]) ## B singlet cross sections -- modbinning has the BR multiplier to get singlet!
+                        hsig2.Scale(0.5*xsec[sig2[3:]])
                 #if len(isRebinned) > 0: ## FIXME later
                 #        hsig1.Scale(10) # 100fb input -> 1pb
                 #        hsig2.Scale(10)
@@ -526,6 +526,16 @@ for tag in taglist:
                 if not scaleSignals:
                         scaleFact1=1
                         scaleFact2=1
+                        if isCategorized:
+                                if 'jet' in tag:
+                                        scaleFact2=5
+                                        if 'x' not in sig2leg:
+                                                sig2leg+=f' x {scaleFact2}'
+                                else:
+                                        sig2leg = sig2leg.split('x')[0]
+                        else:
+                                scaleFact1=100 # scale kinematicsAll to 1pb
+                                scaleFact2=100
                 hsig1.Scale(scaleFact1)
                 hsig2.Scale(scaleFact2)
 
