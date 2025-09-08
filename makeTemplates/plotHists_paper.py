@@ -15,6 +15,9 @@ gROOT.SetBatch(1)
 # 3 specify the precision
 gStyle.SetTitleFont(42)
 gStyle.SetTextFont(42)
+# set tick marks on both sides
+gStyle.SetPadTickX(1)
+gStyle.SetPadTickY(1)
 
 start_time = time.time()
 
@@ -117,7 +120,7 @@ if len(isRebinned)>0 and 'stat1p1' not in isRebinned and 'mvagof' not in isRebin
                 doNormByBinWidth = False
         else:
                 doNormByBinWidth = True
-doNormByBinWidth = False # TEMP: Try for paper
+#doNormByBinWidth = False # TEMP: Try for paper
 
 doOneBand = True
 if not doAllSys: doOneBand = True # Don't change this!
@@ -182,11 +185,12 @@ def formatUpperHist(histogram,th1hist):
                 labels = ['','T+lepW','W+lepT','X+lepT','X+lepW']
                 for ibin in range(1,th1hist.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
-                histogram.GetXaxis().SetLabelSize(0.25)
+                #histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetLabelSize(0)
                 histogram.GetXaxis().SetRangeUser(1,5)
                 histogram.GetXaxis().SetTitleOffset(1.0)
                 histogram.GetXaxis().SetTitle('B quark decay mode')
-
+                histogram.GetXaxis().SetNdivisions(0)
         if blind == True:
                 histogram.GetXaxis().SetLabelSize(0.045)
                 histogram.GetXaxis().SetTitleSize(0.055)
@@ -197,6 +201,8 @@ def formatUpperHist(histogram,th1hist):
         else:
                 histogram.GetYaxis().SetLabelSize(0.05)
                 histogram.GetYaxis().SetTitleSize(0.06)
+                if yLog:
+                        histogram.GetYaxis().SetTitleOffset(0.82)
                 #histogram.GetYaxis().SetTitleOffset(1.1) #used to be 0.82. overlaps with label
 
         #histogram.GetYaxis().CenterTitle()
@@ -212,7 +218,7 @@ def formatUpperHist(histogram,th1hist):
 
                 if yLog:
                         uPad.SetLogy()
-                        if not (doNormByBinWidth and tag=='tagTjet'):
+                        if not (doNormByBinWidth and 'jet' in tag):
                                 histogram.SetMaximum(500*histogram.GetMaximum())
                         else: 
                                 histogram.SetMaximum(200*histogram.GetMaximum())
@@ -255,7 +261,7 @@ def formatLowerHist(histogram):
         histogram.GetYaxis().SetNdivisions(7)
         if doRealPull: 
                 histogram.GetYaxis().SetRangeUser(-2.99,2.99)
-        elif yLog and (doNormByBinWidth and tag=='tagTjet'):
+        elif yLog and (doNormByBinWidth and 'jet' in tag):
                 histogram.GetYaxis().SetRangeUser(0.1,1.9)
         else: 
                 histogram.GetYaxis().SetRangeUser(0.1,1.9)
@@ -339,7 +345,17 @@ for tag in taglist:
                         else:
                                 sys.exit("Error: Edit partial unblinding for {}!".format(iPlot))
 
-                gaeData = TGraphAsymmErrors(hData.Clone(hData.GetName().replace(datalabel,'gaeDATA')))
+                #if doNormByBinWidth and tag=='tagTjet':
+                #       gaeData = TGraphAsymmErrors(hData.Clone(hData.GetName().replace(datalabel,'gaeDATA')))
+                #else:
+                if not isCategorized and 'BpDecay' in iPlot:
+                        gaeData = hData.Clone(hData.GetName().replace(datalabel,'gaeDATA'))
+                else:
+                        gaeData = TGraphAsymmErrors(hData.Clone(hData.GetName().replace(datalabel,'gaeDATA')))
+                        if not (doNormByBinWidth and 'jet' in tag): # plot horizontal bar only for doNormByBinWidth
+                                for binNo in range(0,hData.GetNbinsX()+2):
+                                        gaeData.SetPointEXhigh(binNo-1,0)
+                                        gaeData.SetPointEXlow(binNo-1,0)
                 hsig1 = RFile1.Get(histPrefix+'__'+sig1).Clone(histPrefix+'__sig1')
                 hsig2 = RFile1.Get(histPrefix+'__'+sig2).Clone(histPrefix+'__sig2')
                 if plotNorm:
@@ -351,7 +367,7 @@ for tag in taglist:
                 #if len(isRebinned) > 0: ## FIXME later
                 #        hsig1.Scale(10) # 100fb input -> 1pb
                 #        hsig2.Scale(10)
-                if doNormByBinWidth and tag=='tagTjet':
+                if doNormByBinWidth and 'jet' in tag:
                         poissonNormByBinWidth(gaeData,hData,perNGeV)
                         for proc in bkgProcList:
                                 try:
@@ -361,9 +377,11 @@ for tag in taglist:
                         normByBinWidth(hsig1,perNGeV)
                         normByBinWidth(hsig2,perNGeV)
                         normByBinWidth(hData,perNGeV)
-                else: poissonErrors(gaeData)
+                elif not(not isCategorized and 'BpDecay' in iPlot): poissonErrors(gaeData) # Draw normal TH1 for easier formatting
+                
                 # Yes, there are easier ways using the TH1's but
                 # it would be rough to swap objects lower down
+
 
                 if plotABCDnn:
                         bkghists["ABCDnn"+catStr] = bkghists[ABCDnnProcList[0]+catStr].Clone()
@@ -444,7 +462,7 @@ for tag in taglist:
                                         for ud in shiftlist:
                                                 try:
                                                         systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
-                                                        if doNormByBinWidth and tag=='tagTjet': 
+                                                        if doNormByBinWidth and 'jet' in tag: 
                                                                 normByBinWidth(systHists[proc+catStr+syst+ud],perNGeV)
                                                 except:
                                                         if 'Wtag' in syst and ('Tjet' in tag or 'Wlep' in tag): continue
@@ -585,6 +603,10 @@ for tag in taglist:
                 #CMS.SetLumi(138)
                 #c1 = CMS.cmsCanvas("c1",0,1,0,1, 'B quark ', 'Events/GeV', extraSpace=0.01, iPos=0) # out-of-frame # paper
                 c1 = TCanvas("c1","c1",1200,1000) # used to be 1200 and 1000, but the y-axis labels might overlap
+                #if doNormByBinWidth and tag=='tagTjet':
+                #       gStyle.SetErrorX(0.5)
+                #else:
+                #       gStyle.SetErrorX(0)
                 gStyle.SetErrorX(0.5)
                 yDiv=0.25
                 if blind == True: yDiv=0.01
@@ -607,6 +629,7 @@ for tag in taglist:
                 uPad.SetRightMargin(rMargin)
                 uPad.SetLeftMargin(0.15) #used to be 0.105. y axis label overlaps with title
                 uPad.Draw()
+                
                 if blind == False:
                         lPad=TPad("lPad","",0,0,1,yDiv) #for sigma runner
                         lPad.SetTopMargin(0)
@@ -615,14 +638,14 @@ for tag in taglist:
                         lPad.SetLeftMargin(0.15) #used to be 0.105. y axis label overlaps with title
                         lPad.SetGridy()
                         lPad.Draw()
-                if not (doNormByBinWidth and tag=='tagTjet'): hData.SetMaximum(1.4*max(hData.GetMaximum(),bkgHT.GetMaximum()))
+                if not (doNormByBinWidth and 'jet' in tag): hData.SetMaximum(1.4*max(hData.GetMaximum(),bkgHT.GetMaximum()))
                 hData.SetMinimum(0.015)
                 hData.SetTitle("")
                 # this is super important now!! gaeData has badly defined (negative) maximum
                 gaeData.SetMaximum(1.2*max(hData.GetMaximum(),bkgHT.GetMaximum()))
                 gaeData.SetMinimum(0.015)
                 gaeData.SetTitle("")
-                if doNormByBinWidth and tag=='tagTjet':
+                if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10):
                                 gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
                         else: 
@@ -631,11 +654,23 @@ for tag in taglist:
                 formatUpperHist(gaeData,hData)
                 uPad.cd()
                 gaeData.SetTitle("")
+                #gaeData.GetXaxis().SetTickLength(0)
                 if not blind:
-                        gaeData.Draw("apz")
+                        # if doNormByBinWidth and tag=='tagTjet':
+                        #         gaeData.Draw("apz")
+                        # else:
+                        #         gaeData.Draw("apz")
+                        if not isCategorized and 'BpDecay' in iPlot:
+                                gaeData.Draw("PEX0")
+                        else:
+                                gaeData.Draw("apz")
+                                # if doNormByBinWidth and tag=='tagTjet':
+                                #         gaeData.Draw("apz")
+                                # else:
+                                #         gaeData.Draw("apzex0")
                 if blind: 
                         hsig1.SetMinimum(0.015)
-                        if doNormByBinWidth and tag=='tagTjet':
+                        if doNormByBinWidth and 'jet' in tag:
                                 if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10): 
                                         hsig1.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
                                 else: hsig1.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
@@ -644,7 +679,7 @@ for tag in taglist:
                         if iPlot=='Tau21Nm1': hsig1.SetMaximum(1.5*hData.GetMaximum())
                         formatUpperHist(hsig1,hsig1)
                         hsig1.Draw("HIST")
-                if doNormByBinWidth and tag=='tagTjet':
+                if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10): 
                                 hData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
                         else: 
@@ -654,7 +689,15 @@ for tag in taglist:
                 stackbkgHT.Draw("SAME HIST")
                 hsig1.Draw("SAME HIST")
                 hsig2.Draw("SAME HIST")
-                if not blind: gaeData.Draw("PZ") #redraw data so its not hidden
+                if not blind:
+                        # if doNormByBinWidth and tag=="tagTjet":
+                        #         gaeData.Draw("PZ") #redraw data so its not hidden
+                        # else:
+                        if not isCategorized and 'BpDecay' in iPlot:
+                                gaeData.Draw("PEX0 SAME") #redraw data so its not hidden
+                        else:
+                                gaeData.Draw("PZ")
+                                #gaeData.Draw("PZEX0") #redraw data so its not hidden
                 uPad.RedrawAxis()
                 bkgHTgerr.Draw("SAME E2")
                 #bkgHTgerr.Draw("SAME PE")
@@ -701,9 +744,9 @@ for tag in taglist:
                         chLatex.DrawLatex(0.26, 0.67, tagString)
                         chLatex.DrawLatex(0.26, 0.61, regionString)
                 else:
-                        chLatex.DrawLatex(0.3, 0.85, flvString)
-                        chLatex.DrawLatex(0.3, 0.79, tagString)
-                        chLatex.DrawLatex(0.3, 0.73, regionString)
+                        chLatex.DrawLatex(0.3, 0.80, flvString)
+                        chLatex.DrawLatex(0.3, 0.73, tagString)
+                        chLatex.DrawLatex(0.3, 0.66, regionString)
                         # if isCategorized:
                         #         chLatex.DrawLatex(0.3, 0.85, flvString)
                         #         chLatex.DrawLatex(0.3, 0.79, tagString)
@@ -717,7 +760,7 @@ for tag in taglist:
                 #         leg = TLegend(0.5,0.62,0.95,0.89)
                 # else:
                 #         leg = TLegend(0.5,0.57,0.95,0.84)
-                leg = TLegend(0.5,0.62,0.95,0.89)
+                leg = TLegend(0.47,0.62,0.92,0.89)
                 
                 leg.SetShadowColor(0)
                 leg.SetFillColor(0)
@@ -733,8 +776,11 @@ for tag in taglist:
                         scaleFact1Str = ''
                         scaleFact2Str = ''
                 if drawQCD:
-                        if not blind: 
-                                leg.AddEntry(gaeData,"Data","pel")  #left
+                        if not blind:
+                                if doNormByBinWidth and "jet" in tag:
+                                        leg.AddEntry(gaeData,"Data","pel")  #left
+                                else:
+                                        leg.AddEntry(gaeData,"Data","pex")  #left
                                 try:
                                         leg.AddEntry(bkghists['singletop'+catStr],"single t","f") #left
                                 except: pass
@@ -780,7 +826,10 @@ for tag in taglist:
                 if not drawQCD:
                         if not blind:
                                 if plotABCDnn:
-                                        leg.AddEntry(gaeData,"Data","pel")
+                                        if doNormByBinWidth and "jet" in tag:
+                                                leg.AddEntry(gaeData,"Data","pel")
+                                        else:
+                                                leg.AddEntry(gaeData,"Data","pex")
                                         leg.AddEntry(bkghists['ABCDnn'+catStr],"ABCDnn","f")
                                         leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l") #left
                                         leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f")
@@ -856,14 +905,20 @@ for tag in taglist:
 
                 #prelimTex3.SetTextFont(52)
                 #prelimTex3.SetTextFont(42)
-                prelimTex3.SetTextSize(0.08)
+                if isCategorized:
+                        prelimTex3.SetTextSize(0.07)
+                else:
+                        prelimTex3.SetTextSize(0.08)
                 if blind: prelimTex3.SetTextSize(0.06)
                 prelimTex3.SetLineWidth(2)
                 # if not blind:
                 #         prelimTex3.DrawLatex(0.23,0.945,"Private work (CMS data & simulation)") #"Preliminary")
                 # if blind: 
                 #         prelimTex3.DrawLatex(0.26,0.945,"Private work (CMS data & simulation)") #"Preliminary")
-                prelimTex3.DrawLatex(0.19,0.86,"#bf{CMS}") #"Preliminary")
+                if isCategorized:
+                        prelimTex3.DrawLatex(0.15,0.96,"#bf{CMS}")
+                else:
+                        prelimTex3.DrawLatex(0.19,0.86,"#bf{CMS}") #"Preliminary")
 
 
                 if blind == False and not doRealPull:
@@ -880,7 +935,10 @@ for tag in taglist:
                         pull.SetMarkerStyle(20)
 
                         formatLowerHist(pull)
-                        pull.Draw("E0")
+                        if doNormByBinWidth and 'jet' in tag:
+                                pull.Draw("E0") #E0
+                        else:
+                                pull.Draw("EX0")
 
                         BkgOverBkg = pull.Clone("bkgOverbkg")
                         BkgOverBkg.Divide(bkgHT, bkgHT)
@@ -944,7 +1002,10 @@ for tag in taglist:
                                 else: 
                                         pullLegend.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus lumi)" , "f")
                         pullLegend.Draw("SAME")
-                        pull.Draw("SAME E0")
+                        if doNormByBinWidth and	'jet' in tag:
+                                pull.Draw("SAME E0") #E0
+                        else:
+                                pull.Draw("SAME EX0")
                         lPad.RedrawAxis()
 
                 if blind == False and doRealPull:
