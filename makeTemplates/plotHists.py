@@ -570,6 +570,9 @@ for tag in taglist:
                 bkgHTgerr.SetFillColor(kBlack)
 
                 gStyle.SetOptStat(0)
+                #CMS.SetExtraText("") # "Preliminary"
+                #CMS.SetLumi(138)
+                #c1 = CMS.cmsCanvas("c1",0,1,0,1, 'B quark ', 'Events/GeV', extraSpace=0.01, iPos=0) # out-of-frame # paper
                 c1 = TCanvas("c1","c1",1200,1000) # used to be 1200 and 1000, but the y-axis labels might overlap
                 gStyle.SetErrorX(0.5)
                 yDiv=0.25

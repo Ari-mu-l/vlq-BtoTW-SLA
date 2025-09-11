@@ -29,10 +29,10 @@ for iPlot in $plotList; do
     echo $iPlot
 
     ### plot for paper ###
-    #python3 plotHists_paper.py BpMass all False _Jan2025 False False
-    #python3 plotHists_paper.py BpDecay all False _Jan2025 False False
-    #python3 plotHists_paper.py NBJets all False _Jan2025 False False
-    #python3 plotHists_paper.py NJetsForward all False _Jan2025 False False
+    python3 plotHists_paper.py BpMass all False _Jan2025 False False
+    python3 plotHists_paper.py BpDecay all False _Jan2025 False False
+    python3 plotHists_paper.py NBJets all False _Jan2025 False False
+    python3 plotHists_paper.py NJetsForward all False _Jan2025 False False
     
     #python3 groupHists.py $iPlot A True _Jan2025
     #python3 groupHists.py $iPlot B True _Jan2025
@@ -244,7 +244,7 @@ for iPlot in $plotList; do
     #python3 plotHists.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned3_stat0p2
 
     ### Plot for paper ###
-    python3 plotHists_paper.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned1_stat0p07
+    #python3 plotHists_paper.py $iPlot V2 True _Jan2025_210bins_noCorrection False True _smoothedJJ_rebinned1_stat0p07
     
     #####################################################################
     # ARC request: compare smoothB for case 1 and 2 as smoothing uncert #

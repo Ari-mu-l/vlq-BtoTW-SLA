@@ -72,7 +72,7 @@ if 'ABCDnn' in iPlot: # SWITCH
         bkgProcList = ['major','ttx','ewk'] #put the most dominant process first
 #ABCDProcList = ['',]
 
-stat_saved = 0.2 #statistical uncertainty requirement (enter >1.0 for no rebinning; i.g., "1.1")
+stat_saved = 0.06 #statistical uncertainty requirement (enter >1.0 for no rebinning; i.g., "1.1")
 if len(sys.argv)>3: stat_saved=float(sys.argv[3])
 
 rebin4chi2 = False
