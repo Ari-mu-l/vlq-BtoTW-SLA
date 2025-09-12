@@ -9,8 +9,7 @@ lumiStr = '138fbfb' #str(targetlumi/1000).replace('.','p') # 1/fb
 systListShort = ['elRecoSF', 'elIdSF', 'elIsoSF', 'TrigEffEl', 'muRecoSF', 'muIdSF', 'muIsoSF', 'TrigEffMu', 'Pileup', 'Prefire', 'jsf', 'toppt', 'muRFcorrd', 'btagHFCO', 'btagHFUC', 'btagLFCO', 'btagLFUC', 'jer', 'jec', 'PuJetSF']
 systListFull = ['elRecoSF', 'elIdSF', 'elIsoSF', 'TrigEffEl', 'muRecoSF', 'muIdSF', 'muIsoSF', 'TrigEffMu', 'Pileup', 'Prefire', 'jsf', 'toppt', 'muRFcorrd', 'muR', 'muF', 'btagHFCO', 'btagHFUC', 'btagLFCO', 'btagLFUC', 'jer', 'jec', 'pNetTtag', 'pNetWtag', 'PuJetSF']
 uncorrList_sf = ['TrigEffEl', 'TrigEffMu', 'jer', 'jec', 'btagHFUC', 'btagLFUC']
-#yearList = []
-yearList = ["2016APV", "2016", "2017", "2018"]
+yearList = ["2016APV", "2016", "2017", "2018"]        
 systListShortPlots = systListShort.copy()
 systListFullPlots = systListFull.copy()
 for syst in uncorrList_sf:
@@ -21,7 +20,7 @@ for syst in uncorrList_sf:
         systListFullPlots.append(syst+year)
 
 
-systListABCDnn = ['correct','train','pNetTtag','pNetWtag', 'smooth2D'] #, 'smoothfrac'] #'smooth' #'smoothB'
+systListABCDnn = ['correct','train','pNetTtag','pNetWtag']#'param0','param1','param2','param3','param4','param5','param6','param7','lastbin']
 
 # out of date
 factorABCDnn = {'allWlep':'0.034045477',
@@ -51,12 +50,60 @@ class sample:
         self.xsec = xsec # in pb
         self.color = ROOT.kBlack
 
-# We will use these for plotting in this "xsec" folder, but keep them as 1 in the actual sample definitions for ROOT files
-# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
-xsec = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
+# We will use these for plotting in this "xsec" folder, but keep them as 1 in the actual sample definitions for ROOT files# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
+xsec_b = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
 # extrapolating from ln(xsec) fit I get 0.000238 for 2200
-for mass in xsec.keys():
-    xsec[mass] = xsec[mass]*0.5  # these xsec values need to be multiplied by the 0.5 BR explicitly
+
+# singlet Btj 1% width, 50% tW
+xsec_t = {'800':0.0719956883, '900':0.0414743839, '1000':0.0247853590, '1100':0.0152876159, '1200':0.0096845890, '1300':0.0062774090, '1400':0.0041439489, '1500':0.0027720790, '1600':0.0019222805, '1700':0.0013402072, '1800':0.0009426958, '1900':0.0006689402, '2000':0.0004797356}
+
+for mass in xsec_b.keys():
+    xsec_b[mass] = xsec_b[mass]*0.5  # these xsec values need to be multiplied by the 0.5 BR explicitly
+for mass in xsec_t.keys():
+    xsec_t[mass] = xsec_t[mass]*0.5
+
+BprimeT_M1000_2016APV = sample("BprimeT_M1000_2016APV", 1.0, "2016APV", "BprimeT_M1000_2016APVULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1000_2016 = sample("BprimeT_M1000_2016", 1.0, "2016", "BprimeT_M1000_2016ULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1000_2017 = sample("BprimeT_M1000_2017", 1.0, "2017", "BprimeT_M1000_2017ULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1000_2018 = sample("BprimeT_M1000_2018", 1.0, "2018", "BprimeT_M1000_2018ULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1200_2016APV = sample("BprimeT_M1200_2016APV", 1.0, "2016APV", "BprimeT_M1200_2016APVULNanoList.txt", "/BprimeTtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1200_2016 = sample("BprimeT_M1200_2016", 1.0, "2016", "BprimeT_M1200_2016ULNanoList.txt", "/BprimeTtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1200_2017 = sample("BprimeT_M1200_2017", 1.0, "2017", "BprimeT_M1200_2017ULNanoList.txt", "/BprimeTtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1200_2018 = sample("BprimeT_M1200_2018", 1.0, "2018", "BprimeT_M1200_2018ULNanoList.txt", "/BprimeTtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1300_2016APV = sample("BprimeT_M1300_2016APV", 1.0, "2016APV", "BprimeT_M1300_2016APVULNanoList.txt", "/BprimeTtoTW_M-1300_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1300_2016 = sample("BprimeT_M1300_2016", 1.0, "2016", "BprimeT_M1300_2016ULNanoList.txt", "/BprimeTtoTW_M-1300_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1300_2017 = sample("BprimeT_M1300_2017", 1.0, "2017", "BprimeT_M1300_2017ULNanoList.txt", "/BprimeTtoTW_M-1300_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1300_2018 = sample("BprimeT_M1300_2018", 1.0, "2018", "BprimeT_M1300_2018ULNanoList.txt", "/BprimeTtoTW_M-1300_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1400_2016APV = sample("BprimeT_M1400_2016APV", 1.0, "2016APV", "BprimeT_M1400_2016APVULNanoList.txt", "/BprimeTtoTW_M-1400_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1400_2016 = sample("BprimeT_M1400_2016", 1.0, "2016", "BprimeT_M1400_2016ULNanoList.txt", "/BprimeTtoTW_M-1400_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1400_2017 = sample("BprimeT_M1400_2017", 1.0, "2017", "BprimeT_M1400_2017ULNanoList.txt", "/BprimeTtoTW_M-1400_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1400_2018 = sample("BprimeT_M1400_2018", 1.0, "2018", "BprimeT_M1400_2018ULNanoList.txt", "/BprimeTtoTW_M-1400_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1500_2016APV = sample("BprimeT_M1500_2016APV", 1.0, "2016APV", "BprimeT_M1500_2016APVULNanoList.txt", "/BprimeTtoTW_M-1500_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1500_2016 = sample("BprimeT_M1500_2016", 1.0, "2016", "BprimeT_M1500_2016ULNanoList.txt", "/BprimeTtoTW_M-1500_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1500_2017 = sample("BprimeT_M1500_2017", 1.0, "2017", "BprimeT_M1500_2017ULNanoList.txt", "/BprimeTtoTW_M-1500_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1500_2018 = sample("BprimeT_M1500_2018", 1.0, "2018", "BprimeT_M1500_2018ULNanoList.txt", "/BprimeTtoTW_M-1500_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1600_2016APV = sample("BprimeT_M1600_2016APV", 1.0, "2016APV", "BprimeT_M1600_2016APVULNanoList.txt", "/BprimeTtoTW_M-1600_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1600_2016 = sample("BprimeT_M1600_2016", 1.0, "2016", "BprimeT_M1600_2016ULNanoList.txt", "/BprimeTtoTW_M-1600_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1600_2017 = sample("BprimeT_M1600_2017", 1.0, "2017", "BprimeT_M1600_2017ULNanoList.txt", "/BprimeTtoTW_M-1600_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1600_2018 = sample("BprimeT_M1600_2018", 1.0, "2018", "BprimeT_M1600_2018ULNanoList.txt", "/BprimeTtoTW_M-1600_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1700_2016APV = sample("BprimeT_M1700_2016APV", 1.0, "2016APV", "BprimeT_M1700_2016APVULNanoList.txt", "/BprimeTtoTW_M-1700_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1700_2016 = sample("BprimeT_M1700_2016", 1.0, "2016", "BprimeT_M1700_2016ULNanoList.txt", "/BprimeTtoTW_M-1700_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1700_2017 = sample("BprimeT_M1700_2017", 1.0, "2017", "BprimeT_M1700_2017ULNanoList.txt", "/BprimeTtoTW_M-1700_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1700_2018 = sample("BprimeT_M1700_2018", 1.0, "2018", "BprimeT_M1700_2018ULNanoList.txt", "/BprimeTtoTW_M-1700_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M1800_2016APV = sample("BprimeT_M1800_2016APV", 1.0, "2016APV", "BprimeT_M1800_2016APVULNanoList.txt", "/BprimeTtoTW_M-1800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M1800_2016 = sample("BprimeT_M1800_2016", 1.0, "2016", "BprimeT_M1800_2016ULNanoList.txt", "/BprimeTtoTW_M-1800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M1800_2017 = sample("BprimeT_M1800_2017", 1.0, "2017", "BprimeT_M1800_2017ULNanoList.txt", "/BprimeTtoTW_M-1800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M1800_2018 = sample("BprimeT_M1800_2018", 1.0, "2018", "BprimeT_M1800_2018ULNanoList.txt", "/BprimeTtoTW_M-1800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M2000_2016APV = sample("BprimeT_M2000_2016APV", 1.0, "2016APV", "BprimeT_M2000_2016APVULNanoList.txt", "/BprimeTtoTW_M-2000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M2000_2016 = sample("BprimeT_M2000_2016", 1.0, "2016", "BprimeT_M2000_2016ULNanoList.txt", "/BprimeTtoTW_M-2000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M2000_2017 = sample("BprimeT_M2000_2017", 1.0, "2017", "BprimeT_M2000_2017ULNanoList.txt", "/BprimeTtoTW_M-2000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M2000_2018 = sample("BprimeT_M2000_2018", 1.0, "2018", "BprimeT_M2000_2018ULNanoList.txt", "/BprimeTtoTW_M-2000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+BprimeT_M800_2016APV = sample("BprimeT_M800_2016APV", 1.0, "2016APV", "BprimeT_M800_2016APVULNanoList.txt", "/BprimeTtoTW_M-800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
+BprimeT_M800_2016  = sample("BprimeT_M800_2016", 1.0, "2016", "BprimeT_M800_2016ULNanoList.txt", "/BprimeTtoTW_M-800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")
+BprimeT_M800_2017  = sample("BprimeT_M800_2017", 1.0, "2017", "BprimeT_M800_2017ULNanoList.txt", "/BprimeTtoTW_M-800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM")
+BprimeT_M800_2018  = sample("BprimeT_M800_2018", 1.0, "2018", "BprimeT_M800_2018ULNanoList.txt", "/BprimeTtoTW_M-800_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v2/NANOAODSIM")
+
+
 
 Bprime_M1000_2016APV = sample("Bprime_M1000_2016APV", 1.0, "2016APV", "Bprime_M1000_2016APVULNanoList.txt", "/BprimeBtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
 Bprime_M1200_2016APV = sample("Bprime_M1200_2016APV", 1.0, "2016APV", "Bprime_M1200_2016APVULNanoList.txt", "/BprimeBtoTW_M-1200_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
@@ -347,6 +394,47 @@ ZZ2017            = sample("ZZ2017", 16.523, "2017", "ZZ2017ULNanoList.txt", "/Z
 ZZ2018            = sample("ZZ2018", 16.523, "2018", "ZZ2018ULNanoList.txt", "/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL18NanoAODv9-106X_upgrade2018_realistic_v16_L1v1-v1/NANOAODSIM")
 
 ## Number of processed events (sum of weights)
+BprimeT_M1000_2016APV.nrun = 483404.0 # from integral 483404, file BprimeT_M1000_2016APV
+BprimeT_M1200_2016APV.nrun = 499079.0 # from integral 499079, file BprimeT_M1200_2016APV
+BprimeT_M1300_2016APV.nrun = 481580.0 # from integral 481580, file BprimeT_M1300_2016APV
+BprimeT_M1400_2016APV.nrun = 488027.0 # from integral 488027, file BprimeT_M1400_2016APV
+BprimeT_M1500_2016APV.nrun = 490780.0 # from integral 490780, file BprimeT_M1500_2016APV
+BprimeT_M1600_2016APV.nrun = 496312.0 # from integral 496312, file BprimeT_M1600_2016APV
+BprimeT_M1700_2016APV.nrun = 500000.0 # from integral 500000, file BprimeT_M1700_2016APV
+BprimeT_M1800_2016APV.nrun = 491711.0 # from integral 491711, file BprimeT_M1800_2016APV
+BprimeT_M2000_2016APV.nrun = 488924.0 # from integral 488924, file BprimeT_M2000_2016APV
+BprimeT_M800_2016APV.nrun = 481640.0 # from integral 481640, file BprimeT_M800_2016APV
+BprimeT_M1000_2016.nrun = 489781.0 # from integral 489781, file BprimeT_M1000_2016
+BprimeT_M1200_2016.nrun = 488840.0 # from integral 488840, file BprimeT_M1200_2016
+BprimeT_M1300_2016.nrun = 493476.0 # from integral 493476, file BprimeT_M1300_2016
+BprimeT_M1400_2016.nrun = 493504.0 # from integral 493504, file BprimeT_M1400_2016
+BprimeT_M1500_2016.nrun = 488828.0 # from integral 488828, file BprimeT_M1500_2016
+BprimeT_M1600_2016.nrun = 492552.0 # from integral 492552, file BprimeT_M1600_2016
+BprimeT_M1700_2016.nrun = 485088.0 # from integral 485088, file BprimeT_M1700_2016
+BprimeT_M1800_2016.nrun = 492552.0 # from integral 492552, file BprimeT_M1800_2016
+BprimeT_M2000_2016.nrun = 500000.0 # from integral 500000, file BprimeT_M2000_2016
+BprimeT_M800_2016.nrun = 492568.0 # from integral 492568, file BprimeT_M800_2016
+BprimeT_M1000_2017.nrun = 996000.0 # from integral 996000, file BprimeT_M1000_2017
+BprimeT_M1200_2017.nrun = 979000.0 # from integral 979000, file BprimeT_M1200_2017
+BprimeT_M1300_2017.nrun = 937000.0 # from integral 937000, file BprimeT_M1300_2017
+BprimeT_M1400_2017.nrun = 965000.0 # from integral 965000, file BprimeT_M1400_2017
+BprimeT_M1500_2017.nrun = 997000.0 # from integral 997000, file BprimeT_M1500_2017
+BprimeT_M1600_2017.nrun = 999000.0 # from integral 999000, file BprimeT_M1600_2017
+BprimeT_M1700_2017.nrun = 985000.0 # from integral 985000, file BprimeT_M1700_2017
+BprimeT_M1800_2017.nrun = 968000.0 # from integral 968000, file BprimeT_M1800_2017
+BprimeT_M2000_2017.nrun = 982000.0 # from integral 982000, file BprimeT_M2000_2017
+BprimeT_M800_2017.nrun = 969000.0 # from integral 969000, file BprimeT_M800_2017
+BprimeT_M1000_2018.nrun = 963000.0 # from integral 963000, file BprimeT_M1000_2018
+BprimeT_M1200_2018.nrun = 988000.0 # from integral 988000, file BprimeT_M1200_2018
+BprimeT_M1300_2018.nrun = 977000.0 # from integral 977000, file BprimeT_M1300_2018
+BprimeT_M1400_2018.nrun = 990000.0 # from integral 990000, file BprimeT_M1400_2018
+BprimeT_M1500_2018.nrun = 999000.0 # from integral 999000, file BprimeT_M1500_2018
+BprimeT_M1600_2018.nrun = 980000.0 # from integral 980000, file BprimeT_M1600_2018
+BprimeT_M1700_2018.nrun = 993000.0 # from integral 993000, file BprimeT_M1700_2018
+BprimeT_M1800_2018.nrun = 994000.0 # from integral 994000, file BprimeT_M1800_2018
+BprimeT_M2000_2018.nrun = 995000.0 # from integral 995000, file BprimeT_M2000_2018
+BprimeT_M800_2018.nrun = 985000.0 # from integral 985000, file BprimeT_M800_2018
+
 Bprime_M1000_2016APV.nrun = 500000.0 # from integral 500000, file Bprime_M1000_2016APV
 Bprime_M1200_2016APV.nrun = 498158.0 # from integral 498158, file Bprime_M1200_2016APV
 Bprime_M1300_2016APV.nrun = 499079.0 # from integral 499079, file Bprime_M1300_2016APV
@@ -629,6 +717,50 @@ samples_signal={
     "Bprime_M800_2017":Bprime_M800_2017,
     "Bprime_M800_2018":Bprime_M800_2018,
 }
+
+samples_signalT={
+    "BprimeT_M800_2016APV":BprimeT_M800_2016APV,
+    "BprimeT_M1000_2016APV":BprimeT_M1000_2016APV,
+    "BprimeT_M1200_2016APV":BprimeT_M1200_2016APV,
+    "BprimeT_M1300_2016APV":BprimeT_M1300_2016APV,
+    "BprimeT_M1400_2016APV":BprimeT_M1400_2016APV,
+    "BprimeT_M1500_2016APV":BprimeT_M1500_2016APV,
+    "BprimeT_M1600_2016APV":BprimeT_M1600_2016APV,
+    "BprimeT_M1700_2016APV":BprimeT_M1700_2016APV,
+    "BprimeT_M1800_2016APV":BprimeT_M1800_2016APV,
+    "BprimeT_M2000_2016APV":BprimeT_M2000_2016APV,
+    "BprimeT_M1000_2016":BprimeT_M1000_2016,
+    "BprimeT_M1000_2017":BprimeT_M1000_2017,
+    "BprimeT_M1000_2018":BprimeT_M1000_2018,
+    "BprimeT_M1200_2016":BprimeT_M1200_2016,
+    "BprimeT_M1200_2017":BprimeT_M1200_2017,
+    "BprimeT_M1200_2018":BprimeT_M1200_2018,
+    "BprimeT_M1300_2016":BprimeT_M1300_2016,
+    "BprimeT_M1300_2017":BprimeT_M1300_2017,
+    "BprimeT_M1300_2018":BprimeT_M1300_2018,
+    "BprimeT_M1400_2016":BprimeT_M1400_2016,
+    "BprimeT_M1400_2017":BprimeT_M1400_2017,
+    "BprimeT_M1400_2018":BprimeT_M1400_2018,
+    "BprimeT_M1500_2016":BprimeT_M1500_2016,
+    "BprimeT_M1500_2017":BprimeT_M1500_2017,
+    "BprimeT_M1500_2018":BprimeT_M1500_2018,
+    "BprimeT_M1600_2016":BprimeT_M1600_2016,
+    "BprimeT_M1600_2017":BprimeT_M1600_2017,
+    "BprimeT_M1600_2018":BprimeT_M1600_2018,
+    "BprimeT_M1700_2016":BprimeT_M1700_2016,
+    "BprimeT_M1700_2017":BprimeT_M1700_2017,
+    "BprimeT_M1700_2018":BprimeT_M1700_2018,
+    "BprimeT_M1800_2016":BprimeT_M1800_2016,
+    "BprimeT_M1800_2017":BprimeT_M1800_2017,
+    "BprimeT_M1800_2018":BprimeT_M1800_2018,
+    "BprimeT_M2000_2016":BprimeT_M2000_2016,
+    "BprimeT_M2000_2017":BprimeT_M2000_2017,
+    "BprimeT_M2000_2018":BprimeT_M2000_2018,
+    "BprimeT_M800_2016":BprimeT_M800_2016,
+    "BprimeT_M800_2017":BprimeT_M800_2017,
+    "BprimeT_M800_2018":BprimeT_M800_2018,
+}
+
 samples_electroweak = {
     "DYMHT12002016APV":DYMHT12002016APV,
     "DYMHT12002016":DYMHT12002016,
@@ -1131,17 +1263,16 @@ samples={
 }
 
 mclist_2016APV = [
-    Bprime_M1000_2016APV,
-    Bprime_M1200_2016APV,
-    Bprime_M1300_2016APV,
-    Bprime_M1400_2016APV,
-    Bprime_M1500_2016APV,
-    Bprime_M1600_2016APV,
-    Bprime_M1700_2016APV,
-    Bprime_M1800_2016APV,
-    Bprime_M2000_2016APV,
-    Bprime_M2200_2016APV,
-    Bprime_M800_2016APV,
+    BprimeT_M1000_2016APV,
+    BprimeT_M1200_2016APV,
+    BprimeT_M1300_2016APV,
+    BprimeT_M1400_2016APV,
+    BprimeT_M1500_2016APV,
+    BprimeT_M1600_2016APV,
+    BprimeT_M1700_2016APV,
+    BprimeT_M1800_2016APV,
+    BprimeT_M2000_2016APV,
+    BprimeT_M800_2016APV,
     DYMHT12002016APV,
     DYMHT2002016APV,
     DYMHT25002016APV,
@@ -1183,17 +1314,16 @@ mclist_2016APV = [
 ]
 
 mclist_2016 = [
-    Bprime_M1000_2016,
-    Bprime_M1200_2016,
-    Bprime_M1300_2016,
-    Bprime_M1400_2016,
-    Bprime_M1500_2016,
-    Bprime_M1600_2016,
-    Bprime_M1700_2016,
-    Bprime_M1800_2016,
-    Bprime_M2000_2016,
-    Bprime_M2200_2016,
-    Bprime_M800_2016,
+    BprimeT_M1000_2016,
+    BprimeT_M1200_2016,
+    BprimeT_M1300_2016,
+    BprimeT_M1400_2016,
+    BprimeT_M1500_2016,
+    BprimeT_M1600_2016,
+    BprimeT_M1700_2016,
+    BprimeT_M1800_2016,
+    BprimeT_M2000_2016,
+    BprimeT_M800_2016,
     DYMHT12002016,
     DYMHT2002016,
     DYMHT25002016,
@@ -1235,17 +1365,16 @@ mclist_2016 = [
 ]
 
 mclist_2017 = [
-    Bprime_M1000_2017,
-    Bprime_M1200_2017,
-    Bprime_M1300_2017,
-    Bprime_M1400_2017,
-    Bprime_M1500_2017,
-    Bprime_M1600_2017,
-    Bprime_M1700_2017,
-    Bprime_M1800_2017,
-    Bprime_M2000_2017,
-    Bprime_M2200_2017,
-    Bprime_M800_2017,
+    BprimeT_M1000_2017,
+    BprimeT_M1200_2017,
+    BprimeT_M1300_2017,
+    BprimeT_M1400_2017,
+    BprimeT_M1500_2017,
+    BprimeT_M1600_2017,
+    BprimeT_M1700_2017,
+    BprimeT_M1800_2017,
+    BprimeT_M2000_2017,
+    BprimeT_M800_2017,
     DYMHT12002017,
     DYMHT2002017,
     DYMHT25002017,
@@ -1287,17 +1416,16 @@ mclist_2017 = [
 ]
 
 mclist_2018 = [
-    Bprime_M1000_2018,
-    Bprime_M1200_2018,
-    Bprime_M1300_2018,
-    Bprime_M1400_2018,
-    Bprime_M1500_2018,
-    Bprime_M1600_2018,
-    Bprime_M1700_2018,
-    Bprime_M1800_2018,
-    Bprime_M2000_2018,
-    Bprime_M2200_2018,
-    Bprime_M800_2018,
+    BprimeT_M1000_2018,
+    BprimeT_M1200_2018,
+    BprimeT_M1300_2018,
+    BprimeT_M1400_2018,
+    BprimeT_M1500_2018,
+    BprimeT_M1600_2018,
+    BprimeT_M1700_2018,
+    BprimeT_M1800_2018,
+    BprimeT_M2000_2018,
+    BprimeT_M800_2018,
     DYMHT12002018,
     DYMHT2002018,
     DYMHT25002018,

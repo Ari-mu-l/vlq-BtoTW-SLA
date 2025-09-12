@@ -15,7 +15,7 @@ setTDRStyle()
 limitdir = sys.argv[1]
 doprelim = False
 if len(sys.argv) > 3: doprelim = bool(eval(sys.argv[3]))
-plotOnly = True # set True if not want to run combine commands
+plotOnly = False # set True if not want to run combine commands
 normByBin = True
 lumi = 138
 

@@ -6,7 +6,7 @@ import os,sys,time,math
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
 from ROOT import *
-from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn, yieldUncertABCDnn, xsec
+from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn, yieldUncertABCDnn, xsec_t, xsec_b
 from utils import *
 
 gROOT.SetBatch(1)
@@ -31,6 +31,11 @@ else:
         pfix+='_Apr2024SysAll'
         #pfix+='_Apr2024SysAll_validation' # TEMP. validation only
 templateDir = f'{os.getcwd()}/{pfix}/'
+
+if 'BprimeT' in templateDir: # make sure to keep BprimeT in the t-associated folder names
+        xsec = xsec_t
+else:
+        xsec = xsec_b
 
 year = 'all'
 if len(sys.argv)>8: year=sys.argv[8]

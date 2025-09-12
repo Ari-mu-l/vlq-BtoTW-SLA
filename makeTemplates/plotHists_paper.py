@@ -6,7 +6,7 @@ import os,sys,time,math
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
 from ROOT import *
-from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn, yieldUncertABCDnn, xsec
+from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn, yieldUncertABCDnn, xsec_t, xsec_b
 from utils import *
 
 gROOT.SetBatch(1)
@@ -41,6 +41,11 @@ else:
         #pfix+='_Apr2024SysAll_validation' # TEMP. validation only
 templateDir = f'{os.getcwd()}/{pfix}/'
 
+if 'BprimeT' in templateDir:
+        xsec = xsec_t
+else:
+        xsec = xsec_b
+
 year = 'all'
 if len(sys.argv)>8: year=sys.argv[8]
 
@@ -60,8 +65,12 @@ sig1leg='B (0.8 TeV, 1 pb)' # singlet 1% xsec
 sig2='BpM1400' #  choose the 2nd signal to plot
 sig2leg='B (1.4 TeV, 1 pb)'
 if isCategorized:
-        sig1leg='B (1.0 TeV, 59.35 fb)'
-        sig2leg='B (1.8 TeV, 2.66 fb)'
+        if 'BprimeT' in templateDir:
+                sig1leg='B (0.8 TeV, 36.00 fb)'
+                sig2leg='B (1.4 TeV, 2.07 fb)'
+        else:
+                sig1leg='B (0.8 TeV, 59.35 fb)'
+                sig2leg='B (1.4 TeV, 2.66 fb)'
 
 scaleSignals = False # no x100 on signal. use log plot
 #if not isCategorized: scaleSignals = True
@@ -528,7 +537,11 @@ for tag in taglist:
                         scaleFact2=1
                         if isCategorized:
                                 if 'jet' in tag:
-                                        scaleFact2=5
+                                        if 'BprimeT' in templateDir:
+                                                scaleFact2=20
+                                        else:
+                                                scaleFact2=5
+
                                         if 'x' not in sig2leg:
                                                 sig2leg+=f' x {scaleFact2}'
                                 else:

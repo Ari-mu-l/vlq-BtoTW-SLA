@@ -52,20 +52,38 @@ if 'kinematics' in folder:
 	normalizePDF    = False #only for signals
 
 massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200]
-theory_xsec = {"BpM800":0.1187124,
-               "BpM900":0.0640113,
-               "BpM1000":0.0362987,
-               "BpM1100":0.0215009,
-               "BpM1200":0.0131348,
-               "BpM1300":0.0082629,
-               "BpM1400":0.0053213,
-               "BpM1500":0.0035078,
-               "BpM1600":0.0022829,
-               "BpM1700":0.0014947,
-               "BpM1800":0.0009898,
-               "BpM1900":0.0006519,
-               "BpM2000":0.0004499,
-               "BpM2200":1.0} # no theory xsec for 2200
+theory_xsec_b = {"BpM800":0.1187124,
+                 "BpM900":0.0640113,
+                 "BpM1000":0.0362987,
+                 "BpM1100":0.0215009,
+                 "BpM1200":0.0131348,
+                 "BpM1300":0.0082629,
+                 "BpM1400":0.0053213,
+                 "BpM1500":0.0035078,
+                 "BpM1600":0.0022829,
+                 "BpM1700":0.0014947,
+                 "BpM1800":0.0009898,
+                 "BpM1900":0.0006519,
+                 "BpM2000":0.0004499,
+                 "BpM2200":1.0} # no theory xsec for 2200
+theory_xsec_t = {"BpM800":0.0719956883,
+	         "BpM900":0.0414743839,
+                 "BpM1000":0.0247853590,
+                 "BpM1100":0.0152876159,
+                 "BpM1200":0.0096845890,
+                 "BpM1300":0.0062774090,
+                 "BpM1400":0.0041439489,
+                 "BpM1500":0.0027720790,
+                 "BpM1600":0.0019222805,
+                 "BpM1700":0.0013402072,
+                 "BpM1800":0.0009426958,
+                 "BpM1900":0.0006689402,
+                 "BpM2000":0.0004797356,
+                 "BpM2200":1.0} # no theory xsec for 2200
+if 'BprimeT' in templateDir:
+        theory_xsec = theory_xsec_t
+else:
+        theory_xsec = theory_xsec_b
 sigProcList = ['BpM'+str(mass) for mass in massList]
 bkgProcList = ['ttbar','singletop','wjets','ttx','ewk','qcd'] #put the most dominant process first
 if 'ABCDnn' in iPlot: # SWITCH

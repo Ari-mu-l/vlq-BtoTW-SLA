@@ -1,6 +1,7 @@
 #!/usr/bin/python
-# python3 groupHists.py $iPlot $region $isCategorized $pfix
-# python3 groupHists.py BpMass D True _Apr2024SysAll
+# python3 groupHists.py $iPlot $region $isCategorized $pfix $isBprimeT
+# t-associated: python3 groupHists.py BpMass_ABCDnn D True _Jan2025BprimeT True
+# b-associated: python3 groupHists.py BpMass_ABCDnn D True _Jan2025 False
 import os,sys,time,math,datetime,itertools,ctypes
 from ROOT import gROOT,TFile,TH1F, TH2D, TH1
 parent = os.path.dirname(os.getcwd())
@@ -40,6 +41,12 @@ if len(sys.argv)>4:
         pfix+=str(sys.argv[4])
 else:
         pfix+='_Jan2025'
+
+if len(sys.argv)>5: # if True, t-associated. if not, b-associated
+        isBprimeT = bool(eval(sys.argv[5]))
+else:
+        isBprimeT = False
+                
 outDir=f'{os.getcwd()}/{pfix}/'
 
 print('Grouping hists for iPlot',iPlot,', region',region,', isCategorized',isCategorized,', and folder',pfix)
@@ -65,8 +72,12 @@ else:
         from samples import samples_ttbar
         
         bkgProcs = {'ewk':samples_electroweak,'wjets':samples_wjets,'ttbar':samples_ttbar,'singletop':samples_singletop,'ttx':samples_ttbarx,'qcd':samples_qcd}
-#bkgProcs = {'ewk':samples_electroweak,'ttx':samples_ttbarx}
-massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200]
+        
+if isBprimeT:
+        massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000] # t-associated
+else:
+        massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000,2200] # b-associated
+        
 sigList = ['BpM'+str(mass) for mass in massList]
 
 isEMlist = ['L'] #['E','M'], 'L' #
@@ -83,7 +94,7 @@ catList = ['is'+item[0]+'_'+item[1] for item in list(itertools.product(isEMlist,
 lumiSys = 0.018 #lumi uncertainty
 
 groupHists = True # TEMP: turn this on to group histograms
-getYields = True # TEMP: turn this on to get yield tables
+getYields = False # TEMP: turn this on to get yield tables
 if len(yearList) == 1:
         getYields = False
         uncorrList_sf = []
@@ -114,7 +125,11 @@ if groupHists:
                         histoPrefix = f'{iPlot}_{lumiStr}_{cat}_{region}'
 
 
-                dataHistFile = TFile.Open(f'{outDir}{cat[2:]}/datahists_{iPlot}.root', "READ")
+                if isBprimeT:
+                        dataHistFile = TFile.Open(f'{outDir}{cat[2:]}/datahists_{iPlot}.root'.replace('BprimeT',''), "READ")
+                else:
+                        dataHistFile = TFile.Open(f'{outDir}{cat[2:]}/datahists_{iPlot}.root', "READ")
+               
                 isFirstHist = True
                 inPrefix = histoPrefix
                 #if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
@@ -130,13 +145,17 @@ if groupHists:
                         else:
                                 hists.Add(dataHistFile.Get(inPrefix+'_'+samples_data[dat].prefix))
                 outHistFile.cd()
-                hists.Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction 
+                hists.Rebin(rebin)
                 hists.Write()
                 dataHistFile.Close()
 
                 for proc in bkgProcs:
                         # DID NOT IMPLEMENT REMOVETHRESHOLD
-                        bkgHistFile = TFile.Open(f'{outDir}{cat[2:]}/bkghists_{proc}_{iPlot}.root', "READ")
+                        if isBprimeT:
+                                bkgHistFile = TFile.Open(f'{outDir}{cat[2:]}/bkghists_{proc}_{iPlot}.root'.replace('BprimeT',''), "READ")
+                        else:
+                                bkgHistFile = TFile.Open(f'{outDir}{cat[2:]}/bkghists_{proc}_{iPlot}.root', "READ")
+
                         bkgGrp = bkgProcs[proc]
                         nomHists = {}
                         systHists = {}
@@ -267,8 +286,9 @@ if groupHists:
                                 systHistsWrite[systHist].Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction
                                 systHistsWrite[systHist].Write()
                         bkgHistFile.Close()
-                     
+
                 sigHistFile = TFile.Open(f'{outDir}{cat[2:]}/sighists_{iPlot}.root', "READ")
+                
                 systematicList = mySystList
                 inPrefix = histoPrefix
                 # if isCategorized and iPlot == 'BpMass' and region != 'BV' and region!='BhighST' and region!='highST':
@@ -278,15 +298,26 @@ if groupHists:
                 for mass in massList:
                         systHists = {}
                         # add nominal and correlated systs
-                        nomHistsAllYears = sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{yearList[0]}').Clone(histoPrefix+'__BpM'+str(mass))
+                        if isBprimeT:
+                                nomHistsAllYears = sigHistFile.Get(f'{inPrefix}_BprimeT_M{mass}_{yearList[0]}').Clone(histoPrefix+'__BpM'+str(mass))
+                        else:
+                                nomHistsAllYears = sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{yearList[0]}').Clone(histoPrefix+'__BpM'+str(mass))
+
                         if doAllSys:
                                 for syst in corrList_sf:
                                         if 'pdf' in syst:
-                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}'] = sigHistFile.Get(f'{inPrefix}_{syst}_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}')
+                                                if isBprimeT:
+                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}'] = sigHistFile.Get(f'{inPrefix}_{syst}_BprimeT_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}')
+                                                else:
+                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}'] = sigHistFile.Get(f'{inPrefix}_{syst}_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}')
                                         else:
                                                 try:
-                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Up')
-                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Down')
+                                                        if isBprimeT:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_BprimeT_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Up')
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_BprimeT_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Down')
+                                                        else:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Up')
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{yearList[0]}').Clone(f'{histoPrefix}__BpM{mass}__{syst}Down')
                                                 except:
                                                         if ('pNet' in syst and ('untag' in cat or ('Wtag' in syst and 'Tjet' in cat) or ('Ttag' in syst and 'Wjet' in cat))):
                                                                 pass
@@ -295,15 +326,25 @@ if groupHists:
 
                         for year in yearList:
                                 if year == yearList[0]: continue
-                                nomHistsAllYears.Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
+                                if isBprimeT:
+                                        nomHistsAllYears.Add(sigHistFile.Get(f'{inPrefix}_BprimeT_M{mass}_{year}'))
+                                else:
+                                        nomHistsAllYears.Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
                                 if doAllSys:
                                         for syst in corrList_sf:
                                                 if 'pdf' in syst:
-                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}'].Add(sigHistFile.Get(f'{inPrefix}_{syst}_Bprime_M{mass}_{year}'))
+                                                        if isBprimeT:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}'].Add(sigHistFile.Get(f'{inPrefix}_{syst}_BprimeT_M{mass}_{year}'))
+                                                        else:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}'].Add(sigHistFile.Get(f'{inPrefix}_{syst}_Bprime_M{mass}_{year}'))
                                                 else:
                                                         try:
-                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{year}'))
-                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{year}'))
+                                                                if isBprimeT:
+                                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Up_BprimeT_M{mass}_{year}'))
+                                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Dn_BprimeT_M{mass}_{year}'))
+                                                                else:
+                                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Up'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{year}'))
+                                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}Down'].Add(sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{year}'))
                                                         except:
                                                                 if ('pNet' in syst and ('untag' in cat or ('Wtag' in syst and 'Tjet' in cat) or ('Ttag' in syst and 'Wjet' in cat))):
                                                                         pass
@@ -313,12 +354,20 @@ if groupHists:
                         # make hists for uncorrleated systs
                         for syst in uncorrList_sf:
                                 for shiftyear in yearList:
-                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up')
-                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down')
+                                        if isBprimeT:
+                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_BprimeT_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up')
+                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_BprimeT_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down')
+                                        else:
+                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'] = sigHistFile.Get(f'{inPrefix}_{syst}Up_Bprime_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up')
+                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'] = sigHistFile.Get(f'{inPrefix}_{syst}Dn_Bprime_M{mass}_{shiftyear}').Clone(f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down')
                                         for year in yearList:
                                                 if year!=shiftyear:
-                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'].Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
-                                                        systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'].Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
+                                                        if isBprimeT:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'].Add(sigHistFile.Get(f'{inPrefix}_BprimeT_M{mass}_{year}'))
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'].Add(sigHistFile.Get(f'{inPrefix}_BprimeT_M{mass}_{year}'))
+                                                        else:
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Up'].Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
+                                                                systHists[f'{histoPrefix}__BpM{mass}__{syst}{shiftyear}Down'].Add(sigHistFile.Get(f'{inPrefix}_Bprime_M{mass}_{year}'))
 
                         outHistFile.cd()
                         nomHistsAllYears.Rebin(rebin) # TEMP: inconsistent binning in template file and 2D correction

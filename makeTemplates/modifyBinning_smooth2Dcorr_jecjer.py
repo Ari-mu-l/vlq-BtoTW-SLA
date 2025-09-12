@@ -93,7 +93,6 @@ for rfile in rfiles:
     print("PROGRESS:")
     rebinnedHists = {}
     for hist in allhists:
-        
         if 'jec' not in hist and 'jer' not in hist:
             tmphist=tfiles[iRfile].Get(hist).Clone()
             tmphist.SetDirectory(0)

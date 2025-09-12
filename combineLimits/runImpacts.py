@@ -9,7 +9,7 @@ limitdir = sys.argv[1]
 mass = sys.argv[2]
 docrab = sys.argv[3]
 expsig = float(sys.argv[4])
-blind = True
+blind = False # TEMP: SWITCH OFF FOR UNBLINDING
 
 name = limitdir.replace('limits_templatesABCDnn_V2_Jan2025_','').replace('limits_templatesABCDnn_DV2_Jan2025_','')
 path = limitdir+'/cmb/'+mass
@@ -33,7 +33,10 @@ if blind and isSR:
     #options = ' --bypassFrequentistFit -t -1 --expectSignal 0'
 else:
     filename = 'workspace.root'
-    options = ''
+    if ('BprimeT' in limitdir) and ('V2' in limitdir):
+        options = '--setParameters signalScale=1'
+    else:
+        options = ''
     #options = '--setParameters signalScale=0.01'
     #options = ' --setParameters signalScale=0.05'
 
@@ -47,7 +50,7 @@ if docrab == 'local': #Bp likely doesn't need crab, fits are fast and not as man
     #os.system(f'combine -M MultiDimFit {filename}') # passes with no problem
     #print("Running Impacts initial fit")
     #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --robustFit 1 --cminDefaultMinimizerStrategy 0 {options}') 
-    os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --robustFit 1 {options}')
+    os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-5.0,5.0 --doInitialFit --robustFit 1 {options}')
     #os.system(f'combineTool.py -M Impacts -d {filename} -m {str(mass)} --setParameterRanges r=-2.0,2.0 --doInitialFit --cminDefaultMinimizerStrategy 0 --verbose 1 {options}')
     #print('Command = combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --doInitialFit --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+options) #--cminDefaultMinimizerStrategy 0 
     #os.system('combineTool.py -M Impacts -d '+filename+' -m '+str(mass)+' --doInitialFit --robustFit 1 --rMin '+str(expsig-2.0)+' --rMax '+str(expsig+2.0)+options)#--cminDefaultMinimizerStrategy 0 # does not work

@@ -38,7 +38,10 @@ os.system(collect)
 #plot = scriptdir+'/plotGof.py gof.json --statistic AD --mass 120.0 -o gof_plot --range 0 4 --title-right="Region D"'
 #plot = scriptdir+'/plotGof.py gof.json --statistic KS --mass 120.0 -o gof_plot --range 0 0.025 --title-right="Region D"'
 #plot = scriptdir+'/plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --range 200 700 --title-right="Region V"'
-plot = scriptdir+'/plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --range 500 1000 --title-right="Region V"'
+if 'V' in limitdir:
+    plot = scriptdir+'/plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --range 500 1000 --title-right="Region V"'
+else:
+    plot = scriptdir+'/plotGof.py gof.json --statistic saturated --mass 120.0 -o gof_plot --range 500 1000 --title-right="Region D"'
 print(plot)
 os.system(plot)
 

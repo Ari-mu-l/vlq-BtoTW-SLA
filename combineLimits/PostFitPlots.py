@@ -2,7 +2,7 @@ import os,sys
 from ROOT import TFile, TH1F, TCanvas, TGraphAsymmErrors, kBlack, kAzure, kOrange, kMagenta, kGray, THStack, gStyle, TPad, TLatex, TLegend, gROOT, kBlue, kRed, TMath
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
-from samples import xsec
+from samples import xsec_t, xsec_b
 from utils import *
 
 gROOT.SetBatch()
@@ -15,8 +15,8 @@ setTDRStyle()
 limitdir = sys.argv[1]
 doprelim = False
 if len(sys.argv) > 3: doprelim = bool(eval(sys.argv[3]))
-plotOnly = True
-normByBin = False
+plotOnly = False
+normByBin = True
 lumi = 138
 
 outDir = os.getcwd()
@@ -24,7 +24,7 @@ outDir = os.getcwd()
 mass1val = int(sys.argv[2])
 mass1 = str(mass1val) #'1000'
 mass2 = '1800'
-mass3 = '1300'
+mass3 = '1400'
 sig1 = 'BpM'+mass1
 sig2 = 'BpM1800'
 #sig3 = 'BpM1300'
@@ -51,6 +51,13 @@ doMorph = False
 plotFit = 'fit_b' # fit_s
 #plotFit = 'fit_s' # TEMP SWITCH
 
+if 'BprimeT' in limitdir:
+    xsec = xsec_t
+    print('Running t-associated interpretation...')
+else:
+    xsec = xsec_b
+    print('Running b-associated interpretation...')
+
 
 os.chdir(path1)
 
@@ -61,7 +68,6 @@ if not isSR:
         print('Creating pre and post-fit histograms from CR')
         print('Command = PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --sampling --print')
         os.system('PostFitShapesFromWorkspace -d combined.txt.cmb -w initialFitWorkspace.root --output CRPostFitShapes.root -m '+mass1+' -f fitDiagnosticsTest.root:'+plotFit+' --postfit --sampling --print')
-
 else:
     if doMorph and not unblind and not partialUnblind:
         shapesfile = 'SRMorphedPrefitShapes.root'
@@ -106,7 +112,7 @@ def formatUpperHist(histogram,th1hist):
     histogram.GetXaxis().SetTitle('')
     histogram.GetYaxis().SetLabelSize(0.06)
     histogram.GetYaxis().SetTitleSize(0.06)
-    histogram.GetYaxis().SetTitleOffset(.85)
+    histogram.GetYaxis().SetTitleOffset(1.1) #0.85
     #histogram.GetYaxis().CenterTitle()
     histogram.SetMinimum(0.0101)
     histogram.GetXaxis().SetNdivisions(506)
@@ -199,10 +205,7 @@ for chn in chns:
         blind = True
     if partialUnblind and ('Case3' in chn or 'Case4' in chn):
         partialUnblind = False
-    yLog = False
-
-    if 'Case1' in chn: # Case1 needs normbybin for the tail
-        normByBin = True
+    yLog = True # for paper
 
     perNGeV = 10
     print('------------------ ',chn,' with perNGeV = ',perNGeV,'-----------------------')
@@ -235,7 +238,7 @@ for chn in chns:
     histrange = [hDatamerged.GetBinLowEdge(1),hDatamerged.GetBinLowEdge(hDatamerged.GetNbinsX()+1)]
     gaeDatamerged = TGraphAsymmErrors(hDatamerged.Clone(hDatamerged.GetName().replace("data_obs","gaeDATA")))
 
-    if normByBin:
+    if normByBin and ('Case1' or 'Case2') in chn: # Case1/2 needs normbybin for the tail
         poissonNormByBinWidth(gaeDatamerged,hDatamerged,perNGeV)
         for proc in bkgProcList:
             try: 
@@ -344,10 +347,10 @@ for chn in chns:
     hDatamerged.SetMaximum(1.2*max(hDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
     hDatamerged.SetMinimum(0.015)    
     #hDatamerged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
-    if normByBin:
+    if normByBin and ('Case1' or 'Case2') in chn: # Case1/2 needs normbybin for the tail
         hDatamerged.GetYaxis().SetTitle("Events / "+str(perNGeV)+" GeV")
     else:
-        hDatamerged.GetYaxis().SetTitle("Events")
+        hDatamerged.GetYaxis().SetTitle("Events / bin")
     if blind and not partialUnblind: hsig1merged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
 
     formatUpperHist(hDatamerged,hDatamerged)
