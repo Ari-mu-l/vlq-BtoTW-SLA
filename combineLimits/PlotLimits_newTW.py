@@ -242,7 +242,11 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected95.GetYaxis().SetRangeUser(.002,10.1)
     expected95.GetXaxis().SetRangeUser(800,2000)
     expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
-    expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
+
+    if 'BprimeT' in limitDir:
+            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
+    else:
+            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
     expected95.GetYaxis().SetTitleOffset(1.05)
 
     expected68.Draw("3same")
@@ -348,7 +352,10 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected95.GetYaxis().SetRangeUser(.002,10.1)
     expected95.GetXaxis().SetRangeUser(800,2000)
     expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
-    expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
+    if 'BprimeT' in limitDir:
+            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
+    else:
+            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
     expected95.GetYaxis().SetTitleOffset(1.05)
 
     expected68.Draw("3same")
