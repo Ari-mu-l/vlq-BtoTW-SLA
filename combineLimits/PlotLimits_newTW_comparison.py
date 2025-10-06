@@ -49,6 +49,12 @@ exp95L=array('d',[0 for i in range(len(mass))])
 
 xsec = array('d',[multiplier for i in range(len(mass))])
 
+# 2016 line starts with 700 but ours start with 800
+# data extraction: https://plotdigitizer.com/app
+mass2016 = array('d', [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000]) #700
+exp_xsecT2016 = [0.25171,0.19829,0.15620,0.12694,0.10210,0.08383,0.06743,0.06016,0.04940,0.04453,0.03851,0.03400,0.03130] #0.35814
+exp_xsecB = [6.96875,2.84375,1.2734375,0.95703125,0.73828125,0.60546875,0.533203125,0.455078125,0.359375,0.2275390625]
+
 # https://docs.google.com/spreadsheets/d/1hrvXSGU1lbLPtbK0wvMwwVQTHFAeTzPX_4GVC4hKLHw/edit?gid=0
 # Calculation of NWA tW cross section based on TopPartners_SingleProduction github (see links within).
 if 'BprimeT' in limitDir:
@@ -96,7 +102,7 @@ theory_xsecD1_up = [(a-b) for a,b in zip(theoryD1up,theory_xsecD1)]
 print('Theory xsec = ',theory_xsecS5)
 theory_xsecS1_v    = TVectorD(len(theory_mass),array('d',theory_xsecS1))
 theory_xsecS1_up_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_up))
-theory_xsecS1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_dn))      
+theory_xsecS1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_dn))
 
 theory_xsecS1_gr = TGraphAsymmErrors(TVectorD(len(theory_mass),theory_mass),theory_xsecS1_v,TVectorD(len(theory_mass),masserr),TVectorD(len(theory_mass),masserr),theory_xsecS1_dn_v,theory_xsecS1_up_v)
 theory_xsecS1_gr.SetFillStyle(3001)
@@ -106,6 +112,17 @@ theory_xsecS1_gr.SetFillColor(red) #ROOT.kRed
 theoryS1 = TGraph(len(theory_mass))
 for i in range(len(theory_mass)):
 	theoryS1.SetPoint(i, theory_mass[i], theory_xsecS1[i])
+
+exp_xsecB_gr = TGraph(len(mass))
+for i in range(len(mass)):
+        exp_xsecB_gr.SetPoint(i, mass[i], exp_xsecB[i] * multiplier)
+exp_xsecB_gr.SetLineColor(ROOT.kBlack)
+
+exp_xsecT2016_gr = TGraph(len(mass2016))
+for i in range(len(mass2016)):
+        exp_xsecT2016_gr.SetPoint(i, mass2016[i], exp_xsecT2016[i])
+purple = TColor.GetColor("#7a21dd")
+exp_xsecT2016_gr.SetLineColor(purple)
         
 theory_xsecS5_v    = TVectorD(len(theory_mass),array('d',theory_xsecS5))
 theory_xsecS5_up_v = TVectorD(len(theory_mass),array('d',theory_xsecS5_up))
@@ -271,6 +288,11 @@ def PlotLimits(limitDir,limitFile,tempKey):
     theoryS5.SetLineStyle(1)
     theoryS5.SetLineWidth(2)
     theoryS5.Draw("same")
+
+    exp_xsecB_gr.SetLineWidth(2)
+    exp_xsecB_gr.Draw("same")
+    exp_xsecT2016_gr.SetLineWidth(2)
+    exp_xsecT2016_gr.Draw("same")
     
     expected.Draw("same")
     if not blind: observed.Draw("lpsame")
@@ -326,6 +348,9 @@ def PlotLimits(limitDir,limitFile,tempKey):
     else:
             legend.AddEntry(theory_xsecS5_gr, 'pp #rightarrow bqtW, #Gamma/M = 5%','f')
             legend.AddEntry(theory_xsecS1_gr, 'pp #rightarrow bqtW, #Gamma/M = 1%','f')
+            
+    legend.AddEntry(exp_xsecB_gr, 'b-associated','l')
+    legend.AddEntry(exp_xsecT2016_gr, '2016 t-associated', 'l')
     legend.AddEntry(0,'B singlet','')
     legend.SetShadowColor(0)
     legend.SetFillStyle(0)
