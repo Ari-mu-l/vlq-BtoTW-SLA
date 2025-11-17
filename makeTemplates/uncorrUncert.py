@@ -18,7 +18,8 @@ else:
 if len(sys.argv)>3:
     postFix = sys.argv[3]
 else:
-    postFix = f'Jan2025_105binsCorr{year[1:]}'
+    #postFix = f'Jan2025_105binsCorr{year[1:]}'
+    postFix = 'Jan2025BprimeT'
 
     
 if len(sys.argv)>4:
@@ -27,17 +28,18 @@ else:
     year = ''
     
 templateDir = f'templates{region}_{postFix}'
-fileName = f'{templateDir}/templates_{iPlot}_138fbfb{year}_rebinned1_stat0p2_smoothed_TVJJ.root' # after rebin and smoothing
+fileName = f'{templateDir}/templates_{iPlot}_138fbfb{year}_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_smoothedCorr.root'
+
 
 if year=='_2016':
     lowTh = {"tagTjet"  :{"correct":1620,"train": 9999}, #, 1080
              "tagWjet"  :{"correct": 840,"train": 840},
-             "untagTlep":{"correct": 520,"train": 840},
-             "untagWlep":{"correct": 560,"train": 740} #preapp5
+             "untagTlep":{"correct": 9999,"train": 840},
+             "untagWlep":{"correct": 9999,"train": 740} #preapp5
              }
     medTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
-             "tagWjet"  :{"correct": 1540,"train": 9999}, #, 1520
-             "untagTlep":{"correct": 1960,"train": 1720},
+             "tagWjet"  :{"correct": 9999,"train": 9999}, #, 1520
+             "untagTlep":{"correct": 9999,"train": 1720},
              "untagWlep":{"correct": 9999,"train": 1780} # preapp 5
              }
     highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
@@ -62,20 +64,20 @@ else:
     #           "untagWlep":{"correct": 9999, "train": 9999}
     #           }
 
-    lowTh = {"tagTjet"  :{"correct": 920,"train": 9999}, #470,950 
-             "tagWjet"  :{"correct": 680,"train": 9999},
-             "untagTlep":{"correct": 610,"train": 9999}, #610, 610
-             "untagWlep":{"correct": 9999,"train": 9999} #490,820 #{"correct": 450,"train": 810} #preapp5
+    lowTh = {"tagTjet"  :{"correct": 9999,"train": 9999,"smooth2D":680}, #470,950 
+             "tagWjet"  :{"correct": 930,"train": 890,"smooth2D":680},
+             "untagTlep":{"correct": 9999,"train": 9999,"smooth2D":9999}, #610, 610
+             "untagWlep":{"correct": 9999,"train": 970,"smooth2D":9999} #490,820 #{"correct": 450,"train": 810} #preapp5
              }
-    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999}, #920,9999
-             "tagWjet"  :{"correct": 1540,"train": 9999}, #1540,1080
-             "untagTlep":{"correct": 1920,"train": 9999}, #1500, 1710
-             "untagWlep":{"correct": 9999,"train": 9999} #610,2100#{"correct": 610,"train": 2100}#preapp5
+    medTh = {"tagTjet"  :{"correct": 9999,"train": 9999,"smooth2D":9999}, #920,9999
+             "tagWjet"  :{"correct": 1260,"train": 1310,"smooth2D":9999}, #1540,1080
+             "untagTlep":{"correct": 9999,"train": 9999,"smooth2D":9999}, #1500, 1710
+             "untagWlep":{"correct": 9999,"train": 9999,"smooth2D":9999} #610,2100#{"correct": 610,"train": 2100}#preapp5
              }
-    highTh = {"tagTjet"  :{"correct": 9999,"train": 9999},
-              "tagWjet"  :{"correct": 9999,"train": 9999},
-              "untagTlep":{"correct": 9999, "train": 9999}, #1920,9999
-              "untagWlep":{"correct": 9999, "train": 9999}
+    highTh = {"tagTjet"  :{"correct": 9999,"train": 9999,"smooth2D":9999},
+              "tagWjet"  :{"correct": 9999,"train": 9999,"smooth2D":9999},
+              "untagTlep":{"correct": 9999, "train": 9999,"smooth2D":9999}, #1920,9999
+              "untagWlep":{"correct": 9999, "train": 9999,"smooth2D":9999}
               }
 
 
@@ -105,26 +107,40 @@ else:
         outfile.write(json_obj)
     print(f'Splitting thresholds wrote to {templateDir}/splitThresholds.json')
     
-    rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_UC.root'), 'RECREATE')
     
-    uncertList = []
-    if 'Train' in postFix:
-        uncertList.append('train')
-    if 'CorrUC' in postFix:
-        uncertList.append('correct')
+    #uncertList = []
+    #if 'Train' in postFix:
+    #    uncertList.append('train')
+    #if 'CorrUC' in postFix:
+    #    uncertList.append('correct')
+
+    uncertList = ['train','correct','smooth2D']
+
+    if len(uncertList)==3:
+        rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_TrainCorrectSmoothUC.root'), 'RECREATE')
+    elif len(uncertList)==2:
+        rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_TrainCorrectUC.root'), 'RECREATE')
+    elif 'train' in uncertList:
+        rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_TrainUC.root'), 'RECREATE')
+    elif 'correct' in uncertList:
+        rootFileOut = ROOT.TFile.Open(fileName.replace('.root','_CorrectUC.root'), 'RECREATE')
+
+    
         
     # save untouched hists
-    if len(uncertList)==2:
+    if len(uncertList)==3:
+        allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'train' not in hist.GetName() and 'correct' not in hist.GetName() and 'smooth' not in hist.GetName()]
+    elif len(uncertList)==2:
         allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'train' not in hist.GetName() and 'correct' not in hist.GetName()]
-    elif 'Train' in postFix:
+    elif 'train' in uncertList:
         allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'train' not in hist.GetName()]
-    elif 'CorrUC' in postFix:
+    elif 'correct' in uncertList:
         allHists = [hist.GetName() for hist in rootFileIn.GetListOfKeys() if 'correct' not in hist.GetName()]
             
     for histName in allHists:
         hist = rootFileIn.Get(histName).Clone()
         rootFileOut.cd()
-        hist.Write()
+        hist.Write(histName)
     
     for tag in tagList:
         for uncert in uncertList:
@@ -157,8 +173,10 @@ else:
                         histMassRange4.SetBinError(i,histShift.GetBinError(i))
                 rootFileOut.cd()
                 histMassRange1.Write()
+                print(lowTh[tag][uncert])
                 if lowTh[tag][uncert]!=9999:
                     histMassRange2.Write()
+                    print('histMassRange2 written')
                 if medTh[tag][uncert]!=9999:
                     histMassRange3.Write()
                 if highTh[tag][uncert]!=9999:
