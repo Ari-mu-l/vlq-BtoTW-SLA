@@ -18,7 +18,7 @@ multiplier = 0.02 ## unscale BR put onto signal
 # set multiplier to 0.02
 signal = 'B'
 
-blind=True #True # for unblinding
+blind=False #True # for unblinding
 morphed=False # True
 saveKey='newTW'
 if blind: saveKey+='_blind'
@@ -51,10 +51,14 @@ xsec = array('d',[multiplier for i in range(len(mass))])
 
 # 2016 line starts with 700 but ours start with 800
 # data extraction: https://plotdigitizer.com/app
-mass2016 = array('d', [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000]) #700
-exp_xsecT2016 = [0.25171,0.19829,0.15620,0.12694,0.10210,0.08383,0.06743,0.06016,0.04940,0.04453,0.03851,0.03400,0.03130] #0.35814
+mass2016 = array('d', [800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800]) #700
+# 2016 single production: 1%
+if 'BprimeT' in limitDir:
+        exp_xsec2016 = [0.19391,0.153400,0.11771,0.09311,0.07992,0.06453,0.05538,0.048511,0.04293,0.03760,0.03227]
+else:
+        exp_xsec2016 = [0.36178,0.24041,0.17130,0.12452,0.09803,0.08031,0.06847,0.05666,0.04977,0.04118,0.03728]
+# SS pi/2
 exp_xsecTpi2 = [14.90625,6.53125,2.90625,2.1796875,1.7421875,1.4296875,1.25390625,1.04296875,0.80859375,0.51953125]
-#exp_xsecB = [6.96875,2.84375,1.2734375,0.95703125,0.73828125,0.60546875,0.533203125,0.455078125,0.359375,0.2275390625]
 
 # https://docs.google.com/spreadsheets/d/1hrvXSGU1lbLPtbK0wvMwwVQTHFAeTzPX_4GVC4hKLHw/edit?gid=0
 # Calculation of NWA tW cross section based on TopPartners_SingleProduction github (see links within).
@@ -100,7 +104,8 @@ else:
 theory_xsecD1_dn = [(a-b) for a,b in zip(theory_xsecD1,theoryD1dn)]
 theory_xsecD1_up = [(a-b) for a,b in zip(theoryD1up,theory_xsecD1)]
 
-print('Theory xsec = ',theory_xsecS5)
+#print('Theory xsec = ',theory_xsecS5)
+print('Theory xsec = ',theory_xsecD1) 
 theory_xsecS1_v    = TVectorD(len(theory_mass),array('d',theory_xsecS1))
 theory_xsecS1_up_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_up))
 theory_xsecS1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecS1_dn))
@@ -119,11 +124,13 @@ for i in range(len(mass)):
         exp_xsecTpi2_gr.SetPoint(i, mass[i], exp_xsecTpi2[i] * multiplier)
 exp_xsecTpi2_gr.SetLineColor(ROOT.kBlack)
 
-exp_xsecT2016_gr = TGraph(len(mass2016))
+exp_xsec2016_gr = TGraph(len(mass2016))
 for i in range(len(mass2016)):
-        exp_xsecT2016_gr.SetPoint(i, mass2016[i], exp_xsecT2016[i])
+	exp_xsec2016_gr.SetPoint(i, mass2016[i], exp_xsec2016[i])
 purple = TColor.GetColor("#7a21dd")
-exp_xsecT2016_gr.SetLineColor(purple)
+exp_xsec2016_gr.SetLineColor(purple)
+
+
         
 theory_xsecS5_v    = TVectorD(len(theory_mass),array('d',theory_xsecS5))
 theory_xsecS5_up_v = TVectorD(len(theory_mass),array('d',theory_xsecS5_up))
@@ -144,23 +151,24 @@ theory_xsecD1_dn_v = TVectorD(len(theory_mass),array('d',theory_xsecD1_dn))
 
 theory_xsecD1_gr = TGraphAsymmErrors(TVectorD(len(theory_mass),theory_mass),theory_xsecD1_v,TVectorD(len(theory_mass),masserr),TVectorD(len(theory_mass),masserr),theory_xsecD1_dn_v,theory_xsecD1_up_v)
 theory_xsecD1_gr.SetFillStyle(3001)
-violet = TColor.GetColor("#964a8b")
-theory_xsecD1_gr.SetFillColor(violet) # ROOT.kViolet
+#violet = TColor.GetColor("#964a8b")
+theory_xsecD1_gr.SetFillColor(red) # ROOT.kViolet
 			   
 theoryD1 = TGraph(len(theory_mass))
 for i in range(len(theory_mass)):
 	theoryD1.SetPoint(i, theory_mass[i], theory_xsecD1[i])
 
-def getSensitivity(index, theory, exp):
-	a1=mass[index]-mass[index-1]
-	b1=mass[index]-mass[index-1]
-	c1=0
-	a2=exp[index]-exp[index-1]
-	b2=theory_xsecS5[theory]-theory_xsecS5[theory-1]
-	c2=theory_xsecS5[theory-1]-exp[index-1]
-	s = (c1*b2-c2*b1)/(a1*b2-a2*b1)
-	t = (a1*c2-a2*c1)/(a1*b2-a2*b1)
-	return mass[index-1]+s*(mass[index]-mass[index-1]), exp[index-1]+s*(exp[index]-exp[index-1])
+def getSensitivity(index, theory, exp, theory_xsecList):
+    #print(mass[index],mass[index-1])
+    a1=mass[index]-mass[index-1]
+    b1=mass[index]-mass[index-1]
+    c1=0
+    a2=exp[index]-exp[index-1]
+    b2=theory_xsecList[theory]-theory_xsecList[theory-1]
+    c2=theory_xsecList[theory-1]-exp[index-1]
+    s = (c1*b2-c2*b1)/(a1*b2-a2*b1)
+    t = (a1*c2-a2*c1)/(a1*b2-a2*b1)
+    return mass[index-1]+s*(mass[index]-mass[index-1]), exp[index-1]+s*(exp[index]-exp[index-1])
 
 def PlotLimits(limitDir,limitFile,tempKey):
     ljust_i = 10
@@ -170,8 +178,10 @@ def PlotLimits(limitDir,limitFile,tempKey):
     f = open(limitDir+'/'+limitFile)       
     data = json.load(f)
 
-    limExpected = 800
-    limObserved = 800
+    limExpectedS = 800
+    limObservedS = 800
+    limExpectedD = 800
+    limObservedD = 800
     for i in range(len(mass)):
         key = str(mass[i])
         if '800' in key and '800.0' not in data.keys(): continue
@@ -197,14 +207,22 @@ def PlotLimits(limitDir,limitFile,tempKey):
         lims[.975] = float(data[key]['exp+2'])
         exp95H[i] = float(data[key]['exp+2']) * xsec[i]
 
+        #print(exp[i])
+
         if i!=0:
                 it = theory_mass.index(mass[i])
                 itm1 = theory_mass.index(mass[i-1])
                 if(exp[i]>theory_xsecS5[it] and exp[i-1]<theory_xsecS5[itm1]) or (exp[i]<theory_xsecS5[it] and exp[i-1]>theory_xsecS5[itm1]):
                         print('Calling getSensitivity. At point',i,'got exp of',exp[i],'and theory of',theory_xsecS5[it],'with previous exp of',exp[i-1],'and theory of',theory_xsecS5[itm1])
-                        limExpected,ycross = getSensitivity(i,it,exp)
+                        limExpectedS,ycrossS = getSensitivity(i,it,exp,theory_xsecS5)
                 if(obs[i]>theory_xsecS5[it] and obs[i-1]<theory_xsecS5[itm1]) or (obs[i]<theory_xsecS5[it] and obs[i-1]>theory_xsecS5[itm1]):
-                        limObserved,ycross = getSensitivity(i,it,obs)
+                        limObservedS,ycrossS = getSensitivity(i,it,obs,theory_xsecS5)
+
+                if(exp[i]>theory_xsecD1[it] and exp[i-1]<theory_xsecD1[itm1]) or (exp[i]<theory_xsecD1[it] and exp[i-1]>theory_xsecD1[itm1]):
+                        print('Calling getSensitivity. At point',i,'got exp of',exp[i],'and theory of',theory_xsecD1[it],'with previous exp of',exp[i-1],'and theory of',theory_xsecD1[itm1])
+                        limExpectedD,ycrossD = getSensitivity(i,it,exp,theory_xsecD1)
+                if(obs[i]>theory_xsecD1[it] and obs[i-1]<theory_xsecD1[itm1]) or (obs[i]<theory_xsecD1[it] and obs[i-1]>theory_xsecD1[itm1]):
+                        limObservedD,ycrossD = getSensitivity(i,it,obs,theory_xsecD1)
         
         exp95L[i]=(exp[i]-exp95L[i])
         exp95H[i]=abs(exp[i]-exp95H[i])
@@ -231,9 +249,9 @@ def PlotLimits(limitDir,limitFile,tempKey):
     obserrv = TVectorD(len(mass),obserr)
     experrv = TVectorD(len(mass),experr)       
 
-    mass2016_gr = TGraph(mass6v,mass2016v)
-    mass2016_gr.SetLineColor(ROOT.kBlue)
-    mass2016_gr.SetLineWidth(2)
+    # mass2016_gr = TGraph(mass6v,mass2016v)
+    # mass2016_gr.SetLineColor(ROOT.kBlue)
+    # mass2016_gr.SetLineWidth(2)
     observed = TGraphAsymmErrors(massv,obsv,masserrv,masserrv,obserrv,obserrv)
     observed.SetLineColor(ROOT.kBlack)
     observed.SetLineWidth(2)
@@ -259,12 +277,15 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected95.Draw("a3")
     expected95.GetYaxis().SetRangeUser(.002,10.1)
     expected95.GetXaxis().SetRangeUser(800,2000)
-    expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
+    expected95.GetXaxis().SetTitle("m_{B} [GeV]")
+    #expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
 
     if 'BprimeT' in limitDir:
-            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
+            expected95.GetYaxis().SetTitle("\\sigma\\mbox{(pp}\\rightarrow\\mbox{tqB)}\\mathscr{B}\mbox{(B}\\rightarrow\mbox{tW) [pb]}")
+            #expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
     else:
-            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
+            expected95.GetYaxis().SetTitle("\\sigma\\mbox{(pp}\\rightarrow\\mbox{bqB)}\\mathscr{B}\mbox{(B}\\rightarrow\mbox{tW) [pb]}")
+            #expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
     expected95.GetYaxis().SetTitleOffset(1.05)
 
     expected68.Draw("3same")
@@ -273,27 +294,29 @@ def PlotLimits(limitDir,limitFile,tempKey):
     #mass2016_gr.Draw("same")
 
     #if not blind: observed.Draw("lpsame")
-    theory_xsecS1_gr.SetLineColor(2)
+    theory_xsecS1_gr.SetLineColor(red)
     theory_xsecS1_gr.SetLineStyle(1)
     theory_xsecS1_gr.SetLineWidth(2)
     theory_xsecS1_gr.Draw("3same") 
-    theoryS1.SetLineColor(2)
+    theoryS1.SetLineColor(red)
     theoryS1.SetLineStyle(1)
     theoryS1.SetLineWidth(2)
     theoryS1.Draw("same")                                                             
-    theory_xsecS5_gr.SetLineColor(ROOT.kBlue)
+    theory_xsecS5_gr.SetLineColor(blue)
     theory_xsecS5_gr.SetLineStyle(1)
     theory_xsecS5_gr.SetLineWidth(2)
     theory_xsecS5_gr.Draw("3same") 
-    theoryS5.SetLineColor(ROOT.kBlue)
+    theoryS5.SetLineColor(blue)
     theoryS5.SetLineStyle(1)
     theoryS5.SetLineWidth(2)
     theoryS5.Draw("same")
 
-    exp_xsecTpi2_gr.SetLineWidth(2)
-    exp_xsecTpi2_gr.Draw("same")
-    exp_xsecT2016_gr.SetLineWidth(2)
-    exp_xsecT2016_gr.Draw("same")
+    # if 'BprimeT' in limitDir:
+    #         exp_xsecTpi2_gr.SetLineWidth(2)
+    #         exp_xsecTpi2_gr.Draw("same")
+
+    exp_xsec2016_gr.SetLineWidth(2)
+    exp_xsec2016_gr.Draw("same")
     
     expected.Draw("same")
     if not blind: observed.Draw("lpsame")
@@ -350,8 +373,11 @@ def PlotLimits(limitDir,limitFile,tempKey):
             legend.AddEntry(theory_xsecS5_gr, 'pp #rightarrow bqtW, #Gamma/M = 5%','f')
             legend.AddEntry(theory_xsecS1_gr, 'pp #rightarrow bqtW, #Gamma/M = 1%','f')
             
-    legend.AddEntry(exp_xsecTpi2_gr, 'SS pi/2','l')
-    legend.AddEntry(exp_xsecT2016_gr, '2016 t-associated', 'l')
+    if 'BprimeT' in limitDir:
+            legend.AddEntry(exp_xsec2016_gr, '2016 t-associated', 'l')
+            #legend.AddEntry(exp_xsecTpi2_gr, 'SS pi/2','l')
+    else:
+            legend.AddEntry(exp_xsec2016_gr, '2016 b-associated', 'l')
     legend.AddEntry(0,'B singlet','')
     legend.SetShadowColor(0)
     legend.SetFillStyle(0)
@@ -382,11 +408,14 @@ def PlotLimits(limitDir,limitFile,tempKey):
     expected95.Draw("a3")
     expected95.GetYaxis().SetRangeUser(.002,10.1)
     expected95.GetXaxis().SetRangeUser(800,2000)
-    expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
+    expected95.GetXaxis().SetTitle("m_{B} [GeV]")
+    #expected95.GetXaxis().SetTitle(signal+" mass [GeV]")
     if 'BprimeT' in limitDir:
-            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
+            expected95.GetYaxis().SetTitle("\\sigma\\mbox{(pp}\\rightarrow\\mbox{tqB)}\\mathscr{B}\mbox{(B}\\rightarrow\mbox{tW) [pb]}")
+            #expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow tqB) #font[12]{B}(B #rightarrow tW) [pb]")
     else:
-            expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
+            expected95.GetYaxis().SetTitle("\\sigma\\mbox{(pp}\\rightarrow\\mbox{bqB)}\\mathscr{B}\mbox{(B}\\rightarrow\mbox{tW) [pb]}")
+            #expected95.GetYaxis().SetTitle("#sigma (pp #rightarrow bqB) #font[12]{B}(B #rightarrow tW) [pb]")
     expected95.GetYaxis().SetTitleOffset(1.05)
 
     expected68.Draw("3same")
@@ -395,11 +424,11 @@ def PlotLimits(limitDir,limitFile,tempKey):
     #mass2016_gr.Draw("same")
 
     #if not blind: observed.Draw("lpsame")
-    theory_xsecD1_gr.SetLineColor(ROOT.kViolet)
+    theory_xsecD1_gr.SetLineColor(red)
     theory_xsecD1_gr.SetLineStyle(1)
     theory_xsecD1_gr.SetLineWidth(2)
     theory_xsecD1_gr.Draw("3same") 
-    theoryD1.SetLineColor(ROOT.kViolet)
+    theoryD1.SetLineColor(red)
     theoryD1.SetLineStyle(1)
     theoryD1.SetLineWidth(2)
     theoryD1.Draw("same")
@@ -477,7 +506,7 @@ def PlotLimits(limitDir,limitFile,tempKey):
 
     f.close()
 
-    return int(round(limExpected)), int(round(limObserved))
+    return int(round(limExpectedS)), int(round(limObservedS)), int(round(limExpectedD)), int(round(limObservedD))
 
 
 tempKeys = ['BToTW']
@@ -489,13 +518,15 @@ for tempKey in tempKeys:
         #exit()
         if blind: 
                 if not morphed:
-                        expTemp,obsTemp = PlotLimits(limitDir,'limitsUB_cmb_cmb.json',tempKey) # TEMP: for t-associated SS1p2 test
+                        expTempS,obsTempS,expTempD,obsTempD = PlotLimits(limitDir,'limitsUB_cmb_cmb.json',tempKey) # TEMP: for t-associated SS1p2 test
                 else:
-                        expTemp,obsTemp = PlotLimits(limitDir,'limitsM_cmb_cmb.json',tempKey)
+                        expTempS,obsTempS,expTempD,obsTempD = PlotLimits(limitDir,'limitsM_cmb_cmb.json',tempKey)
         else:
-                expTemp,obsTemp = PlotLimits(limitDir,'limitsUB_cmb_cmb.json',tempKey)
-        expLims.append(expTemp)
-        obsLims.append(obsTemp)
+                expTempS,obsTempS,expTempD,obsTempD = PlotLimits(limitDir,'limitsUB_cmb_cmb.json',tempKey)
+        expLims.append([expTempS,expTempD])
+        obsLims.append([obsTempS,obsTempD])
 
-print("Expected:",expLims)
-print("Observed:",obsLims)
+print("Singlet Expected:",expLims[0][0])
+print("Singlet Observed:",obsLims[0][0])
+print("Doublet Expected:",expLims[0][1])
+print("Doublet Observed:",obsLims[0][1])

@@ -145,7 +145,7 @@ if year=='2016':
         partialBlind = False
 #partialBlind = False # for making unblinded SR plots
 
-lumiSys = 0.016 # lumi uncertainty
+lumiSys = 0.0073 # lumi uncertainty
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
 
 #### Consider: Did not set removeThreshold

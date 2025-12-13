@@ -18,42 +18,50 @@ import CombineHarvester.CombineTools.ch as ch
 #V2, DV2 for ABCDnn
 #V2 or ABCV2V2, for MC CRs, DV2, ABCDCV2V2 for MC SRs
 boosted = False
-region = 'DV2' #TEMP: change region here
+region = 'D' #TEMP: change region here
 fileDir = '/uscms_data/d3/xshen/alma9/CMSSW_13_3_3/src/vlq-BtoTW-SLA/makeTemplates/'
 
 #dirPostFix = 'BtargetHoleCorrABCpABCTrain_2Dsmooth_rebin' #sys.argv[1] # 2D smoothing
 #####################
 # ANv8 and paper-v4 #
 #####################
-#dirPostFix = 'BtargetHoleCorrBTrain_smooth_rebin_dynamicST_smoothBUncert' #_clipped' # 1D smoothing
+#dirPostFix = 'BtargetHoleCorrBTrain_smooth_rebin_dynamicST' #_clipped' # 1D smoothing
 #template = 'templates'+region+'_Jan2025_210bins'+dirPostFix # 210 for 1D smooth. 105 for 2D smooth.
 ################
 # t-associated #
 ################
-dirPostFix = 'BprimeT'
+dirPostFix = 'BprimeT_clipped' #_rebinned'
 template = 'templates'+region+'_Jan2025'+dirPostFix
 
 #postfix = 'rebinned1_stat0p2_smoothed_TVJJ'
 #option = sys.argv[1] #'JumpAll'
-if 'BprimeT' in template:
-        postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
-else: # b-associated
-        if 'smooth2D' in dirPostFix or '2Dsmooth' in dirPostFix and '2DsmoothUncert' not in dirPostFix:
-                #postfix = 'smoothedJJ_rebinned1_stat0p2'
-                postfix = 'rebinned1_stat0p2' # no jecjer smoothing
-        else:
-                #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV'
-                #postfix = 'rebinned1_stat0p2_smoothedTV' # no jecjer smoothing
-                #postfix = 'rebinned1_stat0p2_smoothedTV_smoothUncert' # smooth Uncert
-                #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert' # smooth Uncert
-                #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothfracUncert'
-                #postfix = 'smoothBUncert_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothedB'
-                postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
-                #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DfracUncert'
-                #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert_rebinned' # rebin again
+postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
+# if 'BprimeT' in template:
+#         #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert'
+#         if region=='V2':
+#                 postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_TrainCorrectUC'
+#         else:
+#                 postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_smoothedCorr_TrainCorrectUC' #SmoothUC'
+# else: # b-associated
+#         if 'smooth2D' in dirPostFix or '2Dsmooth' in dirPostFix and '2DsmoothUncert' not in dirPostFix:
+#                 #postfix = 'smoothedJJ_rebinned1_stat0p2'
+#                 postfix = 'rebinned1_stat0p2' # no jecjer smoothing
+#         else:
+#                 #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV'
+#                 #postfix = 'rebinned1_stat0p2_smoothedTV' # no jecjer smoothing
+#                 #postfix = 'rebinned1_stat0p2_smoothedTV_smoothUncert' # smooth Uncert
+#                 #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothUncert' # smooth Uncert
+#                 #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothfracUncert'
+#                 #postfix = 'smoothBUncert_smoothedJJ_rebinned1_stat0p2_smoothedTV_smoothedB'
+#                 #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert' # ANv8
+#                 if region=='V2':
+#                         postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_TrainCorrectUC'
+#                 else:
+#                         #postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_smoothedCorr_TrainCorrectUC'
+#                         postfix = 'smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_TrainCorrectUC' # TEMP: for test how the changes affect limits
 saveKey = 'ABCDnn_'+region 
 dateKey = '_Jan2025'
-outputdir = 'limits_templates'+saveKey+dateKey+'_RB1_2Dcorr'+dirPostFix #+'_largeRateUncert' #+'_smooth2DUncert_Case2DB_C1C20p04' #+'_2DsmoothUncert_noSmoothTail_largeRateUncert2' #+'_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth_tail0p01' #+'_smoothfracUncert_Case2DB' #+'_rebinned' #'_smoothUncertFrac2Symm0p06' #NoSmoothTail' #0p07NoSmoothNoUncertTail' #'_fullMassRange' #+'smoothAfterClip' #+'_case2B' #+'_alternative2_nojecjer' #+'_alternative2_jecjer0p07' #+'_BB2k3a' #+'k3ak3aCorrAsym' #+'_test' #+f'_{option}'  #+'upload'#+'_largeRateUncert' #.replace('UC4','NoUC')  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
+outputdir = 'limits_templates'+saveKey+dateKey+'_RB1_2Dcorr'+dirPostFix+'_correctLastBin' #+'_correctLastBin_TrainNoSmoothCorrectUCS1'#'_correctLastBin_TrainCorrectUCS9' #'_correctLastBin_TrainCorrectUCS9_0p03CorrSmooth'#_TrainCorrectUCS10_0p03CorrSmooth' #_TrainCorrectUCS8' #+'_largeRateUncert' #+'_smooth2DUncert_Case2DB_C1C20p04' #+'_2DsmoothUncert_noSmoothTail_largeRateUncert2' #+'_smooth2DUncert_Case2DB_largeRateUncert2_C1C20p04Smooth_tail0p01' #+'_smoothfracUncert_Case2DB'  ## Edit last string for unique identifier. IF CHANGING BINNING, GO CHANGE FILE NAME BELOW!
 discrim = 'BpMass_ABCDnn'
 
 if '2016' in template:
@@ -89,7 +97,8 @@ print('output = ',outputdir)
 massList = [800,1000,1200,1300,1400,1500,1600,1700,1800,2000]
 #massList = [1200,1300,1800]
 if region == 'V2':
-        massList = [1200]
+        #massList = [1200]
+        massList = [1000,1300,1800]
 
 def add_processes_and_observations(cb, prefix='Bp'):
         print('------------------------------------------------------------------------')
@@ -181,27 +190,12 @@ def add_systematics(cb):
                 #cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'smoothB', 'shape', ch.SystMap()(1.0))
 
                 # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'trainMassRange1', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'trainMassRange2', 'shape', ch.SystMap()(1.0))
                 # cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'trainMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'trainMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'trainMassRange3', 'shape', ch.SystMap()(1.0))
-                # #cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'trainMassRange3', 'shape', ch.SystMap()(1.0))
-                # #cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'trainMassRange2', 'shape', ch.SystMap()(1.0))
+                # cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'trainMassRange3', 'shape', ch.SystMap()(1.0))
                 
                 # cb.cp().process([allbkgs[0]]).channel(chns).AddSyst(cb, 'correctMassRange1', 'shape', ch.SystMap()(1.0))
-                
-                # cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'correctMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'correctMassRange3', 'shape', ch.SystMap()(1.0))
-                
                 # cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'correctMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'correctMassRange3', 'shape', ch.SystMap()(1.0))
-                
-                # cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'correctMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'correctMassRange3', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns3).AddSyst(cb, 'correctMassRange4', 'shape', ch.SystMap()(1.0))
-                
-                # cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'correctMassRange2', 'shape', ch.SystMap()(1.0))
-                # cb.cp().process([allbkgs[0]]).channel(chns4).AddSyst(cb, 'correctMassRange3', 'shape', ch.SystMap()(1.0))
+                # #cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'correctMassRange3', 'shape', ch.SystMap()(1.0))
                 
                 cb.cp().process([allbkgs[0]]).channel(chns1).AddSyst(cb, 'abcdRateC1', 'lnN', ch.SystMap()(1.08)) #1.02 #1.08
                 cb.cp().process([allbkgs[0]]).channel(chns2).AddSyst(cb, 'abcdRateC2', 'lnN', ch.SystMap()(1.04)) #1.02 #1.04
@@ -218,7 +212,7 @@ def add_systematics(cb):
         if isABCDnn:
                 allmcgrps = signal + [allbkgs[1]] + [allbkgs[2]]
 
-        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'lumi', 'lnN', ch.SystMap()(1.018))
+        cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'lumi', 'lnN', ch.SystMap()(1.0073))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elRecoSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elIdSF', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, 'elIsoSF', 'shape', ch.SystMap()(1.0))
@@ -235,7 +229,7 @@ def add_systematics(cb):
         cb.cp().process(allmcgrps+[allbkgs[0]]).channel(chns1).AddSyst(cb, 'pNetTtag', 'shape', ch.SystMap()(1.0))
         cb.cp().process(allmcgrps+[allbkgs[0]]).channel(chns2).AddSyst(cb, 'pNetWtag', 'shape', ch.SystMap()(1.0))
 
-        for syst in ['jec','jer','TrigEffEl','TrigEffMu','btagHFUC','btagLFUC']: #
+        for syst in ['jec','jer','TrigEffEl','TrigEffMu','btagHFUC','btagLFUC']:
                 for year in yearList:
                         cb.cp().process(allmcgrps).channel(chns).AddSyst(cb, syst+year, 'shape', ch.SystMap()(1.0))
                         
@@ -344,19 +338,23 @@ def create_workspace(cb):
                                                 chnfile.write('nuisance edit rename major Case2_'+reg+' smooth2D abcdSmooth2DC2\n')
                                                 #chnfile.write('nuisance edit rename major Case1_'+reg+' smoothfrac abcdSmoothFracC1\n')
                                                 #chnfile.write('nuisance edit rename major Case2_'+reg+' smoothfrac abcdSmoothFracC2\n')
+
+                                                #chnfile.write('nuisance edit rename major Case1_'+reg+' smooth2DMassRange1 abcdSmooth2DMR1C1\n')
+                                                #chnfile.write('nuisance edit rename major Case1_'+reg+' smooth2DMassRange2 abcdSmooth2DMR2C1\n')
+                                                #chnfile.write('nuisance edit rename major Case2_'+reg+' smooth2DMassRange1 abcdSmooth2DMR1C2\n')
+                                                #chnfile.write('nuisance edit rename major Case2_'+reg+' smooth2DMassRange2 abcdSmooth2DMR2C2\n')
+
                                                 # chnfile.write('nuisance edit rename major Case1_'+reg+' trainMassRange1 abcdTrainMassRange1C1\n')
-                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' trainMassRange2 abcdTrainMassRange2C1\n')
-                                                
+
                                                 # chnfile.write('nuisance edit rename major Case2_'+reg+' trainMassRange1 abcdTrainMassRange1C2\n')
                                                 # chnfile.write('nuisance edit rename major Case2_'+reg+' trainMassRange2 abcdTrainMassRange2C2\n')
+                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' trainMassRange3 abcdTrainMassRange3C2\n')
 
                                                 # chnfile.write('nuisance edit rename major Case1_'+reg+' correctMassRange1 abcdCorrMassRange1C1\n')
-                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' correctMassRange2 abcdCorrMassRange2C1\n')
-                                                # chnfile.write('nuisance edit rename major Case1_'+reg+' correctMassRange3 abcdCorrMassRange3C1\n')
                                                 
                                                 # chnfile.write('nuisance edit rename major Case2_'+reg+' correctMassRange1 abcdCorrMassRange1C2\n')
                                                 # chnfile.write('nuisance edit rename major Case2_'+reg+' correctMassRange2 abcdCorrMassRange2C2\n')
-                                                # chnfile.write('nuisance edit rename major Case2_'+reg+' correctMassRange3 abcdCorrMassRange3C2\n')
+                                                # #chnfile.write('nuisance edit rename major Case2_'+reg+' correctMassRange3 abcdCorrMassRange3C2\n')
                                                 
                                                 if not boosted:
                                                         chnfile.write('nuisance edit rename major Case3_'+reg+' train abcdTrainC3\n')
@@ -371,22 +369,15 @@ def create_workspace(cb):
                                                         chnfile.write('nuisance edit rename major Case4_'+reg+' smooth2D abcdSmooth2DC4\n')
                                                         #chnfile.write('nuisance edit rename major Case3_'+reg+' smoothfrac abcdSmoothFracC3\n')
                                                         #chnfile.write('nuisance edit rename major Case4_'+reg+' smoothfrac abcdSmoothFracC4\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' trainMassRange1 abcdTrainMassRange1C3\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' trainMassRange2 abcdTrainMassRange2C3\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' trainMassRange3 abcdTrainMassRange3C3\n')
+
+                                                        #chnfile.write('nuisance edit rename major Case3_'+reg+' smooth2DMassRange1 abcdSmooth2DMR1C3\n')
+                                                        #chnfile.write('nuisance edit rename major Case4_'+reg+' smooth2DMassRange1 abcdSmooth2DMR1C4\n')
                                                         
+                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' trainMassRange1 abcdTrainMassRange1C3\n')
                                                         # chnfile.write('nuisance edit rename major Case4_'+reg+' trainMassRange1 abcdTrainMassRange1C4\n')
-                                                        # #chnfile.write('nuisance edit rename major Case4_'+reg+' trainMassRange2 abcdTrainMassRange2C4\n')
-                                                        # #chnfile.write('nuisance edit rename major Case4_'+reg+' trainMassRange3 abcdTrainMassRange3C4\n')
                                                         
                                                         # chnfile.write('nuisance edit rename major Case3_'+reg+' correctMassRange1 abcdCorrMassRange1C3\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' correctMassRange2 abcdCorrMassRange2C3\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' correctMassRange3 abcdCorrMassRange3C3\n')
-                                                        # chnfile.write('nuisance edit rename major Case3_'+reg+' correctMassRange4 abcdCorrMassRange4C3\n')
-                                                        
                                                         # chnfile.write('nuisance edit rename major Case4_'+reg+' correctMassRange1 abcdCorrMassRange1C4\n')
-                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' correctMassRange2 abcdCorrMassRange2C4\n')
-                                                        # chnfile.write('nuisance edit rename major Case4_'+reg+' correctMassRange3 abcdCorrMassRange3C4\n')
                                                         
                                         #chnfile.write('nuisance edit rename ewk * muRFcorrdNewEWK muRFewk ifexists \n') # ifexists DIDNT WORK
                                         #chnfile.write('nuisance edit rename ttx * muRFcorrdNewTTX muRFttx ifexists \n')
@@ -399,14 +390,14 @@ def create_workspace(cb):
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2016 TrigMu16\n')
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2017 TrigMu17\n')
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * TrigEffMu2018 TrigMu18\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016APV jec16APV\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016 jec16\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2017 jec17\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2018 jec18\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016APV jer16APV\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016 jer16\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2017 jer17\n')
-                                        chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2018 jer18\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016APV jec16APV\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2016 jec16\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2017 jec17\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jec2018 jec18\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016APV jer16APV\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2016 jer16\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2017 jer17\n')
+                                        # chnfile.write('nuisance edit rename (ttx|ewk|BpM) * jer2018 jer18\n')
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2016APV bHFUC16APV\n')
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2016 bHFUC16\n')
                                         chnfile.write('nuisance edit rename (ttx|ewk|BpM) * btagHFUC2017 bHFUC17\n')
@@ -495,8 +486,10 @@ if __name__ == '__main__':
         masses.push_back("1500")
         masses.push_back("1700")
         if region == 'V2':
-                masses = ch.ValsFromRange('1200:1300|200') # original setting
+                #masses = ch.ValsFromRange('1200:1300|200') # original setting
                 #masses = ch.ValsFromRange('1200:1400|100')# added for testing the 1300 kink
+                masses = ch.ValsFromRange('1000:1300|300')
+                masses.push_back("1800")
         
         print('Found this mass list: ',masses)
 

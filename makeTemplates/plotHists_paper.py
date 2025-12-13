@@ -163,7 +163,7 @@ if year=='2016':
         partialBlind = False
 #partialBlind = False # for making unblinded SR plots
 
-lumiSys = 0.016 # lumi uncertainty
+lumiSys = 0.0073 # lumi uncertainty
 factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
 
 #### Consider: Did not set removeThreshold
@@ -178,20 +178,20 @@ def formatUpperHist(histogram,th1hist):
         highside = th1hist.GetBinLowEdge(th1hist.GetNbinsX()+1)
         histogram.GetXaxis().SetRangeUser(lowside,highside)
         histogram.GetXaxis().SetNdivisions(506)
-                
+        
         #if 'BpMass' in histogram.GetName():
-        #        histogram.GetYaxis().SetTitleOffset(1.0)
-
+        #        histogram.GetXaxis().SetTitle('m_{tw}')
         if 'JetTag' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
                 labels = ['b/light','t','W','both']
                 for ibin in range(1,th1hist.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
                 histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetLabelOffset(0.05)
                 histogram.GetXaxis().SetTitleOffset(1.0)
         if 'BpDecay' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
-                labels = ['','T+lepW','W+lepT','X+lepT','X+lepW']
+                labels = ['','Case 1','Case 2','Case 3','Case 4']
                 for ibin in range(1,th1hist.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
                 #histogram.GetXaxis().SetLabelSize(0.25)
@@ -237,11 +237,14 @@ def formatUpperHist(histogram,th1hist):
 
 def formatLowerHist(histogram):
         histogram.GetXaxis().SetLabelSize(.15)
+        histogram.GetXaxis().SetLabelOffset(0.04)
         histogram.GetXaxis().SetTitleSize(0.18)
-        histogram.GetXaxis().SetTitleOffset(0.95)
+        histogram.GetXaxis().SetTitleOffset(1.0) # 0.95
         histogram.GetXaxis().SetNdivisions(506)
         if 'YLD' in iPlot: histogram.GetXaxis().LabelsOption("u")
 
+        if 'BpMass' in histogram.GetName():
+                histogram.GetXaxis().SetTitle('m_{tw} [GeV]')
         if 'JetTag' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
                 labels = ['b/light','t','W','both']
@@ -252,19 +255,20 @@ def formatLowerHist(histogram):
                 histogram.GetXaxis().SetTitle("AK8 ParticleNet tag")
         if 'BpDecay' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
-                labels = ['','T+lepW','W+lepT','X+lepT','X+lepW']
+                labels = ['','Case 1','Case 2','Case 3','Case 4']
                 for ibin in range(1,histogram.GetNbinsX()+1):
                         histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
-                histogram.GetXaxis().SetLabelSize(0.25)
+                histogram.GetXaxis().SetLabelSize(0.24)
+                histogram.GetXaxis().SetLabelOffset(0.03)
                 histogram.GetXaxis().SetRangeUser(1,5)
-                histogram.GetXaxis().SetTitleOffset(1.0)
+                histogram.GetXaxis().SetTitleOffset(1.1)
                 histogram.GetXaxis().SetTitle('B quark decay mode')
 
         histogram.GetYaxis().SetLabelSize(0.15)
         histogram.GetYaxis().SetTitleSize(0.145)
         histogram.GetYaxis().SetTitleOffset(0.3)
         if not doRealPull: 
-                histogram.GetYaxis().SetTitle('Data/Bkg')
+                histogram.GetYaxis().SetTitle('Data/Bkg.')
         else: 
                 histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{std. dev.}')
         histogram.GetYaxis().SetNdivisions(7)
@@ -620,6 +624,7 @@ for tag in taglist:
                 #bkgHTgerr.SetMarkerColor(kBlack)
                 bkgHTgerr.SetFillStyle(3004)
                 bkgHTgerr.SetFillColor(kBlack)
+                bkgHTgerr.SetLineColor(kBlack)
 
                 gStyle.SetOptStat(0)
                 #CMS.SetExtraText("") # "Preliminary"
@@ -631,16 +636,17 @@ for tag in taglist:
                 #else:
                 #       gStyle.SetErrorX(0)
                 gStyle.SetErrorX(0.5)
-                yDiv=0.25
+                yDiv=0.3 #0.25
                 if blind == True: yDiv=0.01
                 # for some reason the markers at 0 don't show with this setting:
-                uMargin = 0.00001
+                uMargin = 0.02 #0.00001
                 if blind == True: uMargin = 0.12
                 rMargin=.04
                 # overlap the pads a little to hide the error bar gap:
                 uPad={}
-                if yLog and not blind: 
-                        uPad=TPad("uPad","",0,yDiv-0.009,1,1) #for actual plots
+                if yLog and not blind:
+                        #uPad=TPad("uPad","",0,yDiv-0.009,1,1) #for actual plots
+                        uPad=TPad("uPad","",0,yDiv,1,1)
                 else: 
                         uPad=TPad("uPad","",0,yDiv,1,1) #for actual plots
                 uPad.SetTopMargin(0.08)
@@ -670,9 +676,9 @@ for tag in taglist:
                 gaeData.SetTitle("")
                 if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10):
-                                gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
+                                gaeData.GetYaxis().SetTitle("Events / "+str(perNGeV))
                         else: 
-                                gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
+                                gaeData.GetYaxis().SetTitle("Events / "+str(perNGeV)+" GeV")
                 else: gaeData.GetYaxis().SetTitle("Events / bin")
                 formatUpperHist(gaeData,hData)
                 uPad.cd()
@@ -704,9 +710,9 @@ for tag in taglist:
                         hsig1.Draw("HIST")
                 if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10): 
-                                hData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
+                                hData.GetYaxis().SetTitle("Events / "+str(perNGeV))
                         else: 
-                                hData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
+                                hData.GetYaxis().SetTitle("Events / "+str(perNGeV)+" GeV")
                 else: hData.GetYaxis().SetTitle("Events / bin")
 
                 stackbkgHT.Draw("SAME HIST")
@@ -734,7 +740,7 @@ for tag in taglist:
                 tagString = ''
                 if isEM=='E': flvString+='e+jets'
                 if isEM=='M': flvString+='#mu+jets'
-                if isEM=='L': flvString+='e/#mu+jets'
+                if isEM=='L': flvString+='' #'e/#mu+jets'
                 tagString = ''
                 regionString = ''
                 if isCategorized:
@@ -822,8 +828,8 @@ for tag in taglist:
                                 try:
                                         leg.AddEntry(bkghists['wjets'+catStr],"W+jets","f") #right
                                 except: pass
+                                leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f") #right
                                 #leg.AddEntry(0, "", "") #left
-                                leg.AddEntry(bkgHTgerr,"Bkg. uncert.","f") #right
                         else:
                                 leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
                                 try: 
@@ -844,7 +850,7 @@ for tag in taglist:
                                 except: pass
                                 leg.AddEntry(bkghists['qcd'+catStr],"QCD","f") #right
                                 leg.AddEntry(0, "", "") #left
-                                leg.AddEntry(bkgHTgerr,"Bkg. uncert.","f") #right
+                                leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f") #right
 
                 if not drawQCD:
                         if not blind:
@@ -858,6 +864,8 @@ for tag in taglist:
                                         leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f")
                                         leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
                                         leg.AddEntry(bkghists['ttx'+catStr],"t#bar{t}+(V,H)","f")
+                                        leg.AddEntry(0,"","")  #left
+                                        leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f")
 
                                 else:
                                         try: 
@@ -878,7 +886,7 @@ for tag in taglist:
                                                 leg.AddEntry(bkghists['singletop'+catStr],"single t","f") #left
                                         except: pass
                                         #leg.AddEntry(0, "", "") #left
-                                        leg.AddEntry(bkgHTgerr,"Bkg. uncert.","f") #right
+                                        leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f") #right
                         else:
                                 leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
                                 try: 
@@ -898,7 +906,7 @@ for tag in taglist:
                                         leg.AddEntry(bkghists['singletop'+catStr],"single t","f") #left
                                 except: pass
                                 leg.AddEntry(0, "", "") #left
-                                leg.AddEntry(bkgHTgerr,"Bkg. uncert.","f") #right
+                                leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f") #right
 
 
                 leg.Draw("same")
@@ -970,9 +978,11 @@ for tag in taglist:
                                 if bkgHT.GetBinContent(binNo)!=0:
                                         pullUncBandTot.SetPointEYhigh(binNo-1,totBkgTemp3[catStr].GetErrorYhigh(binNo-1)/bkgHT.GetBinContent(binNo))
                                         pullUncBandTot.SetPointEYlow(binNo-1,totBkgTemp3[catStr].GetErrorYlow(binNo-1)/bkgHT.GetBinContent(binNo))			
-                        if not doOneBand: 
+                        if not doOneBand:
                                 pullUncBandTot.SetFillStyle(3001)
-                        else: pullUncBandTot.SetFillStyle(3344)
+                        else:
+                                #pullUncBandTot.SetFillStyle(3344)
+                                pullUncBandTot.SetFillStyle(3004)
                         pullUncBandTot.SetFillColor(1)
                         pullUncBandTot.SetLineColor(1)
                         pullUncBandTot.SetMarkerSize(0)
@@ -1005,26 +1015,26 @@ for tag in taglist:
                         gStyle.SetHatchesLineWidth(1)
                         if not doOneBand: pullUncBandStat.Draw("SAME E2")
 
-                        pullLegend=TLegend(0.14,0.87,0.85,0.96)
-                        SetOwnership( pullLegend, 0 )   # 0 = release (not keep), 1 = keep
-                        pullLegend.SetShadowColor(0)
-                        pullLegend.SetNColumns(3)
-                        pullLegend.SetFillColor(0)
-                        pullLegend.SetFillStyle(0)
-                        pullLegend.SetLineColor(0)
-                        pullLegend.SetLineStyle(0)
-                        pullLegend.SetBorderSize(0)
-                        #pullLegend.SetTextFont(42)
-                        if not doOneBand: 
-                                pullLegend.AddEntry(pullUncBandStat , "Bkg. uncert. (shape syst.)" , "f")
-                                pullLegend.AddEntry(pullUncBandNorm , "Bkg. uncert. (shape #oplus norm. syst.)" , "f")
-                                pullLegend.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus all syst.)" , "f")
-                        else: 
-                                if doAllSys: 
-                                        pullLegend.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus syst.)" , "f")
-                                else: 
-                                        pullLegend.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus lumi)" , "f")
-                        pullLegend.Draw("SAME")
+                        # pullLegend=TLegend(0.14,0.87,0.85,0.96)
+                        # SetOwnership( pullLegend, 0 )   # 0 = release (not keep), 1 = keep
+                        # pullLegend.SetShadowColor(0)
+                        # pullLegend.SetNColumns(3)
+                        # pullLegend.SetFillColor(0)
+                        # pullLegend.SetFillStyle(0)
+                        # pullLegend.SetLineColor(0)
+                        # pullLegend.SetLineStyle(0)
+                        # pullLegend.SetBorderSize(0)
+                        # #pullLegend.SetTextFont(42)
+                        # # if not doOneBand: 
+                        # #         pullLegend.AddEntry(pullUncBandStat , "Bkg. Uncert. (shape syst.)" , "f")
+                        # #         pullLegend.AddEntry(pullUncBandNorm , "Bkg. Uncert. (shape #oplus norm. syst.)" , "f")
+                        # #         pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus all syst.)" , "f")
+                        # # else: 
+                        # #         if doAllSys: 
+                        # #                 pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus syst.)" , "f")
+                        # #         else: 
+                        # #                 pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus lumi)" , "f")
+                        # pullLegend.Draw("SAME")
                         if doNormByBinWidth and	'jet' in tag:
                                 pull.Draw("SAME E0") #E0
                         else:
