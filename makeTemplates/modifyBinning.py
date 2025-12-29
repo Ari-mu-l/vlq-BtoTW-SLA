@@ -7,6 +7,7 @@ from array import array
 from samples import lumiStr, systListShort, systListFull,  systListABCDnn
 from utils import *
 from ROOT import TFile, TH1, gROOT
+TH1.SetDefaultSumw2(True)
 
 gROOT.SetBatch(1)
 start_time = time.time()
@@ -150,6 +151,8 @@ else:
 # Use this line to plot ANv7 plots before correction
 #rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')]
 
+# for SS1p2 test: no jec jer
+#rfiles = [file for file in findfiles(templateDir, f'templates_{iPlot}_138fbfb.root')]
 
 print("templateDir: "+templateDir)
 print("iPlot: "+iPlot)
@@ -254,13 +257,15 @@ for chn in totBkgHists.keys():
                                                 xbinsListTemp[chn].append(totBkgHists[chn].GetXaxis().GetBinLowEdge(Nbins+1-iBin))
 
         ## Going right to left -- if the last entry isn't 0 add it
-        if '_42' in folder or 'Jan2025' in folder:
-                if 'clipped' in folder:
-                        if xbinsListTemp[chn][-1]!=600: xbinsListTemp[chn].append(600)
-                else:
-                        if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
-        else:
-                if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0)
+        # if '_42' in folder or 'Jan2025' in folder:
+        #         if 'clipped' in folder:
+        #                 if xbinsListTemp[chn][-1]!=600: xbinsListTemp[chn].append(600)
+        #         else:
+        #                 if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400)
+        # else:
+        #         if xbinsListTemp[chn][-1]!=0: xbinsListTemp[chn].append(0)
+
+        if xbinsListTemp[chn][-1]!=400: xbinsListTemp[chn].append(400) # default start with 400
 
         ## Placeholder: if needed for some plot, can add 1 at the end if rebinning left to right
 	#if 'Large' in chn and 'LargeJ' not in chn and 'templatesCR' in folder and xbinsListTemp[chn][-1]!=1: xbinsListTemp[chn].append(1)
@@ -366,10 +371,10 @@ for rfile in rfiles:
                         rebinnedHists[hist].Write()
                         if '__'+sigName in hist:
                                 hist_sigToXsec = rebinnedHists[hist].Clone(hist+'_scaled')
-                                hist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
+                                hist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]]/4) # undo Scale(2) and time branching ratio for singlet
                                 yieldHistName = hist
                                 yieldsAll[yieldHistName] = hist_sigToXsec.Integral()
-                                yieldsErrsAll[yieldHistName] = 0
+                                yieldsErrsAll[yieldHistName] = 0.
                                 for ibin in range(1,hist_sigToXsec.GetXaxis().GetNbins()+1):
                                         yieldsErrsAll[yieldHistName] += hist_sigToXsec.GetBinError(ibin)**2
                                 yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
