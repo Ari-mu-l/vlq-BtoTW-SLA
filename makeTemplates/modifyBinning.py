@@ -8,6 +8,7 @@ from samples import lumiStr, systListShort, systListFull,  systListABCDnn
 from utils import *
 from ROOT import TFile, TH1, gROOT
 TH1.SetDefaultSumw2(True)
+#import ctypes
 
 gROOT.SetBatch(1)
 start_time = time.time()
@@ -91,7 +92,7 @@ if 'ABCDnn' in iPlot: # SWITCH
         bkgProcList = ['major','ttx','ewk'] #put the most dominant process first
 #ABCDProcList = ['',]
 
-stat_saved = 0.06 #statistical uncertainty requirement (enter >1.0 for no rebinning; i.g., "1.1")
+stat_saved = 0.2 #statistical uncertainty requirement (enter >1.0 for no rebinning; i.g., "1.1")
 if len(sys.argv)>3: stat_saved=float(sys.argv[3])
 
 rebin4chi2 = False
@@ -112,7 +113,7 @@ sigName = 'Bp'
 
 addCRsys = False
 addShapes = True
-lumiSys = math.sqrt(0.018**2) #lumi uncertainty plus higgs prop
+lumiSys = math.sqrt(0.0073**2) #lumi uncertainty plus higgs prop
 
 removalKeys = {} # True == keep, False == remove
 removalKeys['__factor'] = False
@@ -366,25 +367,15 @@ for rfile in rfiles:
                         if '__pdf' in hist:
                                 if 'Up' not in hist or 'Down' not in hist: continue
                         if any([item in hist and not removalKeys[item] for item in removalKeys.keys()]): continue
-
-
+                        
                         rebinnedHists[hist].Write()
-                        if '__'+sigName in hist:
-                                hist_sigToXsec = rebinnedHists[hist].Clone(hist+'_scaled')
-                                hist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]]/4) # undo Scale(2) and time branching ratio for singlet
-                                yieldHistName = hist
-                                yieldsAll[yieldHistName] = hist_sigToXsec.Integral()
-                                yieldsErrsAll[yieldHistName] = 0.
-                                for ibin in range(1,hist_sigToXsec.GetXaxis().GetNbins()+1):
-                                        yieldsErrsAll[yieldHistName] += hist_sigToXsec.GetBinError(ibin)**2
-                                yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
-                        else:
-                                yieldHistName = hist
-                                yieldsAll[yieldHistName] = rebinnedHists[hist].Integral()
-                                yieldsErrsAll[yieldHistName] = 0.
-                                for ibin in range(1,rebinnedHists[hist].GetXaxis().GetNbins()+1):
-                                        yieldsErrsAll[yieldHistName] += rebinnedHists[hist].GetBinError(ibin)**2
-                                yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
+
+                        yieldHistName = hist
+                        yieldsAll[yieldHistName] = rebinnedHists[hist].Integral()
+                        yieldsErrsAll[yieldHistName] = 0.
+                        for ibin in range(1,rebinnedHists[hist].GetXaxis().GetNbins()+1):
+                                yieldsErrsAll[yieldHistName] += rebinnedHists[hist].GetBinError(ibin)**2
+                        yieldsErrsAll[yieldHistName] = math.sqrt(yieldsErrsAll[yieldHistName])
 
 			
                 ##Check for empty signal bins
@@ -574,24 +565,10 @@ for rfile in rfiles:
                         muFUpHist.Write()
                         muFDnHist.Write()
                         
-                        if '__'+sigName in hist:
-                                muRUpHist_sigToXsec = muRUpHist.Clone(hist+'muRUpHist_sigToXsec')
-                                muRDnHist_sigToXsec = muRDnHist.Clone(hist+'muRDnHist_sigToXsec')
-                                muFUpHist_sigToXsec = muFUpHist.Clone(hist+'muFUpHist_sigToXsec')
-                                muFDnHist_sigToXsec = muFDnHist.Clone(hist+'muFDnHist_sigToXsec')
-                                muRUpHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                muRDnHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                muFUpHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                muFDnHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                yieldsAll[muRUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRUpHist_sigToXsec.Integral()
-                                yieldsAll[muRDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRDnHist_sigToXsec.Integral()
-                                yieldsAll[muFUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFUpHist_sigToXsec.Integral()
-                                yieldsAll[muFDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFDnHist_sigToXsec.Integral()
-                        else:
-                                yieldsAll[muRUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRUpHist.Integral()
-                                yieldsAll[muRDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRDnHist.Integral()
-                                yieldsAll[muFUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFUpHist.Integral()
-                                yieldsAll[muFDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFDnHist.Integral()
+                        yieldsAll[muRUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRUpHist.Integral()
+                        yieldsAll[muRDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muRDnHist.Integral()
+                        yieldsAll[muFUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFUpHist.Integral()
+                        yieldsAll[muFDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = muFDnHist.Integral()
 
                 #Constructing PDF shapes -- FIXME LATER FOR BPRIME!
                 pdfUphists = [k.GetName() for k in tfiles[iRfile].GetListOfKeys() if 'pdf0' in k.GetName() and chn in k.GetName()]
@@ -635,16 +612,8 @@ for rfile in rfiles:
                         pdfNewUpHist.Write()
                         pdfNewDnHist.Write()
 
-                        if '__'+sigName in hist:
-                                pdfNewUpHist_sigToXsec = pdfNewUpHist.Clone(hist+'pdfNewUpHist_sigToXsec')
-                                pdfNewDnHist_sigToXsec = pdfNewDnHist.Clone(hist+'pdfNewDnHist_sigToXsec')
-                                pdfNewUpHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                pdfNewDnHist_sigToXsec.Scale(theory_xsec[hist.split('__')[1]])
-                                yieldsAll[pdfNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewUpHist_sigToXsec.Integral()
-                                yieldsAll[pdfNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewDnHist_sigToXsec.Integral()
-                        else:
-                                yieldsAll[pdfNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewUpHist.Integral()
-                                yieldsAll[pdfNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewDnHist.Integral()
+                        yieldsAll[pdfNewUpHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewUpHist.Integral()
+                        yieldsAll[pdfNewDnHist.GetName().replace('_sig','_'+rfile.split('_')[-2])] = pdfNewDnHist.Integral()
 
 			
         tfiles[iRfile].Close()
@@ -681,7 +650,7 @@ def getShapeSystUnc(proc,chn):
 
 table = []
 taglist = ['tag']
-factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.02,'untagWlep':0.08}
+factor = {'tagTjet':0.08,'tagWjet':0.04,'untagTlep':0.02,'untagWlep':0.08}
 if 'kinematics' in folder: taglist = ['all']
 for isEM in isEMlist:
         if isEM=='isE': corrdSys = elcorrdSys
@@ -697,7 +666,6 @@ for isEM in isEMlist:
                         for chn in channels:
                                 if not (isEM in chn and tag in chn): continue
                                 modTag = chn[chn.find('is'):].split('_')[1]
-                                #print('modTag = ',modTag)
                                 histoPrefix = allhists[chn][0][:allhists[chn][0].find('__')+2]
                                 yieldtemp = 0.
                                 yielderrtemp = 0.
@@ -710,6 +678,7 @@ for isEM in isEMlist:
                                                 except:
                                                         if bkg != 'qcd': print("Missing "+bkg+" for channel in totBkg or dataOverBkg: "+chn)
                                                         pass
+                                                
                                                 if bkg != 'major':
                                                         try:
                                                                 yielderrtemp += (corrdSys*yieldsAll[histoPrefix+bkg])**2
@@ -730,12 +699,7 @@ for isEM in isEMlist:
                                         except:
                                                 if proc != 'qcd': print("Missing "+proc+" for channel individual: "+chn)
                                                 pass
-                                        if proc in sigProcList:
-                                                signal=proc
-                                                if 'left' in signal: signal=proc.replace('left','')+'left'
-                                                if 'right' in signal: signal=proc.replace('right','')+'right'
-                                                #yieldtemp*=xsec[signal]  ### FIXME using the new dicts if we want non-1pb
-                                                #yielderrtemp*=xsec[signal]**2
+                                        
                                         if proc != 'major':
                                                 try:
                                                         yielderrtemp += (corrdSys*yieldsAll[histoPrefix+proc])**2
@@ -743,7 +707,15 @@ for isEM in isEMlist:
                                                         print(f'{proc} might be empty. Skipping.')
                                         else:
                                                 yielderrtemp += (factor[modTag]*yieldsAll[histoPrefix+proc])**2
+
+                                        
                                 yielderrtemp = math.sqrt(yielderrtemp)
+                                
+                                if proc in sigProcList:
+                                        #if 'left' in signal: signal=proc.replace('left','')+'left'
+                                        #if 'right' in signal: signal=proc.replace('right','')+'right'
+                                        yieldtemp*=(theory_xsec[proc]/4)
+                                        yielderrtemp*=(theory_xsec[proc]/4)
 				#print "yieldsAll: ",yieldsAll
                                 if proc==dataName: 
                                         row.append(' & '+str(int(yieldsAll[histoPrefix+proc])))
