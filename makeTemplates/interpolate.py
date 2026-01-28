@@ -1,4 +1,6 @@
-import ROOT, os, sys
+import ROOT, os, sys, json
+import numpy as np
+import matplotlib.pyplot as plt
 ROOT.TH1.SetDefaultSumw2(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(1)
@@ -14,23 +16,12 @@ fileName = "templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root"
 os.makedirs(f"{indir}/plots_interpolate", exist_ok=True)
 os.makedirs(f"{indir}/plots_fit", exist_ok=True)
 
+tagList = ['tagTjet', 'tagWjet', 'untagTlep', 'untagWlep']
+for tag in tagList:
+   os.makedirs(f"{indir}/plots_fit/{tag}", exist_ok=True)
+
 inFile = ROOT.TFile(f"{indir}/{fileName}","READ")
 outFile =  ROOT.TFile(f"{indir}/{fileName.replace('.root','_interpolate.root')}","RECREATE")
-nomHists = []
-systHists = []
-
-for key in inFile.GetListOfKeys():
-    histName = key.GetName()
-    outFile.cd()
-    hist = inFile.Get(histName)
-    hist.Write()
-    
-    if 'BpM800' in histName:
-        if len(histName.split('__'))==2:
-            nomHists.append(histName)
-        else:
-            systHists.append(histName)
-
 
 ROOT.gInterpreter.Declare("""
 Double_t DoubleSidedCB2(double x, double mu, double width, double a1, double p1, double a2, double p2)
@@ -55,154 +46,131 @@ double DoubleSidedCB(double* x, double *par)
 }
 """)
 
-peak = {800:0.045, 1000:0.04, 1200:0.035}
-#BpMass_ABCDnn_138fbfb_isL_tagTjet_D__BpM800__elRecoSFUp
-#for hsitName in nomHists:
-# tagList = ["tagTjet"]
-# for tag in tagList:
-#     for mass in [800]:
-#         for syst in systListFull:
-#             hist = hist.inFile.Get(f'BpMass_ABCDnn_138fbfb_isL_{tag}_D__BpM{mass}')
-#             histUp = inFile.Get(f'BpMass_ABCDnn_138fbfb_isL_{tag}_D__BpM{mass}__{syst}Up')
-#             histDn = inFile.Get(f'BpMass_ABCDnn_138fbfb_isL_{tag}_D__BpM{mass}__{syst}Down')
+def getFit(tag, massList):
+    
+    #nomHists = []
+    #systHists = []
+    histLists = []
+    for key in inFile.GetListOfKeys():
+        histName = key.GetName()
+        outFile.cd()
+        hist = inFile.Get(histName)
+        hist.Write()
 
-#             #hist.Scale(1/hist.Integral())
-#             #histUp.Scale(1/histUp.Integral())
-#             #histDn.Scale(1/histDn.Integral())
+        if ('BpM800' in histName) and (tag in histName):
+            histLists.append(histName)
+            #if len(histName.split('__'))==2:
+            #    nomHists.append(histName)
+            #else:
+            #    systHists.append(histName)
 
-            
-#             exit()
+    #print(nomHists[0].split('_')[4]) # tag
+    #print(systHists[0].split('__')[-1]) # syst
 
-#for histName in nomHists:
-for histName in systHists:
-    for mass in [800]:
-    #for mass in [800,1000,1200,1800]:
-        if 'tagTjet' not in histName: continue
-        hist = inFile.Get(histName.replace('800',str(mass)))
-        hist.Scale(1/hist.Integral())
+    nomParams = {}
+    systParams = {}
+    #massList = [800,1000,1200,1300,1400]
+    #for histName in nomHists:
+    for histName in histLists:
 
-        cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7) # TEMP: change fit range if necessary
-        #cb.SetParLimits(3,-500,500)
-        #cb.SetParLimits(4,0,10)
-        #cb.SetParLimits(5,-500,500)
-        #cb.SetParLimits(6,0,10)
-        if mass==1800:
-            cb.SetParameters(0.05,mass,100,1,1,5,2)
+        if len(histName.split('__'))==2: # nom
+            syst = "nom"
         else:
-            cb.SetParameters(0.05,mass,100,1,1,1,1)
-        #cb.SetParameters(0.05,mass,100,1,1,1,1)
-        #cb.FixParameter(0,0.044)
-        #cb.SetParameters(0.05,mass,100,100,1,100,1)
-        
-        #cb = ROOT.TF1("cb","crystalball",400,2400)
-        #cb.SetParameters(0.05,mass,100,100,2)
-        #cb = ROOT.TF1("cb","gaus",400,2500)
-        #cb.SetParameters(0.05,mass,100)
-        #cb.FixParameter(0,peak[mass])
-        hist.Fit("cb","R")
+            syst = histName.split('__')[-1]
 
-        c1 = ROOT.TCanvas(f"c1_{histName}",f"c1_{histName}",1200,1000)
-        hist.Draw()
-        #cb.Draw("SAME")
+        subdir = f"{indir}/plots_fit/{histName.split('_')[4]}/{syst}"
+        os.makedirs(subdir, exist_ok=True)
 
-        c1.SaveAs(f"{indir}/plots_fit/{histName.replace('800',str(mass))}_fit.png")
-        
-print(f"Plot saved to {indir}/plots_fit/")
+        interpolateParams = {}
 
-exit()
-            
-for histName in nomHists+systHists:
-    hist800 = inFile.Get(histName)
-    hist1000 = inFile.Get(histName.replace('800','1000'))
-    hist1200 = inFile.Get(histName.replace('800','1200'))
-    hist1300 = inFile.Get(histName.replace('800','1300'))
+        for mass in massList:
+            nomParams[f'{mass}'] = [0,0,0,0,0,0,0]
 
-    hist800.Scale(1/hist800.Integral())
-    hist1000.Scale(1/hist1000.Integral())
-    hist1200.Scale(1/hist1200.Integral())
-    hist1300.Scale(1/hist1300.Integral())
+            hist = inFile.Get(histName.replace('800',str(mass)))
+            hist.Scale(1/hist.Integral())
 
-    #cb = ROOT.TF1("cb","crystalball",400,2400)
-    #cb.SetParameters(0.045,800,100,100,2)
-    #cb.FixParameter(0,0.045)
-    cb = ROOT.TF1("cb","gaus",400,2500)
-    cb.SetParameters(0.045,800,100)
-    cb.FixParameter(0,0.045)
-    
-    hist800.Fit("cb","B")
+            #peak = hist.GetBinCenter(hist.GetMaximumBin())
 
-    hist800.Draw()
-    exit()
+            if "jet" in tag:
+                cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                cb.SetParameters(0.05,mass,100,1,1,1,1)
+            elif tag=="untagTlep": # TEMP: decision not finalized
+                if mass==1000:
+                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,450,2490,npar=7)
+                else:
+                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                cb.SetParameters(0.05,mass,100,2,2,5,2)
+            elif tag=="untagWlep":
+                if mass==800:
+                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                else:
+                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,500,2490,npar=7)
+                cb.SetParameters(hist.GetMaximum(),mass,100,1,100,1,1)
 
-    # print('BpM1000')
-    # cb = ROOT.TF1("cb","crystalball",400,2500)
-    # cb.SetParameters(1,1,100,1000)
-    # hist1000.Fit("cb","R")
-    
-    print('BpM1200')
-    cb = ROOT.TF1("cb","crystalball",400,2500)
-    cb.SetParameters(1,1,150,1200)
-    hist1200.Fit("cb","R")
 
-    print('BpM1300')
-    cb = ROOT.TF1("cb","crystalball",400,2500)
-    cb.SetParameters(1,1,150,1300)
-    hist1300.Fit("cb","R")
+            #cb.SetParameters(0.05,peak,100,1,1,1,1)
+            #cb.SetParameters(0.05,mass,100,1,1,1,1) 
+            #cb.SetParameters(0.05,mass,100,2,2,5,2) # untagTlep
+            #cb.SetParameters(hist.GetMaximum(),mass,100,2,2,5,2)
+            #cb.SetParameters(hist.GetMaximum(),mass,100,1,100,1,1) # untagWlep
+            #cb.SetParameters(hist.GetMaximum(),peak,100,1,100,1,1)
+            #cb.SetParLimits(0,hist.GetMaximum()*0.95,hist.GetMaximum()*1.05)
+            #cb.SetParLimits(1,peak*0.9,peak*1.1)
 
-    exit()
+            # if mass==1800:
+            #     cb.SetParameters(0.05,mass,100,1,1,5,2)
+            # else:
+            #     cb.SetParameters(0.05,mass,100,1,1,1,1)
 
-    hist900 = hist800.Clone(histName.replace('800','900'))
-    hist900.Add(hist1000)
-    hist900.Scale(0.5)
+            #cb = ROOT.TF1("cb","crystalball",400,2400)
+            #cb.SetParameters(0.05,mass,100,0.5,1)
+            #cb = ROOT.TF1("cb","gaus",400,2500)
+            #cb.SetParameters(0.05,mass,100)
+            #cb.FixParameter(0,peak[mass])
 
-    hist1100 = hist1000.Clone(histName.replace('800','1100'))
-    hist1100.Add(hist1200)
-    hist1100.Scale(0.5)
-    
-    outFile.cd()
-    hist900.Write()
-    hist1100.Write()
+            fit = hist.Fit("cb","RS")
 
-print(f"Created {outFile.GetName()}")
+            for i in range(7): # save fit parameters
+                nomParams[f'{mass}'][i] = fit.Parameter(i)        
 
-tagList = ["tagTjet","tagWjet","untagTlep","untagWlep"]
-for tag in tagList:
-    c1 = ROOT.TCanvas(f"c1_{tag}",f"c1_{tag}",1200,1000)
+            c1 = ROOT.TCanvas(f"c1_{histName}",f"c1_{histName}",1200,1000)
+            hist.Draw()
 
-    #BpMass_ABCDnn_138fbfb_isL_tagTjet_D__BpM1100
-    hist800 = outFile.Get(nomHists[0].replace('tagTjet',tag))
-    hist900 = outFile.Get(nomHists[0].replace('tagTjet',tag).replace('800','900'))
-    hist1000 = outFile.Get(nomHists[0].replace('tagTjet',tag).replace('800','1000'))
-    hist1100 = outFile.Get(nomHists[0].replace('tagTjet',tag).replace('800','1100'))
-    hist1200 = outFile.Get(nomHists[0].replace('tagTjet',tag).replace('800','1200'))
+            c1.SaveAs(f"{subdir}/{histName.replace('800',str(mass))}_fit.png")
 
-    hist800.Scale(1/hist800.Integral())
-    hist900.Scale(1/hist900.Integral())
-    hist1000.Scale(1/hist1000.Integral())
-    hist1100.Scale(1/hist1100.Integral())
-    hist1200.Scale(1/hist1200.Integral())
-    
-    hist800.SetLineColor(2)
-    hist900.SetLineColor(3)
-    hist1000.SetLineColor(4)
-    hist1100.SetLineColor(6)
-    hist1200.SetLineColor(43)
-    
-    hist800.Draw("HIST")
-    hist900.Draw("HIST SAME")
-    hist1000.Draw("HIST SAME")
-    hist1100.Draw("HIST SAME")
-    hist1200.Draw("HIST SAME")
+        for i in range(7): # plot param vs mass
+            masses = np.array(massList)/1000
+            param_i = np.zeros(len(massList))
+            for j_mass in range(len(massList)):
+                param_i[j_mass] = nomParams[f'{massList[j_mass]}'][i]
 
-    legend = ROOT.TLegend(0.47,0.62,0.92,0.89)
-    legend.AddEntry(hist800, "BpM800", "l")
-    legend.AddEntry(hist900, "BpM900", "l")
-    legend.AddEntry(hist1000, "BpM1000", "l")
-    legend.AddEntry(hist1100, "BpM1100", "l")
-    legend.AddEntry(hist1200, "BpM1200", "l")
-    legend.Draw()
+            fit = np.polyfit(masses,param_i,1) # tried order 3
+            if ("jet" in tag) and (i==5):
+                interpolateParams[f'p{i}'] = [0, np.average(param_i)] # take avg and fit as a const
+            else:
+                interpolateParams[f'p{i}'] = [fit[0],fit[1]]
+            #print(f'p{i}: {fit}')
 
-    c1.SaveAs(f"{indir}/plots_interpolate/interploate_{tag}.png")
+            plt.figure()
+            plt.plot(masses, param_i, 'o', label=f'best fit $p_{i}$')
+            plt.plot(masses, masses*fit[0] + fit[1], label= f'{fit[0]:.3f}' +' * $m_{B}$ + '+ f'{fit[1]:.3f}')
+            plt.legend()
+            plt.xlabel("$m_{B}$ [TeV]")
+            plt.ylabel(f"$p_{i}$")
+            plt.savefig(f"{subdir}/p{i}.png")
+            plt.close()
 
+
+        print(f"Plot saved to {indir}/plots_fit/")
+
+        json_obj = json.dumps(interpolateParams, indent=4)
+        with open(f"{subdir}/interpolate_params.json","w") as outjson:
+            outjson.write(json_obj)
+
+getFit("tagTjet", [800,1000,1200,1300,1400])
+getFit("tagWjet", [800,1000,1200,1300,1400,1500])
+getFit("untagTlep", [800,1000,1200,1400])
+getFit("untagWlep", [800,1000,1200,1300,1400])
 inFile.Close()
 outFile.Close()
+
