@@ -48,9 +48,8 @@ double DoubleSidedCB(double* x, double *par)
 
 def getFit(tag, massList):
     
-    #nomHists = []
-    #systHists = []
-    histLists = []
+    nomHists = []
+    systHists = []
     for key in inFile.GetListOfKeys():
         histName = key.GetName()
         outFile.cd()
@@ -58,20 +57,17 @@ def getFit(tag, massList):
         hist.Write()
 
         if ('BpM800' in histName) and (tag in histName):
-            histLists.append(histName)
-            #if len(histName.split('__'))==2:
-            #    nomHists.append(histName)
-            #else:
-            #    systHists.append(histName)
+            if len(histName.split('__'))==2:
+                nomHists.append(histName)
+            else:
+                systHists.append(histName)
 
     #print(nomHists[0].split('_')[4]) # tag
     #print(systHists[0].split('__')[-1]) # syst
 
     nomParams = {}
     systParams = {}
-    #massList = [800,1000,1200,1300,1400]
-    #for histName in nomHists:
-    for histName in histLists:
+    for histName in nomHists+systHists:
 
         if len(histName.split('__'))==2: # nom
             syst = "nom"
@@ -84,16 +80,20 @@ def getFit(tag, massList):
         interpolateParams = {}
 
         for mass in massList:
-            nomParams[f'{mass}'] = [0,0,0,0,0,0,0]
+            nomParams[f'{mass}'] = [0,0,0,0,0,0,0,0] # 7 parameters + last bin
 
             hist = inFile.Get(histName.replace('800',str(mass)))
             hist.Scale(1/hist.Integral())
+
+            #cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,npar=7)
+            #cb.SetParameters(0.05,mass,100,1,1,1,1)
+            #fit = hist.Fit("cb",400,2490,"RS")
 
             #peak = hist.GetBinCenter(hist.GetMaximumBin())
 
             if "jet" in tag:
                 cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
-                cb.SetParameters(0.05,mass,100,1,1,1,1)
+                cb.SetParameters(0.05,mass,100,1,100,1,1)
             elif tag=="untagTlep": # TEMP: decision not finalized
                 if mass==1000:
                     cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,450,2490,npar=7)
@@ -106,7 +106,9 @@ def getFit(tag, massList):
                 else:
                     cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,500,2490,npar=7)
                 cb.SetParameters(hist.GetMaximum(),mass,100,1,100,1,1)
+                #cb.SetParLimits(0,hist.GetMaximum()*0.95,hist.GetMaximum()*1.05)
 
+            #cb.SetParLimits(4,100,200)
 
             #cb.SetParameters(0.05,peak,100,1,1,1,1)
             #cb.SetParameters(0.05,mass,100,1,1,1,1) 
@@ -131,14 +133,16 @@ def getFit(tag, massList):
             fit = hist.Fit("cb","RS")
 
             for i in range(7): # save fit parameters
-                nomParams[f'{mass}'][i] = fit.Parameter(i)        
+                nomParams[f'{mass}'][i] = fit.Parameter(i)
+            nomParams[f'{mass}'][7] = hist.GetBinContent(210) # last bin content
 
             c1 = ROOT.TCanvas(f"c1_{histName}",f"c1_{histName}",1200,1000)
             hist.Draw()
 
             c1.SaveAs(f"{subdir}/{histName.replace('800',str(mass))}_fit.png")
 
-        for i in range(7): # plot param vs mass
+
+        for i in range(8): # plot param vs mass + last bin
             masses = np.array(massList)/1000
             param_i = np.zeros(len(massList))
             for j_mass in range(len(massList)):
@@ -163,14 +167,65 @@ def getFit(tag, massList):
 
         print(f"Plot saved to {indir}/plots_fit/")
 
-        json_obj = json.dumps(interpolateParams, indent=4)
-        with open(f"{subdir}/interpolate_params.json","w") as outjson:
-            outjson.write(json_obj)
+        json_obj_int = json.dumps(interpolateParams, indent=4)
+        with open(f"{subdir}/interpolate_params.json","w") as outjson: # probably need to change a file name
+            outjson.write(json_obj_int)
+
+        json_obj_par = json.dumps(nomParams, indent=4)
+        with open(f"{subdir}/fit_params.json","w") as outjson:
+            outjson.write(json_obj_par)
 
 getFit("tagTjet", [800,1000,1200,1300,1400])
 getFit("tagWjet", [800,1000,1200,1300,1400,1500])
-getFit("untagTlep", [800,1000,1200,1400])
+getFit("untagTlep", [800,1000,1300,1400])
 getFit("untagWlep", [800,1000,1200,1300,1400])
+
+###############################################
+# Study the effect of parameters on the shape #
+###############################################
+# idea: choose one histogram and vary the tail parameter
+# overlay the fit lines with the histogram
+# Check Case3: untagTlep
+#BpMass_ABCDnn_138fbfb_isL_untagTlep_D__BpM800
+
+# subdir = f"{indir}/plots_fit/untagTlep/nom"
+# histName = 'BpMass_ABCDnn_138fbfb_isL_untagTlep_D__BpM1300'
+
+# with open(f"{subdir}/fit_params.json", "r") as infile:
+#    fitParams = json.load(infile)
+
+# hist = inFile.Get(histName)
+# hist.Scale(1/hist.Integral())
+
+# cb0 = ROOT.TF1("cb0",ROOT.DoubleSidedCB,400,2490,npar=7)
+# cb1 = ROOT.TF1("cb1",ROOT.DoubleSidedCB,400,2490,npar=7)
+# #cb2 = ROOT.TF1("cb2",ROOT.DoubleSidedCB,400,2490,npar=7)
+# for i in range(7):
+#    cb0.SetParameter(i,fitParams['1300'][i])
+
+#    # check tail params
+#    #if i==4:
+#    #   cb1.SetParameter(i,110)
+#    #elif i==5:
+#    #   cb1.SetParameter(i,0.76)
+#    #else:
+#    #   cb1.SetParameter(i,fitParams['1300'][i]) # from the linear fit
+
+#    # check width
+#    if i==2:
+#       cb1.SetParameter(i,115)
+#    else:
+#       cb1.SetParameter(i,fitParams['1300'][i])
+
+# cb1.SetLineColor(ROOT.kBlue)
+
+# c1 = ROOT.TCanvas(f"c1_{histName}",f"c1_{histName}",1200,1000)
+# hist.Draw()
+# cb0.Draw("SAME")
+# cb1.Draw("SAME")
+
+# c1.SaveAs(f"{subdir}/{histName}_fitComparison.png")
+
+
 inFile.Close()
 outFile.Close()
-
