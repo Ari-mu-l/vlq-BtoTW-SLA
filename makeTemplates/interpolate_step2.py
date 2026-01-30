@@ -47,16 +47,7 @@ def saveOriginalHists():
         hist.Write()
    print(f"Created {outFile.GetName()}")
 
-
-
-def interpolate(tag, mass):
-    paramDir = f"{indir}/plots_fit/{tag}"
-    systList = []
-    for entry in os.scandir(paramDir):
-        if entry.is_dir():
-            systList.append(entry.name) # include nom
-
-    for systName in systList:
+def createHistogramFromFit(tag, systName, mass):
         subdir = f"{indir}/plots_fit/{tag}/{systName}"
         with open(f"{subdir}/fit_params.json", "r") as infile:
             fitParams = json.load(infile)
@@ -84,7 +75,7 @@ def interpolate(tag, mass):
         histParams_highM = np.array(histParams[f'{mass+100}'])
         histParams_new = (histParams_lowM + histParams_highM)/2
         for iparam in range(7): # 7 params for dscb
-        cb.SetParameter(i,histParams_new[i])
+            cb.SetParameter(iparam,histParams_new[iparam])
 
         # Generate histogram from the function
         # BpMass_ABCDnn_138fbfb_isL_untagWlep_D__BpM1800__jer2018Up
@@ -92,32 +83,98 @@ def interpolate(tag, mass):
            histName = f'BpMass_ABCDnn_138fbfb_isL_{tag}_D__BpM{mass}'
         else:
            histName = f'BpMass_ABCDnn_138fbfb_isL_{tag}_D__BpM{mass}__{systName}'
-        histOut = ROOT.TH1D(histName, histName, 210, 400, 2500)
-        histOut.FillRandom("cb", 10000)
+        histOut = ROOT.TH1D(f'{histName}_interpolate', histName, 210, 400, 2500)
+        histOut.FillRandom("cb", 50000)
 
         # add last bin
         # bulk yield: x, last bin yield: y
         # y/(x+y) = p7 (p7 is the percentage of events in the last bin)
         # y' = (p7/(1-p7)) * x'
         # here x' = 10000, because generated 10000 from the function
-        histOut.SetBinContent(210, histParams_new[7]*10000/(1-histParams_new[7]))
+        histOut.SetBinContent(210, histParams_new[7]*50000/(1-histParams_new[7]))
 
-        # Bin error: sqrt(N)
-        for i in range(1,211):
-           histOut.SetBinError(i, np.sqrt(histOut.GetBinContent(i)))
-
+        # normalize to 1
+        histOut.Scale(1/histOut.Integral())
+        
         # Scale to lumi*1pb/Ngen to be consistent with the MC signals
         # 1.0/0.5 is done in the next step (modifyBinning) along with MC signals
-        histOut.Scale(138/histOut.Integral())
+        #histOut.Scale(138/histOut.Integral())
+
+        return histOut
+
+     
+def interpolate(tag, mass):
+    paramDir = f"{indir}/plots_fit/{tag}"
+    systList = []
+    for entry in os.scandir(paramDir):
+        if (entry.name!="nom") and (entry.is_dir()):
+            systList.append(entry.name)
+
+    hist_nom = createHistogramFromFit(tag,"nom",mass)
+
+    # normalize nom to the correct yield
+    subdir = f"{indir}/plots_fit/{tag}/nom"
+    with open(f"{subdir}/hist_params.json", "r") as infile:
+        histParams = json.load(infile)
         
-        c1 = ROOT.TCanvas(f"c1_{histName}",f"c1_{histName}",1200,1000)
-        histOut.Scale(1/histOut.Integral())
-        histOut.Draw()
-        cb.Draw("SAME")
-        c1.SaveAs(f"{indir}/plots_interpolate/{tag}/{histName}.png")
+    yields = (histParams[f'{mass-100}'][8] + histParams[f'{mass+100}'][8])/2 # interpolate yields with adjacent points
+    Ngen = yields/((histParams[f'{mass-100}'][9] + histParams[f'{mass+100}'][9])/2) # param9 is N_selected / N_gen. Interpolate this ratio to get interpolated Ngen to set stat err
+    factor = (histParams[f'{mass-100}'][10] + histParams[f'{mass+100}'][10])/2
+    
+    histOutName = hist_nom.GetName().replace('_interpolate','')
+    hist_nom_out = hist_nom.Clone(histOutName)
+    hist_nom_out.SetTitle(histOutName)
+    hist_nom_stat = hist_nom.Clone(f'{histOutName}_stat') # used to get statistical error
+    hist_nom_out.Scale(yields)
+    hist_nom_stat.Scale(Ngen)
+
+    for ibin in range(1,211): # loop over bins
+        hist_nom_out.SetBinError(ibin, np.sqrt(hist_nom_stat.GetBinContent(ibin))*factor)
+
+    outFile.cd()
+    hist_nom_out.Write()
+
+    c_nom = ROOT.TCanvas(f"c1_{histOutName}",f"c1_{histOutName}",1200,1000)
+    hist_nom_out.Draw("HIST E")
+    c_nom.SaveAs(f"{indir}/plots_interpolate/{tag}/{histOutName}.png")
+            
+    for systName in systList:
+        hist_sys = createHistogramFromFit(tag,systName,mass)
+        hist_shift = hist_sys.Clone(f'{systName}_shift')
+        hist_shift.Add(hist_nom, -1)
+        hist_shift.Divide(hist_nom)
+
+        for ibin in range(1,211):
+           hist_shift.SetBinContent(ibin, 1+hist_shift.GetBinContent(ibin)) # make it into a SF
+           hist_shift.SetBinError(ibin, 0)
+
+        systOutName = f"{histOutName}__{systName}"
+        hist_syst_out = hist_nom_out.Clone(systOutName)
+        hist_syst_out.SetTitle(systOutName)
+        
+        hist_syst_out.Multiply(hist_shift)
+
+        outFile.cd()
+        hist_syst_out.Write()
+        
+        c_syst = ROOT.TCanvas(f"c1_{systOutName}",f"c1_{systOutName}",1200,1000)
+        hist_syst_out.Draw()
+        c_syst.SaveAs(f"{indir}/plots_interpolate/{tag}/{systOutName}.png")
+        
+        #histOut.Scale(1/histOut.Integral())
+        #histOut.Draw()
+        #cb.Draw("SAME")
+        #c_syst.SaveAs(f"{indir}/plots_interpolate/{tag}/{histName}.png")
             
 
-#saveOriginalHists()
+saveOriginalHists()
 interpolate('tagTjet', 900)
+interpolate('tagWjet', 900)
+interpolate('untagTlep', 900)
+interpolate('untagWlep', 900)
 
+interpolate('tagTjet', 1100)
+interpolate('tagWjet', 1100)
+interpolate('untagTlep', 1100)
+interpolate('untagWlep', 1100)
 
