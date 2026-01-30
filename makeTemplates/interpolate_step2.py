@@ -123,7 +123,8 @@ def interpolate(tag, mass):
     
     histOutName = hist_nom.GetName().replace('_interpolate','')
     hist_nom_out = hist_nom.Clone(histOutName)
-    hist_nom_out.SetTitle(histOutName)
+    #hist_nom_out.SetTitle(histOutName)
+    hist_nom_out.SetTitle('')
     hist_nom_stat = hist_nom.Clone(f'{histOutName}_stat') # used to get statistical error
     hist_nom_out.Scale(yields)
     hist_nom_stat.Scale(Ngen)
@@ -150,7 +151,8 @@ def interpolate(tag, mass):
 
         systOutName = f"{histOutName}__{systName}"
         hist_syst_out = hist_nom_out.Clone(systOutName)
-        hist_syst_out.SetTitle(systOutName)
+        hist_syst_out.SetTitle('')
+        #hist_syst_out.SetTitle(systOutName)
         
         hist_syst_out.Multiply(hist_shift)
 
