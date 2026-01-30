@@ -207,10 +207,10 @@ def getFit(tag, massList):
         with open(f"{subdir}/hist_params.json","w") as outjson:
             outjson.write(json_obj_par)
 
-getFit("tagTjet", [800,1000,1200,1300,1400])
-getFit("tagWjet", [800,1000,1200,1300,1400,1500])
-getFit("untagTlep", [800,1000,1300,1400])
-getFit("untagWlep", [800,1000,1200,1300,1400])
+#getFit("tagTjet", [800,1000,1200,1300,1400])
+#getFit("tagWjet", [800,1000,1200,1300,1400,1500])
+getFit("untagTlep", [800,1000,1200,1300,1400])
+#getFit("untagWlep", [800,1000,1200,1300,1400])
 
 ###############################################
 # Study the effect of parameters on the shape #
