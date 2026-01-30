@@ -13,7 +13,6 @@ indir = "templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST"
 fileName = "templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root"
 #fileName = "templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_smoothedCorr.root"
 
-#os.makedirs(f"{indir}/plots_interpolate", exist_ok=True)
 os.makedirs(f"{indir}/plots_fit", exist_ok=True)
 
 tagList = ['tagTjet', 'tagWjet', 'untagTlep', 'untagWlep']
@@ -21,7 +20,6 @@ for tag in tagList:
    os.makedirs(f"{indir}/plots_fit/{tag}", exist_ok=True)
 
 inFile = ROOT.TFile(f"{indir}/{fileName}","READ")
-#outFile =  ROOT.TFile(f"{indir}/{fileName.replace('.root','_interpolate.root')}","RECREATE")
 
 ROOT.gInterpreter.Declare("""
 Double_t DoubleSidedCB2(double x, double mu, double width, double a1, double p1, double a2, double p2)
@@ -52,9 +50,7 @@ def getFit(tag, massList):
     systHists = []
     for key in inFile.GetListOfKeys():
         histName = key.GetName()
-        #outFile.cd()
         hist = inFile.Get(histName)
-        #hist.Write()
 
         if ('BpM800' in histName) and (tag in histName):
             if len(histName.split('__'))==2:
@@ -207,10 +203,10 @@ def getFit(tag, massList):
         with open(f"{subdir}/hist_params.json","w") as outjson:
             outjson.write(json_obj_par)
 
-#getFit("tagTjet", [800,1000,1200,1300,1400])
-#getFit("tagWjet", [800,1000,1200,1300,1400,1500])
+getFit("tagTjet", [800,1000,1200,1300,1400])
+getFit("tagWjet", [800,1000,1200,1300,1400,1500])
 getFit("untagTlep", [800,1000,1200,1300,1400])
-#getFit("untagWlep", [800,1000,1200,1300,1400])
+getFit("untagWlep", [800,1000,1200,1300,1400])
 
 ###############################################
 # Study the effect of parameters on the shape #
@@ -260,4 +256,3 @@ getFit("untagTlep", [800,1000,1200,1300,1400])
 
 
 inFile.Close()
-#outFile.Close()
