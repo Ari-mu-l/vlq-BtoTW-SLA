@@ -2,7 +2,7 @@ import ROOT, os, sys, json
 import numpy as np
 ROOT.TH1.SetDefaultSumw2(True)
 ROOT.gStyle.SetOptStat(0)
-ROOT.gROOT.SetBatch(1)
+#ROOT.gROOT.SetBatch(1)
 
 indir = "templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST"
 
@@ -95,10 +95,6 @@ def createHistogramFromFit(tag, systName, mass):
 
         # normalize to 1
         histOut.Scale(1/histOut.Integral())
-        
-        # Scale to lumi*1pb/Ngen to be consistent with the MC signals
-        # 1.0/0.5 is done in the next step (modifyBinning) along with MC signals
-        #histOut.Scale(138/histOut.Integral())
 
         return histOut
 
@@ -135,13 +131,15 @@ def interpolate(tag, mass):
     outFile.cd()
     hist_nom_out.Write()
 
-    c_nom = ROOT.TCanvas(f"c1_{histOutName}",f"c1_{histOutName}",1200,1000)
-    hist_nom_out.Draw("HIST E")
-    c_nom.SaveAs(f"{indir}/plots_interpolate/{tag}/{histOutName}.png")
+    # TEMP: comment out for debug
+    #c_nom = ROOT.TCanvas(f"c1_{histOutName}",f"c1_{histOutName}",1200,1000)
+    #hist_nom_out.Draw("HIST E")
+    #c_nom.SaveAs(f"{indir}/plots_interpolate/{tag}/{histOutName}.png")
             
     for systName in systList:
         hist_sys = createHistogramFromFit(tag,systName,mass)
         hist_shift = hist_sys.Clone(f'{systName}_shift')
+        
         hist_shift.Add(hist_nom, -1)
         hist_shift.Divide(hist_nom)
 
