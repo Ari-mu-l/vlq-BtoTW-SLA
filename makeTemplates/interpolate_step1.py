@@ -81,8 +81,8 @@ def getFit(tag, massList):
             hist = inFile.Get(histName.replace('800',str(mass)))
             if syst == "nom":
                histParams[f'{mass}'][8] = hist.Integral()
-               nrun = samples_signal[f'Bprime_M{mass}_2016APV'].nrun + samples_signal[f'Bprime_M{mass}_2016'].nrun + samples_signal[f'Bprime_M{mass}_2017'].nrun + samples_signal[f'Bprime_M{mass}_2018'].nrun
-               histParams[f'{mass}'][9] = hist.GetEntries()/nrun
+               nrun = samples_signal[f'Bprime_M{mass}_2016APV'].nrun + samples_signal[f'Bprime_M{mass}_2016'].nrun + samples_signal[f'Bprime_M{mass}_2017'].nrun + samples_signal[f'Bprime_M{mass}_2018'].nrun # not needed
+               histParams[f'{mass}'][9] = hist.GetEntries()/nrun # not needed
                histParams[f'{mass}'][10] = hist.Integral()/hist.GetEntries()
 
                # two different ways of estimating the overall scaling.
