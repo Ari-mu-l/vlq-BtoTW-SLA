@@ -5,13 +5,21 @@ ROOT.TH1.SetDefaultSumw2(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(1)
 
-parent = os.path.dirname(os.getcwd())
-sys.path.append(parent)
-from samples import samples_signal # TEMP: for Bbj only. samples_signalT for Btj
-
+# b-associated
 indir = "templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST"
+# t-associated
+#indir = "templatesD_Jan2025BprimeT"
 fileName = "templates_BpMass_ABCDnn_138fbfb_smoothedJJ.root"
 #fileName = "templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert_smoothedCorr.root"
+
+parent = os.path.dirname(os.getcwd())
+sys.path.append(parent)
+if "BprimeT" in indir:
+   from samples import samples_signalT as samples_signal
+   Bprime = "BprimeT"
+else:
+   from samples import samples_signal
+   Bprime = "Bprime"
 
 os.makedirs(f"{indir}/plots_fit", exist_ok=True)
 
@@ -76,14 +84,11 @@ def getFit(tag, massList):
         interpolateParams = {}
 
         for mass in massList:
-            histParams[f'{mass}'] = [0,0,0,0,0,0,0,0,0,0,0] # 7 parameters + last bin + yields + N_select/N_gen
+            histParams[f'{mass}'] = [0,0,0,0,0,0,0,0,0,0] # 7 parameters + last bin + yields + N_select/N_gen
 
             hist = inFile.Get(histName.replace('800',str(mass)))
-            if syst == "nom":
-               histParams[f'{mass}'][8] = hist.Integral()
-               nrun = samples_signal[f'Bprime_M{mass}_2016APV'].nrun + samples_signal[f'Bprime_M{mass}_2016'].nrun + samples_signal[f'Bprime_M{mass}_2017'].nrun + samples_signal[f'Bprime_M{mass}_2018'].nrun # not needed
-               histParams[f'{mass}'][9] = hist.GetEntries()/nrun # not needed
-               histParams[f'{mass}'][10] = hist.Integral()/hist.GetEntries()
+            histParams[f'{mass}'][8] = hist.Integral()
+            histParams[f'{mass}'][9] = hist.Integral()/hist.GetEntries()
 
                # two different ways of estimating the overall scaling.
                # bin-by-bin scaling for two bins
@@ -105,26 +110,42 @@ def getFit(tag, massList):
 
             #peak = hist.GetBinCenter(hist.GetMaximumBin())
 
-            if "jet" in tag:
-                cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
-                cb.SetParameters(0.05,mass,100,1,1,1,1)
-            elif tag=="untagTlep": # TEMP: decision not finalized
-                if mass==1000:
-                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,450,2490,npar=7)
-                else:
-                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
-                cb.SetParameters(0.05,mass,100,2,2,5,2)
-            elif tag=="untagWlep":
-                if mass==800:
-                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
-                else:
-                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,500,2490,npar=7)
-                cb.SetParameters(hist.GetMaximum(),mass,100,1,1,1,1)
-                #cb.SetParameters(hist.GetMaximum(),mass,100,1,100,1,1) # not good for some systematics
+            if "BprimeT" in indir:
+               cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+               if "jet" in tag:
+                  cb.SetParameters(hist.GetMaximum(),mass,100,1,1,1,1)
+                  cb.SetParLimits(0,hist.GetMaximum()*0.95,hist.GetMaximum()*1.05)
+               else:
+                  cb.SetParameters(0.05,mass,100,1,1,1,1)
+                  cb.SetParLimits(0,0,1)
+            else:
+
+                # Fit not-normalized historam (peak reflects the yield)
+                #cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                #cb.SetParameters(hist.GetMaximum(),mass,100,1,1,1,1)
                 #cb.SetParLimits(0,hist.GetMaximum()*0.95,hist.GetMaximum()*1.05)
+                if "jet" in tag:
+                    cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                    cb.SetParameters(0.05,mass,100,1,1,1,1)
+                elif tag=="untagTlep": # TEMP: decision not finalized
+                    if mass==1000:
+                        cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,450,2490,npar=7)
+                    else:
+                        cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                    cb.SetParameters(0.05,mass,100,2,2,5,2)
+                elif tag=="untagWlep":
+                    if mass==800:
+                        cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,400,2490,npar=7)
+                    else:
+                        cb = ROOT.TF1("cb",ROOT.DoubleSidedCB,500,2490,npar=7)
+                    cb.SetParameters(hist.GetMaximum(),mass,100,1,1,1,1)
+                    #cb.SetParameters(hist.GetMaximum(),mass,100,1,100,1,1) # not good for some systematics
+                    #cb.SetParLimits(0,hist.GetMaximum()*0.95,hist.GetMaximum()*1.05)
+                cb.SetParLimits(0,0,1)
 
             #cb.SetParLimits(4,100,200)
-            cb.SetParLimits(0,0,1)
+            #cb.SetParLimits(0,hist.GetMaximum()*0.9,hist.GetMaximum()*1.1)
+            #cb.SetParLimits(0,0,1) # Set above
             cb.SetParLimits(1,0,2000)
             cb.SetParLimits(2,0,400)
             cb.SetParLimits(3,0,5)
@@ -165,10 +186,11 @@ def getFit(tag, massList):
             c1.SaveAs(f"{subdir}/{histName.replace('800',str(mass))}_fit.png")
 
 
-        if syst=="nom":
-           numPlots = 11 # get yield interpretation only for nom
-        else:
-           numPlots = 8
+        #if syst=="nom":
+        #   numPlots = 10 # get yield interpretation only for nom
+        #else:
+        #   numPlots = 8
+        numPlots = 10
            
         for i in range(numPlots): # plot param vs mass + last bin
             masses = np.array(massList)/1000

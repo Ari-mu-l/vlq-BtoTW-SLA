@@ -4,7 +4,10 @@ ROOT.TH1.SetDefaultSumw2(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(1)
 
+# b-associated
 indir = "templatesD_Jan2025_210binsBtargetHoleCorrBTrain_smooth_rebin_dynamicST"
+# t-associated
+#indir = "templatesD_Jan2025BprimeT"
 
 os.makedirs(f"{indir}/plots_interpolate", exist_ok=True)
 
@@ -87,10 +90,7 @@ def getSystShifts(tag, systName, mass, cb_nom):
       value_sys = cb_sys.Eval(hist_shift.GetBinCenter(i))
       value_nom = cb_nom.Eval(hist_shift.GetBinCenter(i))
       if value_nom==0:
-         if value_sys==0:
-            hist_shift.SetBinContent(i,0)
-         else:
-            hist_shift.SetBinContent(i,value_sys/0.00001)
+         hist_shift.SetBinContent(i,value_sys/1e-10)
       else:
          hist_shift.SetBinContent(i,value_sys/value_nom)
       hist_shift.SetBinError(i,0)
@@ -107,11 +107,15 @@ def interpolate(tag, mass):
     histOutNom.SetBinContent(210, histParams_nom[7]*100000/(1-histParams_nom[7]))
    
     yields = histParams_nom[8] # interpolate yields with adjacent points
-    Nselect = yields/histParams_nom[10] # param10 is the approximate weight factor
-    #Nselect2 = histParams_nom[9] * Ngen # param9 is N_selected / N_gen. Interpolate this ratio to get interpolated Ngen to set stat err
-    #print(Nselect1,Nselect2)
-    factor = histParams_nom[10]
-   
+    Nselect = yields/histParams_nom[9] # param9 is the approximate weight factor
+    factor = histParams_nom[9]
+
+    histOutNom_nom1 = histOutNom.Clone(f'{histName}_norm1')
+    histOutNom_nom1.Scale(1/histOutNom_nom1.Integral())
+    for i in range(1,211):
+       if histOutNom_nom1.GetBinContent(i)==0:
+          histOutNom_nom1.SetBinContent(i,1e-10)
+          
     histOutNom.Scale(yields/histOutNom.Integral())
     histStatNom = histOutNom.Clone(f'{histName}_stat')
     histStatNom.Scale(Nselect/histStatNom.Integral())
@@ -138,8 +142,20 @@ def interpolate(tag, mass):
 
     for pdf in pdfList:
        histShift = getSystShifts(tag, pdf, mass, cb_nom)
-       histOutSys = histOutNom.Clone(f'{histName}__{pdf}')
+       histOutSys = histOutNom_nom1.Clone(f'{histName}__{pdf}')
+       
        histOutSys.Multiply(histShift)
+
+       for i in range(1,211):
+           if histOutSys.GetBinContent(i)<0:
+              histOutSys.SetBinContent(i,0)
+
+       subdir = f"{indir}/plots_fit/{tag}/{pdf}"
+       with open(f"{subdir}/hist_params.json", "r") as infile:
+           histParams = json.load(infile)
+           yields = (histParams[f'{mass-100}'][8]+histParams[f'{mass+100}'][8])/2
+
+       histOutSys.Scale(yields/histOutSys.Integral())
 
        outFile.cd()
        histOutSys.Write()
@@ -174,18 +190,29 @@ def interpolate(tag, mass):
               factorShift = 1-percentageShift
               histShiftDownApply.SetBinContent(i,factorShift)
       
-        histOutSysUp = histOutNom.Clone(f'{histName}__{systName}Up')
-        histOutSysDown = histOutNom.Clone(f'{histName}__{systName}Down')
-
-        for i in range(1,211):
-            if histOutSysUp.GetBinContent(i)==0:
-                if histShiftUpApply.GetBinContent(i)!=0:
-                    histOutSysUp.SetBinContent(i,0.00001)
-                if histShiftDownApply.GetBinContent(i)!=0:
-                    histOutSysDown.SetBinContent(i,0.00001)
+        histOutSysUp = histOutNom_nom1.Clone(f'{histName}__{systName}Up')
+        histOutSysDown = histOutNom_nom1.Clone(f'{histName}__{systName}Down')
      
         histOutSysUp.Multiply(histShiftUpApply)
         histOutSysDown.Multiply(histShiftDownApply)
+
+        for i in range(1,211):
+           if histOutSysUp.GetBinContent(i)<0:
+              histOutSysUp.SetBinContent(i,0)
+           if histOutSysDown.GetBinContent(i)<0:
+              histOutSysDown.SetBinContent(i,0)
+
+        subdir = f"{indir}/plots_fit/{tag}/{systName}"
+        with open(f"{subdir}Up/hist_params.json", "r") as infile:
+            histParamsUp = json.load(infile)
+            yieldsUp = (histParamsUp[f'{mass-100}'][8]+histParamsUp[f'{mass+100}'][8])/2
+        with open(f"{subdir}Down/hist_params.json", "r") as infile:
+            histParamsDown = json.load(infile)
+            yieldsDown = (histParamsDown[f'{mass-100}'][8]+histParamsDown[f'{mass+100}'][8])/2 # systematics might become a problem. Check
+
+        
+        histOutSysUp.Scale(yieldsUp/histOutSysUp.Integral()) # TEST: adjust syst yields
+        histOutSysDown.Scale(yieldsDown/histOutSysDown.Integral())
      
         outFile.cd()
         histOutSysUp.Write()
