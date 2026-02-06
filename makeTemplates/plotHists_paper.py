@@ -21,7 +21,7 @@ gStyle.SetPadTickY(1)
 
 start_time = time.time()
 
-lumi=138. #for plots #56.1 #
+lumi=138 #for plots #56.1 #
 lumiInTemplates= lumiStr
 
 iPlot='HT'
@@ -45,6 +45,16 @@ if 'BprimeT' in templateDir:
         xsec = xsec_t
 else:
         xsec = xsec_b
+
+blind = False
+if len(sys.argv)>5: blind=bool(eval(sys.argv[5]))
+
+yLog  = False
+if len(sys.argv)>6: yLog=bool(eval(sys.argv[6]))
+print('Plotting blind?',blind,' yLog?',yLog)
+if yLog or 'V' in region or 'validation' in pfix: scaleSignals = False
+
+partialBlind = False
 
 year = 'all'
 if len(sys.argv)>8: year=sys.argv[8]
@@ -138,16 +148,6 @@ if doRealPull: doOneBand=False
 
 plotNorm = False
 
-blind = False
-if len(sys.argv)>5: blind=bool(eval(sys.argv[5]))
-
-yLog  = False
-if len(sys.argv)>6: yLog=bool(eval(sys.argv[6]))
-print('Plotting blind?',blind,' yLog?',yLog)
-if yLog or 'V' in region or 'validation' in pfix: scaleSignals = False
-
-partialBlind = False
-
 isEMlist =['L']#'E','M']
 taglist = ['all']
 if isCategorized == True:
@@ -155,7 +155,7 @@ if isCategorized == True:
         taglist = ['tagTjet','tagWjet','untagWlep','untagTlep']
         #if region == 'V' or 'validation' in pfix:  # this should be fixed now
         #        taglist = ['untagWlep','untagTlep'] #
-        if ('D' in region or 'C' in region or 'Y' in region or region=='all') and 'BpMass' in iPlot and 'validation' not in pfix:
+        if blind and ('D' in region or 'C' in region or 'Y' in region or region=='all') and 'BpMass' in iPlot and 'validation' not in pfix:
                 partialBlind = True
                 print(f'Partial blind {iPlot} for {region}.')
 
@@ -540,16 +540,28 @@ for tag in taglist:
                         scaleFact1=1
                         scaleFact2=1
                         if isCategorized:
-                                if 'jet' in tag:
-                                        if 'BprimeT' in templateDir:
-                                                scaleFact2=20
-                                        else:
-                                                scaleFact2=5
+                                if yLog:
+                                        if 'jet' in tag:
+                                                if 'BprimeT' in templateDir:
+                                                        scaleFact2=20
+                                                else:
+                                                        scaleFact2=5
 
+                                                if 'x' not in sig2leg:
+                                                        sig2leg+=f' x {scaleFact2}'
+                                        else:
+                                                sig2leg = sig2leg.split('x')[0]
+                                else:
+                                        if 'tagT' in tag and region=='D':
+                                                scaleFact1 = 50
+                                                scaleFact2 = 100
+                                        else:
+                                                scaleFact1=50
+                                                scaleFact2=1000
+                                        if 'x' not in sig1leg:
+                                                sig1leg+=f' x {scaleFact1}'
                                         if 'x' not in sig2leg:
                                                 sig2leg+=f' x {scaleFact2}'
-                                else:
-                                        sig2leg = sig2leg.split('x')[0]
                         else:
                                 scaleFact1=100 # scale kinematicsAll to 1pb
                                 scaleFact2=100
@@ -676,10 +688,17 @@ for tag in taglist:
                 gaeData.SetTitle("")
                 if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10):
-                                gaeData.GetYaxis().SetTitle("Events / "+str(perNGeV))
+                            gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
                         else: 
-                                gaeData.GetYaxis().SetTitle("Events / "+str(perNGeV)+" GeV")
-                else: gaeData.GetYaxis().SetTitle("Events / bin")
+                            if tag == 'tagTjet' or tag == 'tagWjet':
+                                gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
+                            else: 
+                                gaeData.GetYaxis().SetTitle("Events / 10 GeV")
+                else:
+                    if region == 'all' and iPlot == 'BpMass':
+                        gaeData.GetYaxis().SetTitle("Events / 50 GeV")
+                    else:
+                        gaeData.GetYaxis().SetTitle("Events / bin")
                 formatUpperHist(gaeData,hData)
                 uPad.cd()
                 gaeData.SetTitle("")
@@ -769,13 +788,15 @@ for tag in taglist:
                         #         chLatex.DrawLatex(0.7, 0.49, flvString)
                         #         chLatex.DrawLatex(0.7, 0.43, tagString)
                         #         chLatex.DrawLatex(0.7, 0.37, regionString)
-                        chLatex.DrawLatex(0.26, 0.73, flvString)
-                        chLatex.DrawLatex(0.26, 0.67, tagString)
-                        chLatex.DrawLatex(0.26, 0.61, regionString)
+                        chLatex.SetTextAlign(12)
+                        chLatex.DrawLatex(0.7, 0.54, flvString)
+                        chLatex.DrawLatex(0.7, 0.48, tagString)
+                        chLatex.DrawLatex(0.7, 0.42, regionString)
                 else:
-                        chLatex.DrawLatex(0.3, 0.80, flvString)
-                        chLatex.DrawLatex(0.3, 0.73, tagString)
-                        chLatex.DrawLatex(0.3, 0.66, regionString)
+                        chLatex.SetTextAlign(12)
+                        chLatex.DrawLatex(0.2, 0.80, flvString)
+                        chLatex.DrawLatex(0.2, 0.71, tagString)
+                        chLatex.DrawLatex(0.2, 0.81, regionString)
                         # if isCategorized:
                         #         chLatex.DrawLatex(0.3, 0.85, flvString)
                         #         chLatex.DrawLatex(0.3, 0.79, tagString)
