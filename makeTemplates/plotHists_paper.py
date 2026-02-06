@@ -208,11 +208,12 @@ def formatUpperHist(histogram,th1hist):
                 histogram.GetYaxis().SetTitleOffset(1.1)
                 if 'YLD' in iPlot: histogram.GetXaxis().LabelsOption("u")
         else:
-                histogram.GetYaxis().SetLabelSize(0.05)
-                histogram.GetYaxis().SetTitleSize(0.06)
+                histogram.GetYaxis().SetLabelSize(0.065)
+                histogram.GetYaxis().SetTitleSize(0.07)
                 if yLog:
-                        histogram.GetYaxis().SetTitleOffset(0.82)
-                #histogram.GetYaxis().SetTitleOffset(1.1) #used to be 0.82. overlaps with label
+                        histogram.GetYaxis().SetTitleOffset(0.96)
+                else:
+                        histogram.GetYaxis().SetTitleOffset(0.96)
 
         #histogram.GetYaxis().CenterTitle()
         if plotNorm:
@@ -244,7 +245,11 @@ def formatLowerHist(histogram):
         if 'YLD' in iPlot: histogram.GetXaxis().LabelsOption("u")
 
         if 'BpMass' in histogram.GetName():
-                histogram.GetXaxis().SetTitle('m_{tw} [GeV]')
+                histogram.GetXaxis().SetTitle('#font[12]{m}_{tW} [GeV]')
+        if 'NBJets' in histogram.GetName():
+                histogram.GetXaxis().SetTitle('b-tagged jet multiplicity')
+        if 'NJetsForward' in histogram.GetName():
+                histogram.GetXaxis().SetTitle('forward jet multiplicity')
         if 'JetTag' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
                 labels = ['b/light','t','W','both']
@@ -265,8 +270,8 @@ def formatLowerHist(histogram):
                 histogram.GetXaxis().SetTitle('B quark decay mode')
 
         histogram.GetYaxis().SetLabelSize(0.15)
-        histogram.GetYaxis().SetTitleSize(0.145)
-        histogram.GetYaxis().SetTitleOffset(0.3)
+        histogram.GetYaxis().SetTitleSize(0.155)
+        histogram.GetYaxis().SetTitleOffset(0.40)
         if not doRealPull: 
                 histogram.GetYaxis().SetTitle('Data/Bkg.')
         else: 
@@ -296,7 +301,7 @@ totBkgTemp1 = {}
 totBkgTemp2 = {}
 totBkgTemp3 = {}
 for tag in taglist:
-        perNGeV = 10 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
+        perNGeV = 20 # choose what "unit" to use for bin widths, similar to the smaller bin widths in the plot. Values < 1 are ok for e.g. NN scores
         print('------------------ ',tag,' with perNGeV = ',perNGeV,' -----------------------')
         
         tagStr=tag
@@ -688,15 +693,14 @@ for tag in taglist:
                 gaeData.SetTitle("")
                 if doNormByBinWidth and 'jet' in tag:
                         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10):
-                            gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
+                                gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
                         else: 
-                            if tag == 'tagTjet' or tag == 'tagWjet':
                                 gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
-                            else: 
-                                gaeData.GetYaxis().SetTitle("Events / 10 GeV")
                 else:
                     if region == 'all' and iPlot == 'BpMass':
                         gaeData.GetYaxis().SetTitle("Events / 50 GeV")
+                    elif iPlot == 'BpMass' or isCategorized:
+                            gaeData.GetYaxis().SetTitle("Events / 20 GeV")
                     else:
                         gaeData.GetYaxis().SetTitle("Events / bin")
                 formatUpperHist(gaeData,hData)
@@ -752,7 +756,7 @@ for tag in taglist:
 
                 chLatex = TLatex()
                 chLatex.SetNDC()
-                chLatex.SetTextSize(0.06)
+                chLatex.SetTextSize(0.07)
                 if blind: chLatex.SetTextSize(0.04)
                 chLatex.SetTextAlign(21) # align center
                 flvString = ''
@@ -795,8 +799,8 @@ for tag in taglist:
                 else:
                         chLatex.SetTextAlign(12)
                         chLatex.DrawLatex(0.2, 0.80, flvString)
-                        chLatex.DrawLatex(0.2, 0.71, tagString)
-                        chLatex.DrawLatex(0.2, 0.81, regionString)
+                        chLatex.DrawLatex(0.2, 0.74, tagString)
+                        chLatex.DrawLatex(0.2, 0.84, regionString)
                         # if isCategorized:
                         #         chLatex.DrawLatex(0.3, 0.85, flvString)
                         #         chLatex.DrawLatex(0.3, 0.79, tagString)
@@ -806,11 +810,15 @@ for tag in taglist:
                         #         chLatex.DrawLatex(0.3, 0.74, tagString)
                         #         chLatex.DrawLatex(0.3, 0.68, regionString)
 
-                # if isCategorized:
-                #         leg = TLegend(0.5,0.62,0.95,0.89)
-                # else:
-                #         leg = TLegend(0.5,0.57,0.95,0.84)
-                leg = TLegend(0.47,0.62,0.92,0.89)
+                if isCategorized:
+                        leg = TLegend(0.35,0.53,0.92,0.89)
+                        # needs more horizontal space b/c xsecs
+                else:
+                        if iPlot == 'BpDecay':
+                                leg = TLegend(0.19,0.41,0.71,0.77)
+                        else:
+                                leg = TLegend(0.40,0.53,0.92,0.89)
+                #leg = TLegend(0.47,0.62,0.92,0.89)
                 
                 leg.SetShadowColor(0)
                 leg.SetFillColor(0)
@@ -881,9 +889,9 @@ for tag in taglist:
                                         else:
                                                 leg.AddEntry(gaeData,"Data","pex")
                                         leg.AddEntry(bkghists['ABCDnn'+catStr],"ABCDnn","f")
-                                        leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l") #left
-                                        leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f")
                                         leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
+                                        leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f")
+                                        leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l") #left              
                                         leg.AddEntry(bkghists['ttx'+catStr],"t#bar{t}+(V,H)","f")
                                         leg.AddEntry(0,"","")  #left
                                         leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f")
@@ -936,7 +944,7 @@ for tag in taglist:
                 prelimTex.SetNDC()
                 prelimTex.SetTextAlign(31) # align right
                 #prelimTex.SetTextFont(42)
-                prelimTex.SetTextSize(0.05)
+                prelimTex.SetTextSize(0.07)
                 if blind: prelimTex.SetTextSize(0.05)
                 prelimTex.SetLineWidth(2)
                 prelimTex.DrawLatex(0.95,0.94,str(lumi)+" fb^{-1} (13 TeV)")
@@ -957,12 +965,12 @@ for tag in taglist:
 
                 #prelimTex3.SetTextFont(52)
                 #prelimTex3.SetTextFont(42)
-                if isCategorized:
-                        prelimTex3.SetTextSize(0.07)
-                else:
-                        prelimTex3.SetTextSize(0.08)
+                #if isCategorized:
+                #        prelimTex3.SetTextSize(0.09)
+                #else:
+                prelimTex3.SetTextSize(0.10)
                 if blind: prelimTex3.SetTextSize(0.06)
-                prelimTex3.SetLineWidth(2)
+                #prelimTex3.SetLineWidth(2)
                 # if not blind:
                 #         prelimTex3.DrawLatex(0.23,0.945,"Private work (CMS data & simulation)") #"Preliminary")
                 # if blind: 
@@ -970,7 +978,7 @@ for tag in taglist:
                 if isCategorized:
                         prelimTex3.DrawLatex(0.15,0.96,"#bf{CMS}")
                 else:
-                        prelimTex3.DrawLatex(0.19,0.86,"#bf{CMS}") #"Preliminary")
+                        prelimTex3.DrawLatex(0.19,0.84,"#bf{CMS}") #"Preliminary")
 
 
                 if blind == False and not doRealPull:
