@@ -2,12 +2,13 @@ import os,sys
 from ROOT import TFile, TH1F, TCanvas, TGraphAsymmErrors, kBlack, kAzure, kOrange, kMagenta, kGray, THStack, gStyle, TPad, TLatex, TLegend, gROOT, kBlue, kRed, TMath, TColor
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
-from samples import xsec
+from samples import xsec_b, xsec_t
 from utils import *
 
 gROOT.SetBatch()
 gStyle.SetTitleFont(42)
 gStyle.SetTextFont(42)
+TH1F.SetDefaultSumw2(True)
 
 from tdrStyle import *
 setTDRStyle()
@@ -15,22 +16,30 @@ setTDRStyle()
 limitdir = sys.argv[1]
 doprelim = False
 if len(sys.argv) > 3: doprelim = bool(eval(sys.argv[3]))
-plotOnly = False # set True if not want to run combine commands
+plotOnly = True #False # set True if not want to run combine commands
 normByBin = True
+plotSplusB = False
 lumi = 138
 
 outDir = os.getcwd()
 
+
+if 'BprimeT' in limitdir:
+    xsec = xsec_t
+    print('Running t-associated interpretation...')
+else:
+    xsec = xsec_b
+    print('Running b-associated interpretation...')
+
 mass1val = int(sys.argv[2])
 mass1 = str(mass1val) #'1000'
-mass2 = '800'
-mass3 = '1400'
-sig1 = 'BpM800' # same as table and other plots
-sig2 = 'BpM1400'
-#sig3 = 'BpM1300'
+mass2 = '800' #'800'
+mass3 = '1400' #'1400'
+sig1 = 'BpM800' #800 # same as table and other plots
+sig2 = 'BpM1400' #'1400'
+#sig1leg = 'B (1.0 TeV)'
 sig1leg = 'B (0.8 TeV, 59.35 fb)'
 sig2leg = 'B (1.4 TeV, 2.66 fb)'
-#sig3leg = 'B ('+'1.3 TeV, 1 fb) x100'
 
 taglabels = {'Case1':'t jet + lept. W','Case2':'W jet + lept. t','Case3':'jet + lept. t','Case4':'jet + lept. W'}
 
@@ -48,8 +57,11 @@ else:
     unblind = True
 doMorph = False
 
-plotFit = 'fit_b' # fit_s
-#plotFit = 'fit_s' # TEMP SWITCH
+#plotFit = 'fit_b' # fit_s
+plotFit = 'fit_b' # TEMP SWITCH
+if not isSR:
+    #sig1leg = '' # TEMP for ANv9: signal empty
+    sig1leg = 'B (1.3 TeV) x 10'
 
 
 os.chdir(path1)
@@ -88,7 +100,7 @@ else:
             #if not os.path.exists(path1+'/'+shapesfile):
             if not plotOnly:
                 print('Creating pre and post-fit histograms from SR')
-                cmd = f'PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output {shapesfile} -m {mass} -f fitDiagnosticsTest.root:{plotFit} --postfit' #--setParameters signalScale=0.01' probably don't need signalScale because it is set in dataCardCombine.py
+                cmd = f'PostFitShapesFromWorkspace -d combined.txt.cmb -w workspace.root --output {shapesfile} -m {mass} -f fitDiagnosticsTest.root:{plotFit} --postfit --sampling' #--setParameters signalScale=0.01' probably don't need signalScale because it is set in dataCardCombine.py # didn't have --sampling v9 and before
                 print(f'Command = {cmd}')
                 os.system(cmd)
         shapesfile = f'SRPostFitShapes_{mass1}.root'
@@ -104,9 +116,9 @@ def formatUpperHist(histogram,th1hist):
     print('Setting range from',lowside,'to',highside)
     histogram.GetXaxis().SetRangeUser(lowside,highside)
     histogram.GetXaxis().SetTitle('')
-    histogram.GetYaxis().SetLabelSize(0.06)
-    histogram.GetYaxis().SetTitleSize(0.06)
-    histogram.GetYaxis().SetTitleOffset(1.1) #0.85
+    histogram.GetYaxis().SetLabelSize(0.065)
+    histogram.GetYaxis().SetTitleSize(0.07)
+    histogram.GetYaxis().SetTitleOffset(0.96)
     #histogram.GetYaxis().CenterTitle()
     histogram.SetMinimum(0.0101)
     histogram.GetXaxis().SetNdivisions(506)
@@ -120,6 +132,8 @@ def formatUpperHist(histogram,th1hist):
         histogram.GetXaxis().SetTitleOffset(1)
     #else:
     #    histogram.GetXaxis().SetLabelOffset(1.2) #hide labels behind lower panel
+
+    #histogram.GetXaxis().SetLabelOffset(0.04)
 
 
     if not yLog: 
@@ -150,16 +164,20 @@ def formatLowerHist(histogram, lpad):
         print('compare low =',histogram.GetXaxis().GetBinLowEdge(histogram.GetXaxis().GetFirst()),', and high =',histogram.GetXaxis().GetBinUpEdge(histogram.GetXaxis().GetLast()))
         histogram.SetTitle('')
         histogram.SetTitle('')
-        histogram.GetXaxis().SetLabelSize(0.13)
-        histogram.GetXaxis().SetTitleSize(0.13)
-        histogram.GetXaxis().SetTitleOffset(1) #0.95
+        histogram.GetXaxis().SetLabelSize(0.15)
+        histogram.GetXaxis().SetTitleSize(0.18)
+        histogram.GetXaxis().SetLabelOffset(0.04)
+        histogram.GetXaxis().SetTitleOffset(1.0) #1
         histogram.GetXaxis().SetNdivisions(506)
-        histogram.GetXaxis().SetTitle("B quark mass [GeV]")
+        histogram.GetXaxis().SetTitle('#font[12]{m}_{tW} [GeV]')
         histogram.GetYaxis().SetLabelOffset(0.01)
-        histogram.GetYaxis().SetLabelSize(0.13)
-        histogram.GetYaxis().SetTitleSize(0.13)
-        histogram.GetYaxis().SetTitleOffset(.35)
-        histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{Err}')
+        histogram.GetYaxis().SetLabelSize(0.15)
+        histogram.GetYaxis().SetTitleSize(0.155)
+        histogram.GetYaxis().SetTitleOffset(0.40)
+        if plotSplusB:
+            histogram.GetYaxis().SetTitle('#frac{(Data-Bkg-Sig)}{Error}')
+        else:
+            histogram.GetYaxis().SetTitle('#frac{(Data-Bkg.)}{Error}')
         #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{#sqrt{bkg}}')
         #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{bkgErr}')
         histogram.GetYaxis().SetNdivisions(7)
@@ -175,6 +193,9 @@ tFile = TFile.Open(f'{path1}/{shapesfile}')
 if isSR:
     tFile2 = TFile.Open(f'{path2}/{shapesfile.replace(mass1,mass2)}')
     tFile3 = TFile.Open(f'{path3}/{shapesfile.replace(mass1,mass3)}')
+
+if plotSplusB:
+    sigFile = TFile.Open(f'limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBprimeT/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert.root')
 
 chns = []
 iPlot = ''
@@ -208,9 +229,25 @@ for chn in chns:
         bkghistsmerged[chn+proc] = tFile.Get(chn+'/'+proc).Clone()
 
     hDatamerged = tFile.Get(chn+'/data_obs').Clone()
+    #bkgHTgerrmerged = tFile.Get(chn+'/TotalProcs').Clone(chn+'__totbkg') # study 1000 GeV Btj deficit
     bkgHTgerrmerged = tFile.Get(chn+'/TotalBkg').Clone(chn+'__totbkg')
-    hsig1merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig1.replace(mass2,'')).Clone(chn+'__sig1merged')
-    #hsig1merged_postfit = tFile.Get(chn+'/TotalSig').Clone(chn+'__totsig') # for evaluating 'significance' at 1000 GeV deficit
+    if plotSplusB:
+        if 'Case1' in chn:
+            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagTjet_D__BpM1000').Clone('Case1_sig')
+        elif 'Case2' in chn:
+            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagWjet_D__BpM1000').Clone('Case2_sig')
+        elif 'Case3' in chn:
+            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagTlep_D__BpM1000').Clone('Case3_sig')
+        elif 'Case4' in chn:
+            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagWlep_D__BpM1000').Clone('Case4_sig')
+        TotalSig.Scale(-11.572*0.01) # scale to sig strength and sigScale
+        bkgHTgerrmerged.Add(TotalSig)
+
+    if isSR:
+        hsig1merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig1.replace(mass2,'')).Clone(chn+'__sig1merged')
+        #hsig1merged_postfit = tFile.Get(chn+'/TotalSig').Clone(chn+'__totsig') # for evaluating 'significance' at 1000 GeV deficit
+    else:
+        hsig1merged = tFile.Get(chn.replace('postfit','prefit')+'/BpM').Clone(chn+'__sig1merged')
 
     if partialUnblind:
         for i in range(hDatamerged.FindBin(700),hDatamerged.GetNbinsX()+1):
@@ -225,19 +262,20 @@ for chn in chns:
     if isSR:
         hsig1merged.Scale(100*xsec[sig1[3:]]*0.5) # 100 is to revert 0.01pb to 1pb. No scaling to make visible
     else:
-        hsig1merged.Scale(100*xsec[sig1[3:]]*0.5)
+        hsig1merged.Scale(100*xsec[sig1[3:]]*0.5*10)
                           
     #if '1000' in sig1: hsig1merged.Scale(0.15) #0.25
 
     histrange = [hDatamerged.GetBinLowEdge(1),hDatamerged.GetBinLowEdge(hDatamerged.GetNbinsX()+1)]
     gaeDatamerged = TGraphAsymmErrors(hDatamerged.Clone(hDatamerged.GetName().replace("data_obs","gaeDATA")))
 
-    if normByBin and ('Case1' or 'Case2') in chn: # Case1/2 needs normbybin for the tail
+    if normByBin and (('Case1' in chn) or ('Case2' in chn)): # Case1/2 needs normbybin for the tail
         poissonNormByBinWidth(gaeDatamerged,hDatamerged,perNGeV)
         for proc in bkgProcList:
             try: 
                 normByBinWidth(bkghistsmerged[chn+proc],perNGeV)
             except: pass
+
         normByBinWidth(hsig1merged,perNGeV)
         normByBinWidth(hDatamerged,perNGeV)
         normByBinWidth(bkgHTgerrmerged,perNGeV)
@@ -249,6 +287,9 @@ for chn in chns:
             bkgHTmerged.Add(bkghistsmerged[chn+proc])
         except: pass
 
+    if plotSplusB:
+        bkgHTmerged.Add(TotalSig)
+
 
     #bkgHTgerrmerged = TGraphAsymmErrors(bkgHTmerged.Clone("bkgHTgerrmerged"))
 
@@ -259,12 +300,13 @@ for chn in chns:
         bkghistsmerged[chn+proc].SetFillColor(bkgHistColors[proc])
         bkghistsmerged[chn+proc].SetLineWidth(2)
         stackbkgHTmerged.Add(bkghistsmerged[chn+proc])
-
+    
     hsig1merged.SetLineColor(kBlack)
     hsig1merged.SetFillStyle(0)
     hsig1merged.SetLineWidth(3)
     
     if isSR:
+        
         hsig2merged = tFile3.Get(chn.replace('postfit','prefit')+'/'+sig2.replace(mass3,'')).Clone(chn+'__sig2merged')
         hsig2merged.Scale(100*xsec[sig2[3:]]*0.5)
         #if ('Case1' in chn or 'Case2' in chn) and '1400' in sig2:
@@ -307,18 +349,19 @@ for chn in chns:
     if blind and not partialUnblind: yDiv = 0.01
     uMargin = 0.02
     if blind and not partialUnblind: uMargin = 0.12
-    rMargin=.05
+    rMargin= .05
     uPad={}
 
     if yLog and ((not blind) or partialUnblind):
-        uPad=TPad("uPad","",0,yDiv-0.009,1,1) #for actual plots
+        #uPad=TPad("uPad","",0,yDiv-0.009,1,1) #for actual plots
         #uPad=TPad("uPad","",0,yDiv+0.1,1,1) #for actual plots
+        uPad=TPad("uPad","",0,yDiv,1,1)
     else: uPad=TPad("uPad","",0,yDiv,1,1) #for actual plots
     
-    uPad.SetTopMargin(0.1) #0.08
+    uPad.SetTopMargin(0.08) #0.08
     uPad.SetBottomMargin(uMargin)
     uPad.SetRightMargin(rMargin)
-    uPad.SetLeftMargin(.12)
+    uPad.SetLeftMargin(.15)
     if not yLog: uPad.SetLeftMargin(0.13)
     uPad.Draw()
 
@@ -327,7 +370,7 @@ for chn in chns:
         lPad.SetTopMargin(0)
         lPad.SetBottomMargin(0.4) #0 for lpad2
         lPad.SetRightMargin(rMargin)
-        lPad.SetLeftMargin(.12)
+        lPad.SetLeftMargin(.15)
         if not yLog: lPad.SetLeftMargin(0.13)
         #lPad.SetGridy()
         lPad.Draw()
@@ -346,10 +389,10 @@ for chn in chns:
     hDatamerged.SetMaximum(1.2*max(hDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
     hDatamerged.SetMinimum(0.015)    
     #hDatamerged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
-    if normByBin and ('Case1' or 'Case2') in chn: # Case1/2 needs normbybin for the tail
-        hDatamerged.GetYaxis().SetTitle("Events / "+str(perNGeV)+" GeV")
+    if normByBin and (('Case1' in chn) or ('Case2' in chn)): # Case1/2 needs normbybin for the tail
+        hDatamerged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
     else:
-        hDatamerged.GetYaxis().SetTitle("Events / bin")
+        hDatamerged.GetYaxis().SetTitle("Events / 20 GeV")
     if blind and not partialUnblind: hsig1merged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
 
     formatUpperHist(hDatamerged,hDatamerged)
@@ -364,7 +407,7 @@ for chn in chns:
         hsig1merged.SetMaximum(1.5*max(hDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
         formatUpperHist(hsig1merged,hsig1merged)
         hsig1merged.Draw("HIST")
-        
+
     stackbkgHTmerged.Draw("SAME HIST")
     #stackbkgHTmerged.Draw("SAME PE")
     hsig1merged.Draw("SAME HIST")
@@ -379,31 +422,32 @@ for chn in chns:
     chLatexmerged = TLatex()
     chLatexmerged.SetNDC()
     #chLatexmerged.SetTextFont(42)
-    chLatexmerged.SetTextSize(0.06)
+    chLatexmerged.SetTextSize(0.07)
     if blind and not partialUnblind: chLatexmerged.SetTextSize(0.04)
     #chLatexmerged.SetTextSize(0.08)
     chLatexmerged.SetTextAlign(12) # align left
-    flvString = 'e/#mu+jets'
+    flvString = 'SR'
     if not isSR:
-        flvString = 'e/#mu (VR)' # unblind
+        #flvString = 'e/#mu (VR)' # unblind
+        flvString = 'VR'
     #tagString = taglabels[chn.split('_')[0]]
     tagString = chn.split('_')[0]
     if yLog:
-        chLatexmerged.DrawLatex(0.18, 0.81, flvString) # 0.18, 0.71    
-        chLatexmerged.DrawLatex(0.18, 0.71, tagString) # 0.18, 0.61
+        chLatexmerged.DrawLatex(0.2, 0.74, tagString)
+        chLatexmerged.DrawLatex(0.2, 0.84, flvString)
     else:
         #chLatexmerged.SetTextAlign(32) #right
         #chLatexmerged.DrawLatex(0.89, 0.45, flvString)    
         #chLatexmerged.DrawLatex(0.89, 0.38, tagString)
         
         chLatexmerged.SetTextAlign(22) # center
-        chLatexmerged.DrawLatex(0.8, 0.45, flvString)
         chLatexmerged.DrawLatex(0.8, 0.38, tagString)
+        chLatexmerged.DrawLatex(0.8, 0.45, flvString)
         
     #if 'postfit' in chn: chLatexmerged.DrawLatex(0.28, 0.72, 'post-fit')
 
     if yLog:
-        legmerged = TLegend(0.4,0.55,0.89,0.87)
+        legmerged = TLegend(0.35,0.53,0.92,0.89)
     else:
         legmerged = TLegend(0.35,0.55,0.84,0.87)
     legmerged.SetShadowColor(0)
@@ -414,23 +458,20 @@ for chn in chns:
     legmerged.SetBorderSize(0) 
     legmerged.SetNColumns(2)
     #legmerged.SetTextFont(42)
-    legmerged.SetColumnSeparation(0.10)
+    #legmerged.SetColumnSeparation(0.10)
     legmerged.SetTextSize(0.05)
     if not blind or partialUnblind:
-        legmerged.AddEntry(gaeDatamerged,"Data","pel")  #left
-        #legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f") #right
-        legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f") #right
-        legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
-        legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
-        if isSR:
-            #print('Not plotting mass2 and 3')
-            legmerged.AddEntry(hsig2merged,sig2leg,"l")  #left
-            #legmerged.AddEntry(hsig3merged,sig3leg,"l")  #left
+        if normByBin and "Case1" in chn or "Case2" in chn:
+            legmerged.AddEntry(gaeDatamerged,"Data","pel")
         else:
-            legmerged.AddEntry(0,"","")  #left
-        legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+X","f") #right
+            legmerged.AddEntry(gaeDatamerged,"Data","pex")
+        legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f")
+        legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
+        legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f")
+        legmerged.AddEntry(hsig2merged,sig2leg,"l") #left              
+        legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+(V,H)","f")
         legmerged.AddEntry(0,"","")  #left
-        legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #right
+        legmerged.AddEntry(bkgHTgerrmerged,"Bkg. Uncert.","f")
     else:
         legmerged.AddEntry(hsig1merged,sig1leg,"l")  #left
         legmerged.AddEntry(bkghistsmerged[chn+'major'],"ABCDnn","f") #right
@@ -440,9 +481,10 @@ for chn in chns:
             #legmerged.AddEntry(hsig3merged,sig3leg,"l")
         else:
             legmerged.AddEntry(0,"","")  #left
+        legmerged.AddEntry(0,"","")  #left # Remove if uncomment the above block
         legmerged.AddEntry(bkghistsmerged[chn+'ewk'],"DY+VV","f") #right
-        legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #left
-        legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+X","f") #right
+        legmerged.AddEntry(bkgHTgerrmerged,"Bkg. Uncert.","f") #left
+        legmerged.AddEntry(bkghistsmerged[chn+'ttx'],"t#bar{t}+(V,H)","f") #right
 
     legmerged.Draw("same")
  
@@ -450,23 +492,24 @@ for chn in chns:
     prelimTex.SetNDC()
     prelimTex.SetTextAlign(31) # align right
     #prelimTex.SetTextFont(42)
-    prelimTex.SetTextSize(0.06)
+    prelimTex.SetTextSize(0.07)
     if blind and not partialUnblind: prelimTex.SetTextSize(0.05)
     prelimTex.SetLineWidth(2)
-    prelimTex.DrawLatex(0.95,0.92,str(lumi)+" fb^{-1} (13 TeV)")
+    prelimTex.DrawLatex(0.95,0.94,str(lumi)+" fb^{-1} (13 TeV)")
     
     prelimTex2=TLatex()
     prelimTex2.SetNDC()
+    prelimTex2.SetTextAlign(12)
     #prelimTex2.SetTextFont(61)
-    prelimTex2.SetLineWidth(2)
-    prelimTex2.SetTextSize(0.08)
+    #prelimTex2.SetLineWidth(2)
+    prelimTex2.SetTextSize(0.10)
     if blind and not partialUnblind: prelimTex2.SetTextSize(0.08)
     #prelimTex2.SetTextSize(0.1)
     #prelimTex2.DrawLatex(0.12,0.93,"CMS")
     if doprelim: 
-        prelimTex2.DrawLatex(0.12,0.93,"#bf{CMS}")
+        prelimTex2.DrawLatex(0.15,0.96,"#bf{CMS}")
     else:
-        prelimTex2.DrawLatex(0.12,0.92,"#bf{CMS}")
+        prelimTex2.DrawLatex(0.15,0.96,"#bf{CMS}")
         
     prelimTex3=TLatex()
     prelimTex3.SetNDC()
@@ -503,6 +546,7 @@ for chn in chns:
                 #pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/MCerror # requested by Julie to understand the deficit in 1000 GeV
                 #pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2)
                 #pull = 0
+                print(hDatamerged.GetBinContent(binNo),MC, MCerror)
                 pull = (hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MC-MCerror**2) # STANDARD
 
             sum_sig += hsig1merged.GetBinContent(binNo)*pull
