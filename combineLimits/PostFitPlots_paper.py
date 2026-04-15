@@ -38,8 +38,8 @@ mass3 = '1400' #'1400'
 sig1 = 'BpM800' #800 # same as table and other plots
 sig2 = 'BpM1400' #'1400'
 #sig1leg = 'B (1.0 TeV)'
-sig1leg = 'B (0.8 TeV, 59.35 fb)'
-sig2leg = 'B (1.4 TeV, 2.66 fb)'
+sig1leg = "B' (0.8 TeV, 59.35 fb)"
+sig2leg = "B' (1.4 TeV, 2.66 fb)"
 
 taglabels = {'Case1':'t jet + lept. W','Case2':'W jet + lept. t','Case3':'jet + lept. t','Case4':'jet + lept. W'}
 
@@ -48,7 +48,7 @@ path1 = limitdir+'/cmb/'+mass1
 path2 = limitdir+'/cmb/'+mass2
 path3 = limitdir+'/cmb/'+mass3
 
-isSR = False
+isSR = True
 partialUnblind = False
 if '_D' in limitdir and 'partialBlind' not in limitdir:
     isSR = True
@@ -263,6 +263,10 @@ for chn in chns:
         hsig1merged.Scale(100*xsec[sig1[3:]]*0.5) # 100 is to revert 0.01pb to 1pb. No scaling to make visible
     else:
         hsig1merged.Scale(100*xsec[sig1[3:]]*0.5*10)
+
+    print(xsec[sig1[3:]])
+    hsig1merged.Print("all")
+    exit()
                           
     #if '1000' in sig1: hsig1merged.Scale(0.15) #0.25
 
@@ -358,7 +362,7 @@ for chn in chns:
         uPad=TPad("uPad","",0,yDiv,1,1)
     else: uPad=TPad("uPad","",0,yDiv,1,1) #for actual plots
     
-    uPad.SetTopMargin(0.08) #0.08
+    uPad.SetTopMargin(0.09) #0.08
     uPad.SetBottomMargin(uMargin)
     uPad.SetRightMargin(rMargin)
     uPad.SetLeftMargin(.15)
@@ -392,7 +396,7 @@ for chn in chns:
     if normByBin and (('Case1' in chn) or ('Case2' in chn)): # Case1/2 needs normbybin for the tail
         hDatamerged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
     else:
-        hDatamerged.GetYaxis().SetTitle("Events / 20 GeV")
+        hDatamerged.GetYaxis().SetTitle("Events / 10 GeV")
     if blind and not partialUnblind: hsig1merged.GetYaxis().SetTitle("#LT Events / "+str(perNGeV)+" GeV #GT")
 
     formatUpperHist(hDatamerged,hDatamerged)
@@ -495,29 +499,26 @@ for chn in chns:
     prelimTex.SetTextSize(0.07)
     if blind and not partialUnblind: prelimTex.SetTextSize(0.05)
     prelimTex.SetLineWidth(2)
-    prelimTex.DrawLatex(0.95,0.94,str(lumi)+" fb^{-1} (13 TeV)")
+    prelimTex.DrawLatex(0.95,0.93,str(lumi)+" fb^{-1} (13 TeV)")
     
     prelimTex2=TLatex()
     prelimTex2.SetNDC()
-    prelimTex2.SetTextAlign(12)
+    prelimTex2.SetTextAlign(11)
     #prelimTex2.SetTextFont(61)
     #prelimTex2.SetLineWidth(2)
     prelimTex2.SetTextSize(0.10)
     if blind and not partialUnblind: prelimTex2.SetTextSize(0.08)
     #prelimTex2.SetTextSize(0.1)
     #prelimTex2.DrawLatex(0.12,0.93,"CMS")
-    if doprelim: 
-        prelimTex2.DrawLatex(0.15,0.96,"#bf{CMS}")
-    else:
-        prelimTex2.DrawLatex(0.15,0.96,"#bf{CMS}")
+    prelimTex2.DrawLatex(0.15,0.93,"#bf{CMS}")
         
     prelimTex3=TLatex()
     prelimTex3.SetNDC()
-    prelimTex3.SetTextAlign(12)
-    #prelimTex3.SetTextFont(52)
-    prelimTex3.SetTextSize(0.055)
+    prelimTex3.SetTextAlign(11)
+    prelimTex3.SetTextFont(52)
+    prelimTex3.SetTextSize(0.07)
     prelimTex3.SetLineWidth(2)
-    if doprelim: prelimTex3.DrawLatex(0.23,0.945,"Preliminary")
+    if doprelim: prelimTex3.DrawLatex(0.28,0.93,"Preliminary")
     #if blind: prelimTex3.DrawLatex(0.26,0.945,"Work in progress") #"Preliminary")
 
     if not blind or partialUnblind:

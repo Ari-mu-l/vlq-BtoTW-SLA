@@ -5,10 +5,12 @@
 import os,sys,time,math
 parent = os.path.dirname(os.getcwd())
 sys.path.append(parent)
+from math import sqrt
 from ROOT import *
 from samples import lumiStr, systListShortPlots, systListFullPlots,  systListABCDnn, yieldUncertABCDnn, xsec_t, xsec_b
 from utils import *
 
+TH1.SetDefaultSumw2(True)
 gROOT.SetBatch(1)
 # set font to Helvetica for paper
 # 4 for Helvetica
@@ -23,6 +25,8 @@ start_time = time.time()
 
 lumi=138 #for plots #56.1 #
 lumiInTemplates= lumiStr
+
+isPrelim = False
 
 iPlot='HT'
 if len(sys.argv)>1: iPlot=str(sys.argv[1])
@@ -71,16 +75,16 @@ saveKey = '' # tag for plot names
 datalabel = 'data_obs'
 shiftlist = ['Up','Down'] # change to Down for future
 sig1='BpM800' #  choose the 1st signal to plot
-sig1leg='B (0.8 TeV, 1 pb)' # singlet 1% xsec
+sig1leg="B' (0.8 TeV, 1 pb)" # singlet 1% xsec
 sig2='BpM1400' #  choose the 2nd signal to plot
-sig2leg='B (1.4 TeV, 1 pb)'
+sig2leg="B' (1.4 TeV, 1 pb)"
 if isCategorized:
         if 'BprimeT' in templateDir:
-                sig1leg='B (0.8 TeV, 36.00 fb)'
-                sig2leg='B (1.4 TeV, 2.07 fb)'
+                sig1leg="B' (0.8 TeV, 36.00 fb)"
+                sig2leg="B' (1.4 TeV, 2.07 fb)"
         else:
-                sig1leg='B (0.8 TeV, 59.35 fb)'
-                sig2leg='B (1.4 TeV, 2.66 fb)'
+                sig1leg="B' (0.8 TeV, 59.35 fb)"
+                sig2leg="B' (1.4 TeV, 2.66 fb)"
 
 scaleSignals = False # no x100 on signal. use log plot
 #if not isCategorized: scaleSignals = True
@@ -102,12 +106,13 @@ if len(isRebinned)>1 and 'ABCDnn' in iPlot: # SWITCH. Added for ARC plot ABCDnn 
         ABCDnnProcList = ['major']
 else:
         if 'ABCDnn' not in iPlot:
-                bkgProcList = ['qcd',
+                bkgProcList = ['ttbar',
+                               'qcd',
                                'ttx',
                                'ewk',
                                'singletop',
-                               'wjets',
-                               'ttbar'
+                               'wjets'
+                               
                 ]
                 ABCDnnProcList = ['major']#'qcd','wjets','singletop','ttbar']
         else:
@@ -171,35 +176,23 @@ factor = {'tagTjet':0.02,'tagWjet':0.02,'untagTlep':0.10,'untagWlep':0.08}
 
 def formatUpperHist(histogram,th1hist):
         histogram.GetXaxis().SetLabelSize(0)
+        
         if plotLowSide:
                 lowside = th1hist.GetBinLowEdge(1)
         else:
-                lowside =  400 #TEMP: plotting only high BpM for ABCDnn
+                lowside =  400.0 #TEMP: plotting only high BpM for ABCDnn
         highside = th1hist.GetBinLowEdge(th1hist.GetNbinsX()+1)
-        histogram.GetXaxis().SetRangeUser(lowside,highside)
+        #histogram.GetXaxis().SetRangeUser(lowside,highside)
+        histogram.GetXaxis().SetLimits(lowside,highside)
         histogram.GetXaxis().SetNdivisions(506)
-        
-        #if 'BpMass' in histogram.GetName():
-        #        histogram.GetXaxis().SetTitle('m_{tw}')
-        if 'JetTag' in histogram.GetName():
-                print('RELABELING!',histogram.GetName())
-                labels = ['b/light','t','W','both']
-                for ibin in range(1,th1hist.GetNbinsX()+1):
-                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
-                histogram.GetXaxis().SetLabelSize(0.25)
-                histogram.GetXaxis().SetLabelOffset(0.05)
-                histogram.GetXaxis().SetTitleOffset(1.0)
+
         if 'BpDecay' in histogram.GetName():
-                print('RELABELING!',histogram.GetName())
-                labels = ['','Case 1','Case 2','Case 3','Case 4']
-                for ibin in range(1,th1hist.GetNbinsX()+1):
-                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
-                #histogram.GetXaxis().SetLabelSize(0.25)
-                histogram.GetXaxis().SetLabelSize(0)
                 histogram.GetXaxis().SetRangeUser(1,5)
-                histogram.GetXaxis().SetTitleOffset(1.0)
-                histogram.GetXaxis().SetTitle('B quark decay mode')
-                histogram.GetXaxis().SetNdivisions(0)
+        elif 'ST' in histogram.GetName():
+                histogram.GetXaxis().SetRangeUser(0,2500)
+        elif 'Jets' in histogram.GetName():
+                histogram.GetXaxis().SetRangeUser(0,6)
+        
         if blind == True:
                 histogram.GetXaxis().SetLabelSize(0.045)
                 histogram.GetXaxis().SetTitleSize(0.055)
@@ -235,6 +228,7 @@ def formatUpperHist(histogram,th1hist):
                         if iPlot=='YLD': 
                                 histogram.SetMaximum(200*histogram.GetMaximum())
                                 histogram.SetMinimum(0.1)
+                                
 
 def formatLowerHist(histogram):
         histogram.GetXaxis().SetLabelSize(.15)
@@ -246,9 +240,24 @@ def formatLowerHist(histogram):
 
         if 'BpMass' in histogram.GetName():
                 histogram.GetXaxis().SetTitle('#font[12]{m}_{tW} [GeV]')
+        if 'ST' in histogram.GetName():
+                histogram.GetXaxis().SetRangeUser(0,2500)
+                histogram.GetXaxis().SetTitle('#font[12]{S}_{T} [GeV]')
         if 'NBJets' in histogram.GetName():
+                labels = ['0','1','2','3','4','#geq 5','','','','']
+                for ibin in range(1,histogram.GetNbinsX()+1):
+                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
+                histogram.GetXaxis().SetRangeUser(0,6)
+                histogram.GetXaxis().SetLabelSize(0.24)
+                histogram.GetXaxis().SetLabelOffset(0.03)
                 histogram.GetXaxis().SetTitle('b-tagged jet multiplicity')
         if 'NJetsForward' in histogram.GetName():
+                labels = ['0','1','2','3','4','#geq 5','','','','']
+                for ibin in range(1,histogram.GetNbinsX()+1):
+                        histogram.GetXaxis().SetBinLabel(ibin,labels[ibin-1])
+                histogram.GetXaxis().SetRangeUser(0,6)
+                histogram.GetXaxis().SetLabelSize(0.24)
+                histogram.GetXaxis().SetLabelOffset(0.03)
                 histogram.GetXaxis().SetTitle('forward jet multiplicity')
         if 'JetTag' in histogram.GetName():
                 print('RELABELING!',histogram.GetName())
@@ -267,7 +276,7 @@ def formatLowerHist(histogram):
                 histogram.GetXaxis().SetLabelOffset(0.03)
                 histogram.GetXaxis().SetRangeUser(1,5)
                 histogram.GetXaxis().SetTitleOffset(1.1)
-                histogram.GetXaxis().SetTitle('B quark decay mode')
+                histogram.GetXaxis().SetTitle("B' quark decay mode")
 
         histogram.GetYaxis().SetLabelSize(0.15)
         histogram.GetYaxis().SetTitleSize(0.155)
@@ -313,9 +322,29 @@ for tag in taglist:
                 totBkg = 0.
                 totMajor = 0.
                 totMinor = 0.
-                for proc in bkgProcList: 
+                for proc in bkgProcList:
                         try:
-                                bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
+                                if 'Jets' in iPlot or 'ST' in iPlot:
+                                        tempHist = RFile1.Get(histPrefix+'__'+proc).Clone()
+                                        binContent = 0
+                                        binError = 0
+                                        
+                                        if 'Jets' in iPlot:
+                                                startBin = 6
+                                        else:
+                                                startBin = tempHist.FindFixBin(2500-1)
+                                                
+                                        for ibin in range(startBin,tempHist.GetNbinsX()+1):
+                                                binContent += tempHist.GetBinContent(ibin)
+                                                binError += tempHist.GetBinError(ibin)**2
+                                        tempHist.SetBinContent(startBin, binContent)
+                                        tempHist.SetBinError(startBin, sqrt(binError))
+                                        for ibin in range(startBin+1,tempHist.GetNbinsX()+1):
+                                                tempHist.SetBinContent(ibin, 0)
+                                                tempHist.SetBinError(ibin, 0)
+                                        bkghists[proc+catStr] = tempHist
+                                else:
+                                        bkghists[proc+catStr] = RFile1.Get(histPrefix+'__'+proc).Clone()
                                 if plotABCDnn: # and not partialBlind:
                                         if proc in minorProcList:
                                                 totMinor += bkghists[proc+catStr].Integral()
@@ -333,6 +362,24 @@ for tag in taglist:
 
                 #print(histPrefix+'__'+datalabel)
                 hData = RFile1.Get(histPrefix+'__'+datalabel).Clone()
+                if 'Jets' in iPlot or 'ST' in iPlot:
+                        binContent = 0
+                        binError = 0
+
+                        if 'Jets' in iPlot:
+                                startBin = 6
+                        else:
+                                startBin = hData.FindFixBin(2500-1)
+                        
+                        for ibin in range(startBin,hData.GetNbinsX()+1):
+                                binContent += hData.GetBinContent(ibin)
+                                binError += hData.GetBinError(ibin)**2
+                        hData.SetBinContent(startBin, binContent)
+                        hData.SetBinError(startBin, sqrt(binError))
+                        for ibin in range(startBin+1,hData.GetNbinsX()+1):
+                                hData.SetBinContent(ibin, 0)
+                                hData.SetBinError(ibin, 0)
+                        
                 print('Data:',hData.Integral())
                 if plotNorm:
                         hData.Scale(1/hData.Integral())
@@ -376,6 +423,31 @@ for tag in taglist:
                                         gaeData.SetPointEXlow(binNo-1,0)
                 hsig1 = RFile1.Get(histPrefix+'__'+sig1).Clone(histPrefix+'__sig1')
                 hsig2 = RFile1.Get(histPrefix+'__'+sig2).Clone(histPrefix+'__sig2')
+                if 'Jets' in iPlot or 'ST' in iPlot:
+                        binContent1 = 0
+                        binError1 = 0
+                        binContent2 = 0
+                        binError2 = 0
+
+                        if 'Jets' in iPlot:
+                                startBin = 6
+                        else:
+                                startBin = hsig1.FindFixBin(2500-1)
+                                
+                        for ibin in range(startBin,hsig1.GetNbinsX()+1):
+                                binContent1 += hsig1.GetBinContent(ibin)
+                                binError1 += hsig1.GetBinError(ibin)**2
+                                binContent2 += hsig2.GetBinContent(ibin)
+                                binError2 += hsig2.GetBinError(ibin)**2
+                        hsig1.SetBinContent(startBin, binContent1)
+                        hsig1.SetBinError(startBin, sqrt(binError1))
+                        hsig2.SetBinContent(startBin, binContent2)
+                        hsig2.SetBinError(startBin, sqrt(binError2))
+                        for ibin in range(startBin+1,hsig1.GetNbinsX()+1):
+                                hsig1.SetBinContent(ibin, 0)
+                                hsig1.SetBinError(ibin, 0)
+                                hsig2.SetBinContent(ibin, 0)
+                                hsig2.SetBinError(ibin, 0)
                 if plotNorm:
                         hsig1.Scale(1/hsig1.Integral())
                         hsig2.Scale(1/hsig2.Integral())
@@ -479,7 +551,28 @@ for tag in taglist:
                                 for syst in systematicList:
                                         for ud in shiftlist:
                                                 try:
-                                                        systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
+                                                        if 'Jets' in iPlot or 'ST' in iPlot:
+                                                                tempHist = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
+                                                                binContent = 0
+                                                                binError = 0
+
+                                                                if 'Jets' in iPlot:
+                                                                        startBin = 6
+                                                                else:
+                                                                        startBin = tempHist.FindFixBin(2500-1)
+                                                                
+                                                                for ibin in range(startBin,tempHist.GetNbinsX()+1):
+                                                                        binContent += tempHist.GetBinContent(ibin)
+                                                                        binError += tempHist.GetBinError(ibin)**2
+                                                                tempHist.SetBinContent(startBin, binContent)
+                                                                tempHist.SetBinError(startBin, sqrt(binError))
+                                                                for ibin in range(startBin+1,tempHist.GetNbinsX()+1):
+                                                                        tempHist.SetBinContent(ibin, 0)
+                                                                        tempHist.SetBinError(ibin, 0)
+                                                                systHists[proc+catStr+syst+ud] = tempHist
+                                                        else:
+                                                                systHists[proc+catStr+syst+ud] = RFile1.Get(f'{histPrefix}__{proc}__{syst}{ud}').Clone()
+                                                        
                                                         if doNormByBinWidth and 'jet' in tag: 
                                                                 normByBinWidth(systHists[proc+catStr+syst+ud],perNGeV)
                                                 except:
@@ -666,7 +759,7 @@ for tag in taglist:
                         uPad=TPad("uPad","",0,yDiv,1,1)
                 else: 
                         uPad=TPad("uPad","",0,yDiv,1,1) #for actual plots
-                uPad.SetTopMargin(0.08)
+                uPad.SetTopMargin(0.09)
                 #if isCategorized:
                 #        uPad.SetTopMargin(0.08)
                 #else:
@@ -697,12 +790,16 @@ for tag in taglist:
                         else: 
                                 gaeData.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
                 else:
-                    if region == 'all' and iPlot == 'BpMass':
-                        gaeData.GetYaxis().SetTitle("Events / 50 GeV")
+                    if region == 'all':
+                            if iPlot == 'BpMass':
+                                    gaeData.GetYaxis().SetTitle("Events / 50 GeV")
+                            elif iPlot == 'ST':
+                                    gaeData.GetYaxis().SetTitle("Events / 100 GeV")
                     elif iPlot == 'BpMass' or isCategorized:
                             gaeData.GetYaxis().SetTitle("Events / 20 GeV")
                     else:
                         gaeData.GetYaxis().SetTitle("Events / bin")
+
                 formatUpperHist(gaeData,hData)
                 uPad.cd()
                 gaeData.SetTitle("")
@@ -811,13 +908,13 @@ for tag in taglist:
                         #         chLatex.DrawLatex(0.3, 0.68, regionString)
 
                 if isCategorized:
-                        leg = TLegend(0.35,0.53,0.92,0.89)
+                        leg = TLegend(0.35,0.52,0.92,0.88)
                         # needs more horizontal space b/c xsecs
                 else:
                         if iPlot == 'BpDecay':
                                 leg = TLegend(0.19,0.41,0.71,0.77)
                         else:
-                                leg = TLegend(0.40,0.53,0.92,0.89)
+                                leg = TLegend(0.40,0.52,0.92,0.88)
                 #leg = TLegend(0.47,0.62,0.92,0.89)
                 
                 leg.SetShadowColor(0)
@@ -840,22 +937,22 @@ for tag in taglist:
                                 else:
                                         leg.AddEntry(gaeData,"Data","pex")  #left
                                 try:
-                                        leg.AddEntry(bkghists['singletop'+catStr],"single t","f") #left
-                                except: pass
-                                leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
-                                try: 
                                         leg.AddEntry(bkghists['ewk'+catStr],"DY+VV","f") #right
                                 except: pass
-                                leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l") #left
-                                try: 
+                                leg.AddEntry(hsig1,sig1leg+scaleFact1Str,"l")  #left
+                                try:
                                         leg.AddEntry(bkghists['ttx'+catStr],"t#bar{t}+(V,H)","f") #right
                                 except: pass
-                                try: 
-                                        leg.AddEntry(bkghists['ttbar'+catStr],"t#bar{t}","f") #left
-                                except: pass
+                                leg.AddEntry(hsig2,sig2leg+scaleFact2Str,"l") #left
                                 leg.AddEntry(bkghists['qcd'+catStr],"QCD","f") #right
                                 try:
-                                        leg.AddEntry(bkghists['wjets'+catStr],"W+jets","f") #right
+                                        leg.AddEntry(bkghists['wjets'+catStr],"W+jets","f") #left
+                                except: pass
+                                try:
+                                        leg.AddEntry(bkghists['ttbar'+catStr],"t#bar{t}","f") #right
+                                except: pass
+                                try:
+                                        leg.AddEntry(bkghists['singletop'+catStr],"single t","f") #left
                                 except: pass
                                 leg.AddEntry(bkgHTgerr,"Bkg. Uncert.","f") #right
                                 #leg.AddEntry(0, "", "") #left
@@ -942,43 +1039,36 @@ for tag in taglist:
 
                 prelimTex=TLatex()
                 prelimTex.SetNDC()
-                prelimTex.SetTextAlign(31) # align right
-                #prelimTex.SetTextFont(42)
+                prelimTex.SetTextAlign(31)
                 prelimTex.SetTextSize(0.07)
                 if blind: prelimTex.SetTextSize(0.05)
                 prelimTex.SetLineWidth(2)
                 prelimTex.DrawLatex(0.95,0.94,str(lumi)+" fb^{-1} (13 TeV)")
 
-                # prelimTex2=TLatex()
-                # prelimTex2.SetNDC()
-                # prelimTex2.SetTextFont(61)
-                # prelimTex2.SetLineWidth(2)
-                # prelimTex2.SetTextSize(0.08)
-
-                #if blind: prelimTex2.SetTextSize(0.08)
-                #prelimTex2.DrawLatex(0.12,0.93,"CMS")
-
-
                 prelimTex3=TLatex()
                 prelimTex3.SetNDC()
-                prelimTex3.SetTextAlign(12)
+                prelimTex3.SetTextAlign(11)
 
-                #prelimTex3.SetTextFont(52)
-                #prelimTex3.SetTextFont(42)
-                #if isCategorized:
-                #        prelimTex3.SetTextSize(0.09)
-                #else:
                 prelimTex3.SetTextSize(0.10)
-                if blind: prelimTex3.SetTextSize(0.06)
-                #prelimTex3.SetLineWidth(2)
-                # if not blind:
-                #         prelimTex3.DrawLatex(0.23,0.945,"Private work (CMS data & simulation)") #"Preliminary")
-                # if blind: 
-                #         prelimTex3.DrawLatex(0.26,0.945,"Private work (CMS data & simulation)") #"Preliminary")
                 if isCategorized:
-                        prelimTex3.DrawLatex(0.15,0.96,"#bf{CMS}")
+                        prelimTex3.DrawLatex(0.15,0.93,"#bf{CMS}")
                 else:
-                        prelimTex3.DrawLatex(0.19,0.84,"#bf{CMS}") #"Preliminary")
+                        prelimTex3.DrawLatex(0.19,0.80,"#bf{CMS}")
+
+                if isPrelim:
+                        prelimTex4 = TLatex()
+                        prelimTex4.SetNDC()
+                        prelimTex4.SetTextFont(52)
+                        prelimTex4.SetTextAlign(11)
+                        prelimTex4.SetTextSize(0.07)
+                        prelimTex4.SetLineWidth(2)
+                        if isCategorized:
+                                prelimTex4.DrawLatex(0.28,0.93,"Preliminary")
+                        else:
+                                if iPlot == 'BpDecay':
+                                        prelimTex4.DrawLatex(0.32,0.80,"Preliminary")
+                                else:
+                                        prelimTex4.DrawLatex(0.19,0.72,"Preliminary")
 
 
                 if blind == False and not doRealPull:
@@ -1044,26 +1134,6 @@ for tag in taglist:
                         gStyle.SetHatchesLineWidth(1)
                         if not doOneBand: pullUncBandStat.Draw("SAME E2")
 
-                        # pullLegend=TLegend(0.14,0.87,0.85,0.96)
-                        # SetOwnership( pullLegend, 0 )   # 0 = release (not keep), 1 = keep
-                        # pullLegend.SetShadowColor(0)
-                        # pullLegend.SetNColumns(3)
-                        # pullLegend.SetFillColor(0)
-                        # pullLegend.SetFillStyle(0)
-                        # pullLegend.SetLineColor(0)
-                        # pullLegend.SetLineStyle(0)
-                        # pullLegend.SetBorderSize(0)
-                        # #pullLegend.SetTextFont(42)
-                        # # if not doOneBand: 
-                        # #         pullLegend.AddEntry(pullUncBandStat , "Bkg. Uncert. (shape syst.)" , "f")
-                        # #         pullLegend.AddEntry(pullUncBandNorm , "Bkg. Uncert. (shape #oplus norm. syst.)" , "f")
-                        # #         pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus all syst.)" , "f")
-                        # # else: 
-                        # #         if doAllSys: 
-                        # #                 pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus syst.)" , "f")
-                        # #         else: 
-                        # #                 pullLegend.AddEntry(pullUncBandTot , "Bkg. Uncert. (stat. #oplus lumi)" , "f")
-                        # pullLegend.Draw("SAME")
                         if doNormByBinWidth and	'jet' in tag:
                                 pull.Draw("SAME E0") #E0
                         else:
@@ -1090,7 +1160,6 @@ for tag in taglist:
                         formatLowerHist(pull)
                         pull.Draw("HIST")
 
-                #c1.Write()
                 savePrefix = templateDir+templateDir.split('/')[-2]+'plots/'
                 if not os.path.exists(savePrefix): os.system('mkdir '+savePrefix)
                 savePrefix+=histPrefix+isRebinned.replace('_rebinned_stat1p1','')+saveKey
@@ -1099,6 +1168,7 @@ for tag in taglist:
                 if doNormByBinWidth: savePrefix+='_NBBW'
                 if yLog: savePrefix+='_logy'
                 if blind: savePrefix+='_blind'
+                if isPrelim: savePrefix+='_prelim'
 
                 if doOneBand:
                         if plotNorm:
@@ -1125,452 +1195,6 @@ for tag in taglist:
                                 del bkghists[proc+catStr]
                         except: pass
 
-        # Making plots for e+jets/mu+jets combined #
-
-        # histPrefixE = iPlot+'_'+lumiInTemplates+'fb_isE_'+tagStr
-        # histPrefixM = iPlot+'_'+lumiInTemplates+'fb_isM_'+tagStr
-        # if isCategorized:
-        #         if region=='CR': 
-        #                 histPrefixE = histPrefixE.replace('isE','isCR_isE')
-        #                 histPrefixM = histPrefixM.replace('isM','isCR_isM')
-        #         else:
-        #                 histPrefixE = histPrefixE.replace('isE','isSR_isE')
-        #                 histPrefixM = histPrefixM.replace('isM','isSR_isM')
-        # totBkgMerged = 0.
-        # for proc in bkgProcList:
-        #      try: 
-	# 		bkghistsmerged[proc+'isL'+tagStr] = RFile1.Get(histPrefixE+'__'+proc).Clone()
-	# 		bkghistsmerged[proc+'isL'+tagStr].Add(RFile1.Get(histPrefixM+'__'+proc))
-	# 		totBkgMerged += bkghistsmerged[proc+'isL'+tagStr].Integral()
-	# 	except:pass
-	# hDatamerged = RFile1.Get(histPrefixE+'__'+datalabel).Clone()
-	# hsig1merged = RFile1.Get(histPrefixE+'__'+siglabel).Clone(histPrefixE+'__sig1merged')
-	# hsig1merged.Add(RFile1.Get(histPrefixM+'__'+siglabel).Clone())
-
-        # if isCategorized:
-        #         hsig2merged = RFile1.Get(histPrefixE+'__'+siglabel.replace(sig1,sig2)).Clone(histPrefixE+'__sig2merged')
-        #         hsig2merged.Add(RFile1.Get(histPrefixM+'__'+siglabel.replace(sig1,sig2)).Clone())
-        # else:
-        #         hsig2merged = RFile2.Get(histPrefixE+'__'+siglabel).Clone(histPrefixE+'__sig2merged')
-        #         hsig2merged.Add(RFile2.Get(histPrefixM+'__'+siglabel).Clone())
-	# hDatamerged.Add(RFile1.Get(histPrefixM+'__'+datalabel).Clone())
-	# hsig1merged.Scale(xsec[sig1])
-	# hsig2merged.Scale(xsec[sig2])
-
-        # if len(isRebinned) > 0: 
-        #         hsig1merged.Scale(10) # 100fb input -> typical 1pb
-        #         hsig2merged.Scale(10)                
-        # histrange = [hDatamerged.GetBinLowEdge(1),hDatamerged.GetBinLowEdge(hDatamerged.GetNbinsX()+1)]
-	# gaeDatamerged = TGraphAsymmErrors(hDatamerged.Clone(hDatamerged.GetName().replace(datalabel,"gaeDATA")))
-	# if doNormByBinWidth:
-	# 	poissonNormByBinWidth(gaeDatamerged,hDatamerged,perNGeV)
-	# 	for proc in bkgProcList:
-	# 		try: normByBinWidth(bkghistsmerged[proc+'isL'+tagStr],perNGeV)
-	# 		except: pass
-	# 	normByBinWidth(hsig1merged,perNGeV)
-	# 	normByBinWidth(hsig2merged,perNGeV)
-	# 	normByBinWidth(hDatamerged,perNGeV)
-	# else: poissonErrors(gaeDatamerged)
-	# # Yes, there are easier ways using the TH1's but
-	# # it would be rough to swap objects lower down	
-
-	# bkgHTmerged = bkghistsmerged[bkgProcList[0]+'isL'+tagStr].Clone()
-	# for proc in bkgProcList:
-	# 	if proc==bkgProcList[0]: continue
-	# 	try: bkgHTmerged.Add(bkghistsmerged[proc+'isL'+tagStr])
-	# 	except: pass
-	# gaeBkgHTmerged = TGraphAsymmErrors(bkgHTmerged.Clone("gaeBkgHTmerged"))
-
-	# #if doNormByBinWidth: poissonNormByBinWidth(gaeBkgHTmerged,bkgHTmerged)
-	# #else: poissonErrors(gaeBkgHTmerged)
-
-	# if doAllSys:
-	# 	for syst in systematicList:
-	# 		for ud in shiftlist:
-	# 			for proc in bkgProcList:
-	# 				try: 
-	# 					systHists[proc+'isL'+tagStr+syst+ud] = systHists[proc+'isE_'+tagStr+syst+ud].Clone()
-	# 					systHists[proc+'isL'+tagStr+syst+ud].Add(systHists[proc+'isM_'+tagStr+syst+ud])
-	# 				except: pass
-
-	# totBkgTemp1['isL'+tagStr] = TGraphAsymmErrors(bkgHTmerged.Clone(bkgHTmerged.GetName()+'shapeOnly'))
-	# totBkgTemp2['isL'+tagStr] = TGraphAsymmErrors(bkgHTmerged.Clone(bkgHTmerged.GetName()+'shapePlusNorm'))
-	# totBkgTemp3['isL'+tagStr] = TGraphAsymmErrors(bkgHTmerged.Clone(bkgHTmerged.GetName()+'All'))
-	
-	# for ibin in range(1,bkghistsmerged[bkgProcList[0]+'isL'+tagStr].GetNbinsX()+1):
-	# 	errorUp = 0.
-	# 	errorDn = 0.
-	# 	errorStatUp = gaeBkgHTmerged.GetErrorYhigh(ibin-1)**2
-	# 	errorStatDn = gaeBkgHTmerged.GetErrorYlow(ibin-1)**2
-	# 	errorNorm = (lumiSys**2)*(bkgHTmerged.GetBinContent(ibin)**2)
-
-	# 	if doAllSys:
-	# 		for syst in systematicList:
-	# 			for proc in bkgProcList:
-	# 				try:
-	# 					errorPlus = systHists[proc+'isL'+tagStr+syst+shiftlist[0]].GetBinContent(ibin)-bkghistsmerged[proc+'isL'+tagStr].GetBinContent(ibin)
-	# 					errorMinus = bkghistsmerged[proc+'isL'+tagStr].GetBinContent(ibin)-systHists[proc+'isL'+tagStr+syst+shiftlist[1]].GetBinContent(ibin)
-	# 					if errorPlus > 0: errorUp += errorPlus**2
-	# 					else: errorDn += errorPlus**2
-	# 					if errorMinus > 0: errorDn += errorMinus**2
-	# 					else: errorUp += errorMinus**2
-	# 				except: pass
-
-	# 	totBkgTemp1['isL'+tagStr].SetPointEYhigh(ibin-1,math.sqrt(errorUp))
-	# 	totBkgTemp1['isL'+tagStr].SetPointEYlow(ibin-1, math.sqrt(errorDn))
-	# 	totBkgTemp2['isL'+tagStr].SetPointEYhigh(ibin-1,math.sqrt(errorUp+errorNorm))
-	# 	totBkgTemp2['isL'+tagStr].SetPointEYlow(ibin-1, math.sqrt(errorDn+errorNorm))
-	# 	totBkgTemp3['isL'+tagStr].SetPointEYhigh(ibin-1,math.sqrt(errorUp+errorNorm+errorStatUp))
-	# 	totBkgTemp3['isL'+tagStr].SetPointEYlow(ibin-1, math.sqrt(errorDn+errorNorm+errorStatDn))
-	
-	# bkgHTgerrmerged = totBkgTemp3['isL'+tagStr].Clone()
-
-	# scaleFact1merged = int(bkgHTmerged.GetMaximum()/hsig1merged.GetMaximum()) - int(bkgHTmerged.GetMaximum()/hsig1merged.GetMaximum()) % 10
-	# scaleFact2merged = int(bkgHTmerged.GetMaximum()/hsig2merged.GetMaximum()) - int(bkgHTmerged.GetMaximum()/hsig2merged.GetMaximum()) % 10
-	# if scaleFact1merged==0: scaleFact1merged=int(bkgHTmerged.GetMaximum()/hsig1merged.GetMaximum())
-	# if scaleFact2merged==0: scaleFact2merged=int(bkgHTmerged.GetMaximum()/hsig2merged.GetMaximum())
-	# if scaleFact1merged==0: scaleFact1merged=1
-	# if scaleFact2merged==0: scaleFact2merged=1
-	# if sigScaleFact>0:
-	# 	scaleFact1merged=sigScaleFact
-	# 	scaleFact2merged=sigScaleFact*2
-	# if not scaleSignals:
-	# 	scaleFact1merged=1
-	# 	scaleFact2merged=1
-	# hsig1merged.Scale(scaleFact1merged)
-	# hsig2merged.Scale(scaleFact2merged)
-	
-	# drawQCDmerged = False
-	# try: drawQCDmerged = bkghistsmerged['qcdisL'+tagStr].Integral()/bkgHTmerged.Integral()>.005
-	# except: pass
-
-	# stackbkgHTmerged = THStack("stackbkgHTmerged","")
-	# bkgProcListNew = bkgProcList[:]
-	# if region=='WJCR':
-	# 	bkgProcListNew[bkgProcList.index("top")],bkgProcListNew[bkgProcList.index("ewk")]=bkgProcList[bkgProcList.index("ewk")],bkgProcList[bkgProcList.index("top")]
-	# for proc in bkgProcListNew:
-	# 	try: 
-	# 		if drawQCDmerged or proc!='qcd': stackbkgHTmerged.Add(bkghistsmerged[proc+'isL'+tagStr])
-	# 	except: pass
-
-	# for proc in bkgProcList:
-	# 	try: 
-	# 		bkghistsmerged[proc+'isL'+tagStr].SetLineColor(bkgHistColors[proc])
-	# 		bkghistsmerged[proc+'isL'+tagStr].SetFillColor(bkgHistColors[proc])
-	# 		bkghistsmerged[proc+'isL'+tagStr].SetLineWidth(2)
-	# 	except: pass
-	# hsig1merged.SetLineColor(sig1Color)
-	# hsig1merged.SetFillStyle(0)
-	# hsig1merged.SetLineWidth(3)
-	# hsig2merged.SetLineColor(sig2Color)
-	# hsig2merged.SetLineStyle(7)#5)
-	# hsig2merged.SetFillStyle(0)
-	# hsig2merged.SetLineWidth(3)
-	
-	# gaeDatamerged.SetMarkerStyle(20)
-	# gaeDatamerged.SetMarkerSize(1.2)
-	# gaeDatamerged.SetLineWidth(2)
-	# gaeDatamerged.SetMarkerColor(kBlack)
-	# gaeDatamerged.SetLineColor(kBlack)
-
-	# bkgHTgerrmerged.SetFillStyle(3004)
-	# bkgHTgerrmerged.SetFillColor(kBlack)
-
-	# gStyle.SetOptStat(0)
-	# c1merged = TCanvas("c1merged","c1merged",1200,1000)
-	# gStyle.SetErrorX(0.5)
-	# yDiv=0.25
-	# if blind == True: yDiv=0.01
-	# uMargin = 0.00001
-	# if blind == True: uMargin = 0.12
-	# rMargin=.04
-	# uPad={}
-	# if yLog and not blind: uPad=TPad("uPad","",0,yDiv-0.009,1,1) #for actual plots
-	# else: uPad=TPad("uPad","",0,yDiv,1,1) #for actual plots
-	# uPad.SetTopMargin(0.08)
-	# uPad.SetBottomMargin(uMargin)
-	# uPad.SetRightMargin(rMargin)
-	# uPad.SetLeftMargin(.105)
-	# uPad.Draw()
-	# if blind == False:
-	# 	lPad=TPad("lPad","",0,0,1,yDiv) #for sigma runner
-	# 	lPad.SetTopMargin(0)
-	# 	lPad.SetBottomMargin(.4)
-	# 	lPad.SetRightMargin(rMargin)
-	# 	lPad.SetLeftMargin(.105)
-	# 	lPad.SetGridy()
-	# 	lPad.Draw()
-	# gaeDatamerged.SetMaximum(1.6*max(gaeDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
-	# if iPlot=='PrunedHNm1': gaeDatamerged.SetMaximum(1.7*max(gaeDatamerged.GetMaximum(),bkgHTmerged.GetMaximum()))
-	# gaeDatamerged.SetMinimum(0.015)
-	# if doNormByBinWidth:
-        #         if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10): 
-        #                 gaeDatamerged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
-        #         else: gaeDatamerged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
-	# else: gaeDatamerged.GetYaxis().SetTitle("Events / bin")
-	# formatUpperHist(gaeDatamerged,hData)
-	# uPad.cd()
-	# gaeDatamerged.SetTitle("")
-	# stackbkgHTmerged.SetTitle("")
-	# if not blind: gaeDatamerged.Draw("apz")
-	# if blind: 
-	# 	hsig1merged.SetMinimum(0.015)
-	# 	if doNormByBinWidth:
-        #                 if iPlot == 'DnnTprime' or (iPlot == 'HTNtag' and perNGeV < 10): 
-        #                         hsig1merged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" >")
-        #                 else: hsig1merged.GetYaxis().SetTitle("< Events / "+str(perNGeV)+" GeV >")
-	# 	else: hsig1merged.GetYaxis().SetTitle("Events / bin")
-	# 	hsig1merged.SetMaximum(1.5*hDatamerged.GetMaximum())
-	# 	if iPlot=='Tau21Nm1': hsig1merged.SetMaximum(1.5*hDatamerged.GetMaximum())
-	# 	formatUpperHist(hsig1merged,hsig1merged)
-	# 	hsig1merged.Draw("HIST")
-	# stackbkgHTmerged.Draw("SAME HIST")
-	# hsig1merged.Draw("SAME HIST")
-	# hsig2merged.Draw("SAME HIST")
-	# if not blind: gaeDatamerged.Draw("PZ") #redraw data so its not hidden
-	# uPad.RedrawAxis()
-	# bkgHTgerrmerged.Draw("SAME E2")
-
-	# chLatexmerged = TLatex()
-	# chLatexmerged.SetNDC()
-	# chLatexmerged.SetTextSize(0.06)
-	# if blind: chLatexmerged.SetTextSize(0.04)
-	# chLatexmerged.SetTextAlign(21) # align center
-	# flvString = 'e/#mu+jets'
-	# tagString = ''
-	# algoString = ''
-	# if isCategorized or 'algos' in region: algoString = tag[1]
-	# if tagString.endswith(', '): tagString = tagString[:-2]
-	# if algoString.endswith(', '): algoString = algoString[:-2]
-	# if iPlot != 'deltaRAK8': chLatexmerged.DrawLatex(0.28, 0.85, flvString)
-	# else: chLatexmerged.DrawLatex(0.75,0.85,flvString)
-	# if iPlot != 'YLD':
-	# 	chLatexmerged.DrawLatex(0.28, 0.78, algoString)
-	# 	chLatexmerged.DrawLatex(0.28, 0.72, tagString)
-
-	# if drawQCDmerged: 
-	# 	legmerged = TLegend(0.45,0.52,0.95,0.87)
-	# 	if iPlot == 'deltaRAK8': legmerged = TLegend(0.15,0.52,0.55,0.82)
-	# if not drawQCDmerged or blind: 
-	# 	legmerged = TLegend(0.45,0.64,0.95,0.89)
-	# 	if iPlot == 'deltaRAK8': legmerged = TLegend(0.12,0.65,0.62,0.90)
-	# legmerged.SetShadowColor(0)
-	# legmerged.SetFillColor(0)
-	# legmerged.SetFillStyle(0)
-	# legmerged.SetLineColor(0)
-	# legmerged.SetLineStyle(0)
-	# legmerged.SetBorderSize(0) 
-	# legmerged.SetNColumns(2)
-	# legmerged.SetTextFont(62)#42)
-	# scaleFact1Str = ' x'+str(scaleFact1)
-	# scaleFact2Str = ' x'+str(scaleFact2)
-	# if not scaleSignals:
-	# 	scaleFact1Str = ''
-	# 	scaleFact2Str = ''
-	# if drawQCDmerged:
-	# 	if not blind: 
-	# 			#legmerged.AddEntry(0, "", "")
-	# 		legmerged.AddEntry(gaeDatamerged,"Data","pel")  #left
-	# 		legmerged.AddEntry(bkghistsmerged['qcdisL'+tagStr],"QCD","f") #right
-	# 		legmerged.AddEntry(hsig1merged,sig1leg+scaleFact1Str,"l")  #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['topisL'+tagStr],"TOP","f") #right
-	# 		except: pass
-	# 		legmerged.AddEntry(hsig2merged,sig2leg+scaleFact2Str,"l") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['ewkisL'+tagStr],"EW","f") #right
-	# 		except: pass
-	# 		#legmerged.AddEntry(0, "", "") #left
-	# 		legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #right
-	# 	else:
-	# 		legmerged.AddEntry(hsig1merged,sig1leg+scaleFact1Str,"l")  #left
-	# 		legmerged.AddEntry(bkghistsmerged['qcdisL'+tagStr],"QCD","f") #right
-	# 		legmerged.AddEntry(hsig2merged,sig2leg+scaleFact2Str,"l") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['topisL'+tagStr],"TOP","f") #right
-	# 		except: pass
-	# 		legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['ewkisL'+tagStr],"EW","f") #right
-	# 		except: pass
-				
-	# if not drawQCDmerged:
-	# 	if not blind: 
-	# 		legmerged.AddEntry(gaeDatamerged,"Data","pel") #left 
-	# 		try: legmerged.AddEntry(bkghistsmerged['topisL'+tagStr],"TOP","f") #right
-	# 		except: pass
-	# 		legmerged.AddEntry(hsig1merged,sig1leg+scaleFact1Str,"l") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['ewkisL'+tagStr],"EW","f") #right
-	# 		except: pass
-	# 		legmerged.AddEntry(hsig2merged,sig2leg+scaleFact2Str,"l") #left
-	# 		legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #right
-	# 	else:
-	# 		legmerged.AddEntry(hsig1merged,sig1leg+scaleFact1Str,"l") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['topisL'+tagStr],"TOP","f") #right
-	# 		except: pass
-	# 		legmerged.AddEntry(hsig2merged,sig2leg+scaleFact2Str,"l") #left
-	# 		try: legmerged.AddEntry(bkghistsmerged['ewkisL'+tagStr],"EW","f") #right
-	# 		except: pass
-	# 		#legmerged.AddEntry(0, "", "") #left
-	# 		legmerged.AddEntry(bkgHTgerrmerged,"Bkg. uncert.","f") #right
-	# legmerged.Draw("same")
-
-	# prelimTex=TLatex()
-	# prelimTex.SetNDC()
-	# prelimTex.SetTextAlign(31) # align right
-	# prelimTex.SetTextFont(42)
-	# prelimTex.SetTextSize(0.05)
-	# if blind: prelimTex.SetTextSize(0.05)
-	# prelimTex.SetLineWidth(2)
-	# prelimTex.DrawLatex(0.95,0.94,str(lumi)+" fb^{-1} (13 TeV)")
-	
-	# prelimTex2=TLatex()
-	# prelimTex2.SetNDC()
-	# prelimTex2.SetTextFont(61)
-	# prelimTex2.SetLineWidth(2)
-	# prelimTex2.SetTextSize(0.08)
-	# if blind: prelimTex2.SetTextSize(0.08)
-	# prelimTex2.DrawLatex(0.12,0.93,"CMS")
-	
-	# prelimTex3=TLatex()
-	# prelimTex3.SetNDC()
-	# prelimTex3.SetTextAlign(12)
-	# prelimTex3.SetTextFont(52)
-	# prelimTex3.SetTextSize(0.055)
-	# if blind: prelimTex3.SetTextSize(0.055)
-	# prelimTex3.SetLineWidth(2)
-	# if not blind: prelimTex3.DrawLatex(0.23,0.945,"Private work") #"Preliminary")
-	# if blind: prelimTex3.DrawLatex(0.26,0.945,"Private work") #"Preliminary")
-	
-	# if blind == False and not doRealPull:
-	# 	lPad.cd()
-	# 	pullmerged=bkgHTmerged.Clone(hDatamerged.GetName()+"pullmerged")
-        #         #scale = str(hDatamerged.Integral()/bkgHTmerged.Integral())
-        #         #print('SCALING TOTAL BACKGOUND FOR RATIO: data =',hDatamerged.Integral(),', mc =',bkgHTmerged.Integral())
-        #         #pullmerged.Scale(hDatamerged.Integral()/bkgHTmerged.Integral())
-	# 	pullmerged.Divide(hDatamerged, pullmerged)                
-
-        #         # if 'probj' in iPlot:
-        #         #         print('probjratio = {')
-        #         #         for binNo in range(0,hDatamerged.GetNbinsX()+2):
-        #         #                 print(str(pullmerged.GetBinContent(binNo))+',')
-        #         #                 if bkgHTmerged.GetBinContent(binNo)!=0:
-        #         #                         pullmerged.SetBinError(binNo,hDatamerged.GetBinError(binNo)/bkgHTmerged.GetBinContent(binNo))
-        #         #         print('};')
-	# 	pullmerged.SetMaximum(3)
-	# 	pullmerged.SetMinimum(0)
-	# 	pullmerged.SetFillColor(1)
-	# 	pullmerged.SetLineColor(1)
-	# 	pullmerged.SetMarkerStyle(20)
-	# 	formatLowerHist(pullmerged)
-	# 	pullmerged.Draw("E0")
-		
-	# 	BkgOverBkgmerged = pullmerged.Clone("bkgOverbkgmerged")
-	# 	BkgOverBkgmerged.Divide(bkgHTmerged, bkgHTmerged)
-	# 	pullUncBandTotmerged=TGraphAsymmErrors(BkgOverBkgmerged.Clone("pulluncTotmerged"))
-	# 	for binNo in range(0,hDatamerged.GetNbinsX()+2):
-	# 		if bkgHTmerged.GetBinContent(binNo)!=0:
-	# 			pullUncBandTotmerged.SetPointEYhigh(binNo-1,totBkgTemp3['isL'+tagStr].GetErrorYhigh(binNo-1)/bkgHTmerged.GetBinContent(binNo))
-	# 			pullUncBandTotmerged.SetPointEYlow(binNo-1, totBkgTemp3['isL'+tagStr].GetErrorYlow(binNo-1)/bkgHTmerged.GetBinContent(binNo))			
-	# 	if not doOneBand: pullUncBandTotmerged.SetFillStyle(3001)
-	# 	else: pullUncBandTotmerged.SetFillStyle(3344)
-	# 	pullUncBandTotmerged.SetFillColor(1)
-	# 	pullUncBandTotmerged.SetLineColor(1)
-	# 	pullUncBandTotmerged.SetMarkerSize(0)
-	# 	gStyle.SetHatchesLineWidth(1)
-	# 	pullUncBandTotmerged.Draw("SAME E2")
-		
-	# 	pullUncBandNormmerged=TGraphAsymmErrors(BkgOverBkgmerged.Clone("pulluncNormmerged"))
-	# 	for binNo in range(0,hData.GetNbinsX()+2):
-	# 		if bkgHTmerged.GetBinContent(binNo)!=0:
-	# 			pullUncBandNormmerged.SetPointEYhigh(binNo-1,totBkgTemp2['isL'+tagStr].GetErrorYhigh(binNo-1)/bkgHTmerged.GetBinContent(binNo))
-	# 			pullUncBandNormmerged.SetPointEYlow(binNo-1, totBkgTemp2['isL'+tagStr].GetErrorYlow(binNo-1)/bkgHTmerged.GetBinContent(binNo))			
-	# 	pullUncBandNormmerged.SetFillStyle(3001)
-	# 	pullUncBandNormmerged.SetFillColor(2)
-	# 	pullUncBandNormmerged.SetLineColor(2)
-	# 	pullUncBandNormmerged.SetMarkerSize(0)
-	# 	gStyle.SetHatchesLineWidth(1)
-	# 	if not doOneBand: pullUncBandNormmerged.Draw("SAME E2")
-		
-	# 	pullUncBandStatmerged=TGraphAsymmErrors(BkgOverBkgmerged.Clone("pulluncStatmerged"))
-	# 	for binNo in range(0,hDatamerged.GetNbinsX()+2):
-	# 		if bkgHTmerged.GetBinContent(binNo)!=0:
-	# 			pullUncBandStatmerged.SetPointEYhigh(binNo-1,totBkgTemp1['isL'+tagStr].GetErrorYhigh(binNo-1)/bkgHTmerged.GetBinContent(binNo))
-	# 			pullUncBandStatmerged.SetPointEYlow(binNo-1, totBkgTemp1['isL'+tagStr].GetErrorYlow(binNo-1)/bkgHTmerged.GetBinContent(binNo))			
-	# 	pullUncBandStatmerged.SetFillStyle(3001)
-	# 	pullUncBandStatmerged.SetFillColor(3)
-	# 	pullUncBandStatmerged.SetLineColor(3)
-	# 	pullUncBandStatmerged.SetMarkerSize(0)
-	# 	gStyle.SetHatchesLineWidth(1)
-	# 	if not doOneBand: pullUncBandStatmerged.Draw("SAME E2")
-
-	# 	pullLegendmerged=TLegend(0.14,0.87,0.85,0.96)
-	# 	SetOwnership( pullLegendmerged, 0 )   # 0 = release (not keep), 1 = keep
-	# 	pullLegendmerged.SetShadowColor(0)
-	# 	pullLegendmerged.SetNColumns(3)
-	# 	pullLegendmerged.SetFillColor(0)
-	# 	pullLegendmerged.SetFillStyle(0)
-	# 	pullLegendmerged.SetLineColor(0)
-	# 	pullLegendmerged.SetLineStyle(0)
-	# 	pullLegendmerged.SetBorderSize(0)
-	# 	pullLegendmerged.SetTextFont(42)
-
-        #         #pullLegendmerged.AddEntry(pullmerged,"Data/(MC*"+scale+")","pl")
-        #         pullLegendmerged.AddEntry(pullmerged,"Data/MC","pl")
-	# 	if not doOneBand: pullLegendmerged.AddEntry(pullUncBandStat , "Bkg. uncert. (shape syst.)" , "f")
-	# 	if not doOneBand: pullLegendmerged.AddEntry(pullUncBandNorm , "Bkg. uncert. (shape #oplus norm. syst.)" , "f")
-	# 	if not doOneBand: pullLegendmerged.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus all syst.)" , "f")
-	# 	else: 
-	# 		if doAllSys: pullLegendmerged.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus syst.)" , "f")
-	# 		else: pullLegendmerged.AddEntry(pullUncBandTot , "Bkg. uncert. (stat. #oplus lumi)" , "f")
-	# 	pullLegendmerged.Draw("SAME")
-	# 	pullmerged.Draw("SAME E0")
-	# 	lPad.RedrawAxis()
-
-	# if blind == False and doRealPull:
-	# 	formatUpperHist(hDatamerged,hDatamerged)
-	# 	lPad.cd()
-	# 	pullmerged=hDatamerged.Clone(hDatamerged.GetName()+"pullmerged")
-	# 	for binNo in range(1,hDatamerged.GetNbinsX()+1):
-	# 		# case for data < MC:
-	# 		dataerror = gaeDatamerged.GetErrorYhigh(binNo-1)
-	# 		MCerror = totBkgTemp3['isL'+tagStr].GetErrorYlow(binNo-1)
-	# 		# case for data > MC:
-	# 		if(hDatamerged.GetBinContent(binNo) > bkgHTmerged.GetBinContent(binNo)):
-	# 			dataerror = gaeDatamerged.GetErrorYlow(binNo-1)
-	# 			MCerror = totBkgTemp3['isL'+tagStr].GetErrorYhigh(binNo-1)
-	# 		pullmerged.SetBinContent(binNo,(hDatamerged.GetBinContent(binNo)-bkgHTmerged.GetBinContent(binNo))/math.sqrt(MCerror**2+dataerror**2))
-	# 	pullmerged.SetMaximum(3)
-	# 	pullmerged.SetMinimum(-3)
-	# 	if '53' in sig1:
-	# 		pullmerged.SetFillColor(2)
-	# 		pullmerged.SetLineColor(2)
-	# 	else:
-	# 		pullmerged.SetFillColor(kGray+2)
-	# 		pullmerged.SetLineColor(kGray+2)
-	# 	formatLowerHist(pullmerged)
-	# 	pullmerged.Draw("HIST")
-
-	# #c1merged.Write()
-	# savePrefixmerged = templateDir+templateDir.split('/')[-2]+'plots/'
-	# if not os.path.exists(savePrefixmerged): os.system('mkdir '+savePrefixmerged)
-	# savePrefixmerged+=histPrefixE.replace('isE','isL')+isRebinned.replace('_rebinned_stat1p1','')+saveKey
-	# if doRealPull: savePrefixmerged+='_pull'
-	# if doNormByBinWidth: savePrefixmerged+='_NBBW'
-	# if yLog: savePrefixmerged+='_logy'
-	# if blind: savePrefixmerged+='_blind'
-
-	# if doOneBand: 
-	# 	c1merged.SaveAs(savePrefixmerged+"totBand.pdf")
-	# 	c1merged.SaveAs(savePrefixmerged+"totBand.png")
-	# 	#c1merged.SaveAs(savePrefixmerged+"totBand.eps")
-	# 	c1merged.SaveAs(savePrefixmerged+"totBand.root")
-	# 	#c1merged.SaveAs(savePrefixmerged+"totBand.C")
-	# else: 
-	# 	c1merged.SaveAs(savePrefixmerged+".pdf")
-	# 	c1merged.SaveAs(savePrefixmerged+".png")
-	# 	#c1merged.SaveAs(savePrefixmerged+".eps")
-	# 	#c1merged.SaveAs(savePrefixmerged+".root")
-	# 	#c1merged.SaveAs(savePrefixmerged+".C")
-	# for proc in bkgProcList:
-	# 	try: del bkghistsmerged[proc+'isL'+tagStr]
-	# 	except: pass
 
 RFile1.Close()
 
