@@ -8,7 +8,7 @@ targetlumi = {'2016APV':19500, '2016':16800, '2017':41480, '2018':59830}
 lumiStr = '138fbfb' #str(targetlumi/1000).replace('.','p') # 1/fb
 systListShort = ['elRecoSF', 'elIdSF', 'elIsoSF', 'TrigEffEl', 'muRecoSF', 'muIdSF', 'muIsoSF', 'TrigEffMu', 'Pileup', 'Prefire', 'jsf', 'toppt', 'muRFcorrd', 'btagHFCO', 'btagHFUC', 'btagLFCO', 'btagLFUC', 'jer', 'jec', 'PuJetSF']
 systListFull = ['elRecoSF', 'elIdSF', 'elIsoSF', 'TrigEffEl', 'muRecoSF', 'muIdSF', 'muIsoSF', 'TrigEffMu', 'Pileup', 'Prefire', 'jsf', 'toppt', 'muRFcorrd', 'muR', 'muF', 'btagHFCO', 'btagHFUC', 'btagLFCO', 'btagLFUC', 'jer', 'jec', 'pNetTtag', 'pNetWtag', 'PuJetSF']
-uncorrList_sf = ['TrigEffEl', 'TrigEffMu', 'jer', 'jec', 'btagHFUC', 'btagLFUC']
+uncorrList_sf = ['TrigEffEl', 'TrigEffMu', 'jer', 'jec','btagHFUC', 'btagLFUC']
 yearList = ["2016APV", "2016", "2017", "2018"]        
 systListShortPlots = systListShort.copy()
 systListFullPlots = systListFull.copy()
@@ -19,8 +19,8 @@ for syst in uncorrList_sf:
         systListShortPlots.append(syst+year)
         systListFullPlots.append(syst+year)
 
-
-systListABCDnn = ['correct','train','pNetTtag','pNetWtag']#'param0','param1','param2','param3','param4','param5','param6','param7','lastbin']
+systListABCDnn = ['smooth2D','correct','train','pNetTtag','pNetWtag']
+#systListABCDnn = ['smooth2D','correct','train','pNetTtag','pNetWtag']#'param0','param1','param2','param3','param4','param5','param6','param7','lastbin']
 
 # out of date
 factorABCDnn = {'allWlep':'0.034045477',
@@ -50,17 +50,23 @@ class sample:
         self.xsec = xsec # in pb
         self.color = ROOT.kBlack
 
-# We will use these for plotting in this "xsec" folder, but keep them as 1 in the actual sample definitions for ROOT files# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
-xsec_b = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
-# extrapolating from ln(xsec) fit I get 0.000238 for 2200
+# # We will use these for plotting in this "xsec" folder, but keep them as 1 in the actual sample definitions for ROOT files# From Xanda, for "singlet" B prod with a b quark, for 1% width, for 50% tW
+# xsec_b = {'800':0.1187124, '900':0.0640113, '1000':0.0362987, '1100':0.0215009, '1200':0.0131348, '1300':0.0082629, '1400':0.0053213, '1500':0.0035078, '1600':0.0022829, '1700':0.0014947, '1800':0.0009898, '1900':0.0006519, '2000':0.0004499}
+# # extrapolating from ln(xsec) fit I get 0.000238 for 2200
 
-# singlet Btj 1% width, 50% tW
-xsec_t = {'800':0.0719956883, '900':0.0414743839, '1000':0.0247853590, '1100':0.0152876159, '1200':0.0096845890, '1300':0.0062774090, '1400':0.0041439489, '1500':0.0027720790, '1600':0.0019222805, '1700':0.0013402072, '1800':0.0009426958, '1900':0.0006689402, '2000':0.0004797356}
+# # singlet Btj 1% width, 50% tW
+# xsec_t = {'800':0.0719956883, '900':0.0414743839, '1000':0.0247853590, '1100':0.0152876159, '1200':0.0096845890, '1300':0.0062774090, '1400':0.0041439489, '1500':0.0027720790, '1600':0.0019222805, '1700':0.0013402072, '1800':0.0009426958, '1900':0.0006689402, '2000':0.0004797356}
 
-for mass in xsec_b.keys():
-    xsec_b[mass] = xsec_b[mass]*0.5  # these xsec values need to be multiplied by the 0.5 BR explicitly
-for mass in xsec_t.keys():
-    xsec_t[mass] = xsec_t[mass]*0.5
+# for mass in xsec_b.keys():
+#     xsec_b[mass] = xsec_b[mass]*0.5  # these xsec values need to be multiplied by the 0.5 BR explicitly
+# for mass in xsec_t.keys():
+#     xsec_t[mass] = xsec_t[mass]*0.5
+
+# already scaled to BR
+xsec_b = {'800':0.2967809151, '900':0.1600282113, '1000':0.0907445091, '1100':0.0537521530, '1200':0.0328370818, '1300':0.0206571632, '1400':0.0133032589, '1500':0.0087696024, '1600':0.0057072186, '1700':0.0037367961, '1800':0.0024744838, '1900':0.0016298605, '2000':0.0011248138}
+
+xsec_t = {'800':0.1799892207, '900':0.1036859596, '1000':0.0619633975, '1100':0.0382190398, '1200':0.0242114724, '1300':0.0156935226, '1400':0.0103598723, '1500':0.0069301975, '1600':0.0048057013, '1700':0.0033505180, '1800':0.0023567396, '1900':0.0016723504, '2000':0.0011993390}
+
 
 BprimeT_M1000_2016APV = sample("BprimeT_M1000_2016APV", 1.0, "2016APV", "BprimeT_M1000_2016APVULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v2/NANOAODSIM")
 BprimeT_M1000_2016 = sample("BprimeT_M1000_2016", 1.0, "2016", "BprimeT_M1000_2016ULNanoList.txt", "/BprimeTtoTW_M-1000_NWALO_TuneCP5_13TeV-madgraph-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v2/NANOAODSIM")

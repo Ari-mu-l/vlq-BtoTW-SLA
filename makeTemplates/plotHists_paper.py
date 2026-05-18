@@ -80,11 +80,11 @@ sig2='BpM1400' #  choose the 2nd signal to plot
 sig2leg="B' (1.4 TeV, 1 pb)"
 if isCategorized:
         if 'BprimeT' in templateDir:
-                sig1leg="B' (0.8 TeV, 36.00 fb)"
-                sig2leg="B' (1.4 TeV, 2.07 fb)"
+                sig1leg="B' (0.8 TeV, 180.0 fb)"
+                sig2leg="B' (1.4 TeV, 10.36 fb)"
         else:
-                sig1leg="B' (0.8 TeV, 59.35 fb)"
-                sig2leg="B' (1.4 TeV, 2.66 fb)"
+                sig1leg="B' (0.8 TeV, 296.8 fb)"
+                sig2leg="B' (1.4 TeV, 13.30 fb)"
 
 scaleSignals = False # no x100 on signal. use log plot
 #if not isCategorized: scaleSignals = True
@@ -718,15 +718,27 @@ for tag in taglist:
                                 except: pass                        
                 hsig1.SetLineColor(sig1Color)
                 hsig1.SetFillStyle(0)
-                hsig1.SetLineWidth(3)
+                #hsig1.SetLineWidth(3)
                 hsig2.SetLineColor(sig2Color)
                 hsig2.SetLineStyle(7)#5)
                 hsig2.SetFillStyle(0)
-                hsig2.SetLineWidth(3)
+                #hsig2.SetLineWidth(3)
+                if isCategorized:
+                        hsig1.SetLineWidth(3)
+                        hsig2.SetLineWidth(3)
+
+                        gaeData.SetMarkerSize(1.2)
+                        gaeData.SetLineWidth(2)
+                else:
+                        hsig1.SetLineWidth(5)
+                        hsig2.SetLineWidth(5)
+
+                        gaeData.SetMarkerSize(1.7)
+                        gaeData.SetLineWidth(4)
 
                 gaeData.SetMarkerStyle(20)
-                gaeData.SetMarkerSize(1.2)
-                gaeData.SetLineWidth(2)
+                #gaeData.SetMarkerSize(1.2)
+                #gaeData.SetLineWidth(2)
                 gaeData.SetMarkerColor(kBlack)
                 gaeData.SetLineColor(kBlack)
 
@@ -734,7 +746,8 @@ for tag in taglist:
                 #bkgHTgerr.SetMarkerColor(kBlack)
                 bkgHTgerr.SetFillStyle(3004)
                 bkgHTgerr.SetFillColor(kBlack)
-                bkgHTgerr.SetLineColor(kBlack)
+                #bkgHTgerr.SetLineColor(kBlack)
+                bkgHTgerr.SetLineWidth(0)
 
                 gStyle.SetOptStat(0)
                 #CMS.SetExtraText("") # "Preliminary"
@@ -775,7 +788,7 @@ for tag in taglist:
                         lPad.SetBottomMargin(.4)
                         lPad.SetRightMargin(rMargin)
                         lPad.SetLeftMargin(0.15) #used to be 0.105. y axis label overlaps with title
-                        lPad.SetGridy()
+                        #lPad.SetGridy()
                         lPad.Draw()
                 if not (doNormByBinWidth and 'jet' in tag): hData.SetMaximum(1.4*max(hData.GetMaximum(),bkgHT.GetMaximum()))
                 hData.SetMinimum(0.015)
@@ -894,10 +907,16 @@ for tag in taglist:
                         chLatex.DrawLatex(0.7, 0.48, tagString)
                         chLatex.DrawLatex(0.7, 0.42, regionString)
                 else:
-                        chLatex.SetTextAlign(12)
-                        chLatex.DrawLatex(0.2, 0.80, flvString)
-                        chLatex.DrawLatex(0.2, 0.74, tagString)
-                        chLatex.DrawLatex(0.2, 0.84, regionString)
+                        if isCategorized:
+                                chLatex.SetTextAlign(12)
+                                chLatex.DrawLatex(0.2, 0.70, flvString)
+                                chLatex.DrawLatex(0.2, 0.66, tagString)
+                                chLatex.DrawLatex(0.2, 0.74, regionString)
+                        else:
+                                chLatex.SetTextAlign(12)
+                                chLatex.DrawLatex(0.2, 0.70, flvString)
+                                chLatex.DrawLatex(0.2, 0.64, tagString)
+                                chLatex.DrawLatex(0.2, 0.74, regionString)
                         # if isCategorized:
                         #         chLatex.DrawLatex(0.3, 0.85, flvString)
                         #         chLatex.DrawLatex(0.3, 0.79, tagString)
@@ -1051,9 +1070,9 @@ for tag in taglist:
 
                 prelimTex3.SetTextSize(0.10)
                 if isCategorized:
-                        prelimTex3.DrawLatex(0.15,0.93,"#bf{CMS}")
+                        prelimTex3.DrawLatex(0.19,0.80,"#bf{CMS}") #0.15,0.93
                 else:
-                        prelimTex3.DrawLatex(0.19,0.80,"#bf{CMS}")
+                        prelimTex3.DrawLatex(0.19,0.80,"#bf{CMS}") #0.19,0.80
 
                 if isPrelim:
                         prelimTex4 = TLatex()
@@ -1063,12 +1082,12 @@ for tag in taglist:
                         prelimTex4.SetTextSize(0.07)
                         prelimTex4.SetLineWidth(2)
                         if isCategorized:
-                                prelimTex4.DrawLatex(0.28,0.93,"Preliminary")
+                                prelimTex4.DrawLatex(0.28,0.83,"Preliminary")
                         else:
                                 if iPlot == 'BpDecay':
-                                        prelimTex4.DrawLatex(0.32,0.80,"Preliminary")
+                                        prelimTex4.DrawLatex(0.32,0.70,"Preliminary")
                                 else:
-                                        prelimTex4.DrawLatex(0.19,0.72,"Preliminary")
+                                        prelimTex4.DrawLatex(0.19,0.32,"Preliminary")
 
 
                 if blind == False and not doRealPull:
@@ -1083,6 +1102,9 @@ for tag in taglist:
                         pull.SetFillColor(1)
                         pull.SetLineColor(1)
                         pull.SetMarkerStyle(20)
+
+                        if not isCategorized:
+                                pull.SetMarkerSize(1.7)
 
                         formatLowerHist(pull)
                         if doNormByBinWidth and 'jet' in tag:
@@ -1157,6 +1179,8 @@ for tag in taglist:
                         pull.SetMinimum(-3)
                         pull.SetFillColor(kGray+2)
                         pull.SetLineColor(kGray+2)
+                        if not isCategorized:
+                                pull.SetMarkerSize(1.7)
                         formatLowerHist(pull)
                         pull.Draw("HIST")
 

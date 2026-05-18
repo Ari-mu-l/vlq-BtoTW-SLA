@@ -38,8 +38,8 @@ mass3 = '1400' #'1400'
 sig1 = 'BpM800' #800 # same as table and other plots
 sig2 = 'BpM1400' #'1400'
 #sig1leg = 'B (1.0 TeV)'
-sig1leg = "B' (0.8 TeV, 59.35 fb)"
-sig2leg = "B' (1.4 TeV, 2.66 fb)"
+sig1leg = "B' (0.8 TeV, 296.8 fb)"
+sig2leg = "B' (1.4 TeV, 13.30 fb)"
 
 taglabels = {'Case1':'t jet + lept. W','Case2':'W jet + lept. t','Case3':'jet + lept. t','Case4':'jet + lept. W'}
 
@@ -175,15 +175,17 @@ def formatLowerHist(histogram, lpad):
         histogram.GetYaxis().SetTitleSize(0.155)
         histogram.GetYaxis().SetTitleOffset(0.40)
         if plotSplusB:
-            histogram.GetYaxis().SetTitle('#frac{(Data-Bkg-Sig)}{Error}')
+            histogram.GetYaxis().SetTitle('#frac{(Data-Bkg-Sig)}{Error}') # ARC meeting
+            #histogram.GetYaxis().SetTitle('#frac{(Data-Bkg-Sig)}{Error}') # FR
         else:
             histogram.GetYaxis().SetTitle('#frac{(Data-Bkg.)}{Error}')
         #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{#sqrt{bkg}}')
         #histogram.GetYaxis().SetTitle('#frac{(data-bkg)}{bkgErr}')
-        histogram.GetYaxis().SetNdivisions(7)
-        #histogram.GetYaxis().SetRangeUser(-2.99,2.99)
+        histogram.GetYaxis().SetRangeUser(-2.99,2.99) # range for standard pull def PAPER
+        histogram.GetYaxis().SetNdivisions(3)
         #histogram.GetYaxis().SetRangeUser(-10,10) # range for large pull def
-        histogram.GetYaxis().SetRangeUser(-2.99,2.99) # range for standard pull def
+        #histogram.GetYaxis().SetRangeUser(-4.99,4.99) # STUDY
+        #histogram.GetYaxis().SetNdivisions(5)
         #histogram.GetYaxis().CenterTitle()
 
     
@@ -194,8 +196,9 @@ if isSR:
     tFile2 = TFile.Open(f'{path2}/{shapesfile.replace(mass1,mass2)}')
     tFile3 = TFile.Open(f'{path3}/{shapesfile.replace(mass1,mass3)}')
 
-if plotSplusB:
-    sigFile = TFile.Open(f'limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBprimeT/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert.root')
+#if plotSplusB:
+    #sigFile = TFile.Open(f'limits_templatesABCDnn_D_Jan2025_RB1_2DcorrBprimeT/templates_BpMass_ABCDnn_138fbfb_smoothedJJ_rebinned1_stat0p2_smoothedTV_smooth2DUncert.root') # ARC review
+    #sigFile = TFile.Open(f'')
 
 chns = []
 iPlot = ''
@@ -232,16 +235,21 @@ for chn in chns:
     #bkgHTgerrmerged = tFile.Get(chn+'/TotalProcs').Clone(chn+'__totbkg') # study 1000 GeV Btj deficit
     bkgHTgerrmerged = tFile.Get(chn+'/TotalBkg').Clone(chn+'__totbkg')
     if plotSplusB:
-        if 'Case1' in chn:
-            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagTjet_D__BpM1000').Clone('Case1_sig')
-        elif 'Case2' in chn:
-            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagWjet_D__BpM1000').Clone('Case2_sig')
-        elif 'Case3' in chn:
-            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagTlep_D__BpM1000').Clone('Case3_sig')
-        elif 'Case4' in chn:
-            TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagWlep_D__BpM1000').Clone('Case4_sig')
-        TotalSig.Scale(-11.572*0.01) # scale to sig strength and sigScale
+        TotalSig = tFile.Get(chn+'/TotalSig').Clone(chn+'__totsig')
+        # if 'Case1' in chn:
+        #     TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagTjet_D__BpM1000').Clone('Case1_sig')
+        # elif 'Case2' in chn:
+        #     TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_tagWjet_D__BpM1000').Clone('Case2_sig')
+        # elif 'Case3' in chn:
+        #     TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagTlep_D__BpM1000').Clone('Case3_sig')
+        # elif 'Case4' in chn:
+        #     TotalSig = sigFile.Get('BpMass_ABCDnn_138fbfb_isL_untagWlep_D__BpM1000').Clone('Case4_sig')
+        #TotalSig.Scale(-11.572*0.01) # scale to sig strength and sigScale #ARC
+        TotalSig.Scale(7.09375)
         bkgHTgerrmerged.Add(TotalSig)
+
+    #print(TotalSig.Integral())
+    #exit()
 
     if isSR:
         hsig1merged = tFile2.Get(chn.replace('postfit','prefit')+'/'+sig1.replace(mass2,'')).Clone(chn+'__sig1merged')
@@ -264,9 +272,9 @@ for chn in chns:
     else:
         hsig1merged.Scale(100*xsec[sig1[3:]]*0.5*10)
 
-    print(xsec[sig1[3:]])
-    hsig1merged.Print("all")
-    exit()
+    #print(xsec[sig1[3:]])
+    #hsig1merged.Print("all")
+    #exit()
                           
     #if '1000' in sig1: hsig1merged.Scale(0.15) #0.25
 
@@ -291,10 +299,6 @@ for chn in chns:
             bkgHTmerged.Add(bkghistsmerged[chn+proc])
         except: pass
 
-    if plotSplusB:
-        bkgHTmerged.Add(TotalSig)
-
-
     #bkgHTgerrmerged = TGraphAsymmErrors(bkgHTmerged.Clone("bkgHTgerrmerged"))
 
     stackbkgHTmerged = THStack("stackbkgHTmerged","")
@@ -302,8 +306,12 @@ for chn in chns:
         print('filling',proc,'into stack')
         bkghistsmerged[chn+proc].SetLineColor(bkgHistColors[proc])
         bkghistsmerged[chn+proc].SetFillColor(bkgHistColors[proc])
-        bkghistsmerged[chn+proc].SetLineWidth(2)
+        bkghistsmerged[chn+proc].SetLineWidth(0)
         stackbkgHTmerged.Add(bkghistsmerged[chn+proc])
+
+    if plotSplusB:
+        bkgHTmerged.Add(TotalSig)
+        stackbkgHTmerged.Add(TotalSig)
     
     hsig1merged.SetLineColor(kBlack)
     hsig1merged.SetFillStyle(0)
@@ -345,6 +353,7 @@ for chn in chns:
     bkgHTgerrmerged.SetFillStyle(3004)
     bkgHTgerrmerged.SetFillColor(kBlack)
     bkgHTgerrmerged.SetLineColor(kBlack)
+    bkgHTgerrmerged.SetLineWidth(0)
 
     gStyle.SetOptStat(0)
     c1merged = TCanvas("c1merged","c1merged",1200,1000)
@@ -437,8 +446,8 @@ for chn in chns:
     #tagString = taglabels[chn.split('_')[0]]
     tagString = chn.split('_')[0]
     if yLog:
-        chLatexmerged.DrawLatex(0.2, 0.74, tagString)
-        chLatexmerged.DrawLatex(0.2, 0.84, flvString)
+        chLatexmerged.DrawLatex(0.2, 0.68, tagString)
+        chLatexmerged.DrawLatex(0.2, 0.75, flvString)
     else:
         #chLatexmerged.SetTextAlign(32) #right
         #chLatexmerged.DrawLatex(0.89, 0.45, flvString)    
@@ -510,7 +519,7 @@ for chn in chns:
     if blind and not partialUnblind: prelimTex2.SetTextSize(0.08)
     #prelimTex2.SetTextSize(0.1)
     #prelimTex2.DrawLatex(0.12,0.93,"CMS")
-    prelimTex2.DrawLatex(0.15,0.93,"#bf{CMS}")
+    prelimTex2.DrawLatex(0.19,0.80,"#bf{CMS}")
         
     prelimTex3=TLatex()
     prelimTex3.SetNDC()
@@ -591,6 +600,7 @@ for chn in chns:
     if blind and partialUnblind: savePrefixMerged+='_blind'
     if yLog: savePrefixMerged+='_logy'
     if doprelim: savePrefixMerged+='_prelim'
+    if plotSplusB: savePrefixMerged+='_SB'
 
     c1merged.SaveAs(f'{savePrefixMerged}.pdf')
     c1merged.SaveAs(f'{savePrefixMerged}.png')
