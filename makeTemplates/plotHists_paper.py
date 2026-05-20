@@ -126,6 +126,7 @@ else:
 minorProcList = ['ttx','ewk']
 
 
+
 # if plotABCDnn:
 #         bkgHistColors = {'ABCDnn': kRed-7,'ewk':kMagenta-6,'ttx':kAzure+2}
 # else:
@@ -480,7 +481,16 @@ for tag in taglist:
 
                         bkgHT = bkghists["ABCDnn"+catStr].Clone() # perhaps redundant
 
+                        # checked that all bkg hists have the same binning
+                        # for i in range(bkghists["ABCDnn"+catStr].GetNbinsX()+1):
+                        #         if bkghists["ABCDnn"+catStr].GetBinLowEdge(i)!=bkghists["ewk"+catStr].GetBinLowEdge(i):
+                        #                 print(bkghists["ABCDnn"+catStr].GetBinLowEdge(i))
+                        #         if bkghists["ABCDnn"+catStr].GetBinLowEdge(i)!=bkghists["ttx"+catStr].GetBinLowEdge(i):
+                        #             print(bkghists["ABCDnn"+catStr].GetBinLowEdge(i))
+                        
+
                         for proc in minorProcList:
+                                print(bkghists[proc+catStr].GetXaxis().GetXbins().GetArray())
                                 try:
                                         bkgHT.Add(bkghists[proc+catStr])
                                 except: pass
@@ -785,14 +795,16 @@ for tag in taglist:
                 if blind == False:
                         lPad=TPad("lPad","",0,0,1,yDiv) #for sigma runner
                         lPad.SetTopMargin(0)
-                        lPad.SetBottomMargin(.4)
+                        lPad.SetBottomMargin(.4) #.4
                         lPad.SetRightMargin(rMargin)
                         lPad.SetLeftMargin(0.15) #used to be 0.105. y axis label overlaps with title
                         #lPad.SetGridy()
                         lPad.Draw()
+
                 if not (doNormByBinWidth and 'jet' in tag): hData.SetMaximum(1.4*max(hData.GetMaximum(),bkgHT.GetMaximum()))
                 hData.SetMinimum(0.015)
                 hData.SetTitle("")
+
                 # this is super important now!! gaeData has badly defined (negative) maximum
                 gaeData.SetMaximum(1.2*max(hData.GetMaximum(),bkgHT.GetMaximum()))
                 gaeData.SetMinimum(0.015)
@@ -1094,6 +1106,7 @@ for tag in taglist:
                         lPad.cd()
                         pull=hData.Clone(hData.GetName()+"pull")
                         pull.Divide(hData, bkgHT)
+                        #pull.Divide(hData, hData) # debug
                         for binNo in range(0,hData.GetNbinsX()+2):
                                 if bkgHT.GetBinContent(binNo)!=0:
                                         pull.SetBinError(binNo,hData.GetBinError(binNo)/bkgHT.GetBinContent(binNo))
@@ -1183,6 +1196,12 @@ for tag in taglist:
                                 pull.SetMarkerSize(1.7)
                         formatLowerHist(pull)
                         pull.Draw("HIST")
+
+                lPad.cd()
+                line = TLine(0,1,2500,1)
+                line.SetLineStyle(3)
+                line.SetLineWidth(2)
+                line.Draw("SAME")
 
                 savePrefix = templateDir+templateDir.split('/')[-2]+'plots/'
                 if not os.path.exists(savePrefix): os.system('mkdir '+savePrefix)
